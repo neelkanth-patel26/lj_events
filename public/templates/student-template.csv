@@ -1,0 +1,6 @@
+email,full_name,password,group_number,school_name,domain,stall_no
+student1@example.com,John Doe,password123,1,Engineering School,AI/ML,A1
+student2@example.com,Jane Smith,password456,1,Engineering School,AI/ML,A1
+student3@example.com,Bob Johnson,password789,2,Science School,Web Dev,B2
+student4@example.com,Alice Brown,password101,2,Science School,Web Dev,B2
+student5@example.com,Charlie Wilson,password202,3,Arts School,Design,C3

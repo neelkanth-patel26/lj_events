@@ -1,84 +1,132 @@
-const CACHE_NAME = 'lj-events-v1'
-const URLS_TO_CACHE = [
+const CACHE_NAME = 'lj-events-v2'
+const STATIC_CACHE = 'lj-events-static-v2'
+const DYNAMIC_CACHE = 'lj-events-dynamic-v2'
+
+const STATIC_ASSETS = [
   '/',
-  '/dashboard',
   '/offline.html',
+  '/manifest.json'
 ]
 
-// Install event - cache assets
+// Install - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing...')
+  console.log('[SW] Installing service worker...')
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching app shell')
-      return cache.addAll(URLS_TO_CACHE).catch(() => {
-        console.log('[SW] Some assets failed to cache')
+    caches.open(STATIC_CACHE)
+      .then(cache => {
+        console.log('[SW] Caching static assets')
+        return cache.addAll(STATIC_ASSETS)
       })
-    })
+      .catch(err => console.log('[SW] Cache failed:', err))
   )
   self.skipWaiting()
 })
 
-// Activate event - clean up old caches
+// Activate - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating...')
+  console.log('[SW] Activating service worker...')
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(keys => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', cacheName)
-            return caches.delete(cacheName)
-          }
-        })
+        keys.filter(key => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+          .map(key => {
+            console.log('[SW] Removing old cache:', key)
+            return caches.delete(key)
+          })
       )
     })
   )
   self.clients.claim()
 })
 
-// Fetch event - serve from cache, fallback to network
+// Fetch - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') {
-    return
-  }
+  if (event.request.method !== 'GET') return
+
+  const { request } = event
+  const url = new URL(request.url)
+
+  // Skip chrome extensions and non-http requests
+  if (!url.protocol.startsWith('http')) return
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      if (response) {
+    fetch(request)
+      .then(response => {
+        // Clone response for caching
+        const responseClone = response.clone()
+        
+        // Cache successful responses
+        if (response.ok && response.type === 'basic') {
+          caches.open(DYNAMIC_CACHE).then(cache => {
+            cache.put(request, responseClone)
+          })
+        }
+        
         return response
-      }
-
-      return fetch(event.request)
-        .then((response) => {
-          // Cache successful API responses
-          if (
-            response.ok &&
-            response.type === 'basic' &&
-            event.request.url.includes('/api/')
-          ) {
-            const responseClone = response.clone()
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone)
-            })
-          }
-          return response
-        })
-        .catch(() => {
-          // Return offline page for navigation requests
-          if (event.request.mode === 'navigate') {
+      })
+      .catch(() => {
+        // Fallback to cache
+        return caches.match(request).then(cached => {
+          if (cached) return cached
+          
+          // Return offline page for navigation
+          if (request.mode === 'navigate') {
             return caches.match('/offline.html')
           }
-          return null
+          
+          return new Response('Offline', { status: 503 })
         })
-    })
+      })
   )
 })
 
-// Handle messages from clients
-self.addEventListener('message', (event) => {
-  if (event.data.type === 'SHOW_NOTIFICATION') {
-    const { title, options } = event.data
+// Push notifications
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() || {}
+  const title = data.title || 'LJ Events'
+  const options = {
+    body: data.body || 'New notification',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [200, 100, 200],
+    data: data.url || '/',
+    actions: [
+      { action: 'open', title: 'Open' },
+      { action: 'close', title: 'Close' }
+    ]
+  }
+  
+  event.waitUntil(
     self.registration.showNotification(title, options)
+  )
+})
+
+// Notification click
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  
+  if (event.action === 'open' || !event.action) {
+    event.waitUntil(
+      clients.openWindow(event.notification.data || '/')
+    )
+  }
+})
+
+// Background sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-data') {
+    event.waitUntil(syncData())
+  }
+})
+
+async function syncData() {
+  console.log('[SW] Syncing data...')
+  // Add your sync logic here
+}
+
+// Message handling
+self.addEventListener('message', (event) => {
+  if (event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
   }
 })

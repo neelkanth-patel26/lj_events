@@ -3,42 +3,51 @@
   "short_name": "LJ Events",
   "description": "Comprehensive event management platform for LJ University with event management, judging, and leaderboards",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "orientation": "portrait-primary",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "dir": "ltr",
+  "lang": "en",
+  "categories": ["productivity", "education", "business"],
   "icons": [
-    {
-      "src": "/icon-light-32x32.png",
-      "sizes": "32x32",
-      "type": "image/png"
-    },
     {
       "src": "/icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "/apple-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ],
-  "screenshots": [
+  "shortcuts": [
     {
-      "src": "/icon.svg",
-      "type": "image/svg+xml",
-      "sizes": "540x720",
-      "form_factor": "narrow"
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Events",
+      "short_name": "Events",
+      "description": "View events",
+      "url": "/dashboard/events",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Leaderboard",
+      "description": "View leaderboard",
+      "url": "/dashboard/leaderboard",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
-  "categories": ["productivity", "education"],
-  "screenshots": [
-    {
-      "src": "/icon.svg",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
-    }
-  ]
+  "prefer_related_applications": false
 }

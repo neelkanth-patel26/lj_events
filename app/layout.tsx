@@ -9,19 +9,18 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: '#000000',
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#0ea5e9',
 }
 
 export const metadata: Metadata = {
   title: 'LJ University Event Management',
   description: 'Comprehensive event management platform with event management, team evaluation, and leaderboards',
-  generator: 'v0.app',
   applicationName: 'LJ Events',
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'LJ Events',
   },
   formatDetection: {
@@ -30,20 +29,14 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    apple: '/apple-icon.png',
+    apple: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 }
 
@@ -54,6 +47,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="LJ Events" />
+      </head>
       <body className="font-sans antialiased">
         {children}
         <Analytics />

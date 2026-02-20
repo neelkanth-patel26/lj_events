@@ -1,1 +1,61 @@
-import { getCurrentUser } from '@/app/actions/auth'\nimport { createClient } from '@/lib/supabase/server'\nimport { NextRequest, NextResponse } from 'next/server'\n\nexport async function GET(request: NextRequest, { params }: { params: { id: string } }) {\n  try {\n    const supabase = await createClient()\n    const user = await getCurrentUser()\n\n    if (!user) {\n      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })\n    }\n\n    const { data: judges, error } = await supabase\n      .from('team_judges')\n      .select(`\n        id,\n        status,\n        created_at,\n        updated_at,\n        users:judge_id (\n          id,\n          full_name,\n          email\n        ),\n        teams (\n          id,\n          team_name,\n          event_id\n        )\n      `)\n      .eq('teams.event_id', params.id)\n\n    if (error) throw error\n\n    // Group judges by judge_id to avoid duplicates\n    const uniqueJudges = judges?.reduce((acc: any[], current: any) => {\n      const existingJudge = acc.find(j => j.judge_id === current.users?.id)\n      if (!existingJudge) {\n        acc.push({\n          judge_id: current.users?.id,\n          name: current.users?.full_name,\n          email: current.users?.email,\n          teams_assigned: 1,\n          status: current.status\n        })\n      } else {\n        existingJudge.teams_assigned += 1\n      }\n      return acc\n    }, []) || []\n\n    return NextResponse.json(uniqueJudges)\n  } catch (error: any) {\n    console.error('[API] Error fetching event judges:', error.message || error)\n    return NextResponse.json(\n      { error: 'Failed to fetch judges', details: error.message || error },\n      { status: 500 }\n    )\n  }\n}\n
+import { getCurrentUser } from '@/app/actions/auth'
+import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const supabase = await createClient()
+    const user = await getCurrentUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { data: judges, error } = await supabase
+      .from('team_judges')
+      .select(`
+        id,
+        status,
+        created_at,
+        updated_at,
+        users:judge_id (
+          id,
+          full_name,
+          email
+        ),
+        teams (
+          id,
+          team_name,
+          event_id
+        )
+      `)
+      .eq('teams.event_id', params.id)
+
+    if (error) throw error
+
+    // Group judges by judge_id to avoid duplicates
+    const uniqueJudges = judges?.reduce((acc: any[], current: any) => {
+      const existingJudge = acc.find(j => j.judge_id === current.users?.id)
+      if (!existingJudge) {
+        acc.push({
+          judge_id: current.users?.id,
+          name: current.users?.full_name,
+          email: current.users?.email,
+          teams_assigned: 1,
+          status: current.status
+        })
+      } else {
+        existingJudge.teams_assigned += 1
+      }
+      return acc
+    }, []) || []
+
+    return NextResponse.json(uniqueJudges)
+  } catch (error: any) {
+    console.error('[API] Error fetching event judges:', error.message || error)
+    return NextResponse.json(
+      { error: 'Failed to fetch judges', details: error.message || error },
+      { status: 500 }
+    )
+  }
+}

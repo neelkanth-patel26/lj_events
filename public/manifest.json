@@ -7,20 +7,20 @@
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
-  "theme_color": "#0ea5e9",
+  "theme_color": "#ffffff",
   "orientation": "any",
   "dir": "ltr",
   "lang": "en",
   "categories": ["productivity", "education", "business"],
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/icon-light.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/icon.svg",
+      "src": "/icon-light.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -32,21 +32,21 @@
       "short_name": "Dashboard",
       "description": "Open dashboard",
       "url": "/dashboard",
-      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/icon-light.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Events",
       "short_name": "Events",
       "description": "View events",
       "url": "/dashboard/events",
-      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/icon-light.svg", "sizes": "any", "type": "image/svg+xml" }]
     },
     {
       "name": "Leaderboard",
       "short_name": "Leaderboard",
       "description": "View leaderboard",
       "url": "/dashboard/leaderboard",
-      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+      "icons": [{ "src": "/icon-light.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ],
   "prefer_related_applications": false

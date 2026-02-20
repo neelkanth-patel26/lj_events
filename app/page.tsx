@@ -51,7 +51,7 @@ export default function Home() {
               </Button>
             </Link>
           </div>
-          <div className="pt-10 space-y-6">
+          <div className="pt-10 space-y-6 hidden md:block">
             <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Features for Admins, Mentors/Judges, and Students
             </p>

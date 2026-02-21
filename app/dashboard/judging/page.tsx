@@ -9,22 +9,19 @@ import { getAssignedGroups } from '@/app/actions/events'
 export default async function JudgingPage() {
   const user = await getCurrentUser()
 
-  if (!user || user.role !== 'mentor') {
+  if (!user) {
     redirect('/dashboard')
   }
 
   const initialGroups = await getAssignedGroups()
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight text-primary flex items-center gap-3">
-          <Gavel className="h-8 w-8" />
-          Judging Suite
-        </h2>
-        <p className="text-muted-foreground max-w-2xl">
-          Evaluate assigned groups, manage your custom rubrics, and track your grading progress.
-        </p>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Judging Suite</h2>
+          <p className="text-sm text-muted-foreground mt-1">Evaluate teams and manage scoring criteria</p>
+        </div>
       </div>
 
       <Tabs defaultValue="groups" className="space-y-6">
@@ -36,7 +33,7 @@ export default async function JudgingPage() {
             >
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
-                Groups to Evaluate
+                Teams to Evaluate
               </div>
             </TabsTrigger>
             <TabsTrigger
@@ -45,7 +42,7 @@ export default async function JudgingPage() {
             >
               <div className="flex items-center gap-2">
                 <Settings2 className="h-4 w-4" />
-                Judging Rubric
+                Scoring Criteria
               </div>
             </TabsTrigger>
           </TabsList>
@@ -56,9 +53,7 @@ export default async function JudgingPage() {
         </TabsContent>
 
         <TabsContent value="criteria">
-          <div className="max-w-3xl mx-auto">
-            <CriteriaBuilder />
-          </div>
+          <CriteriaBuilder />
         </TabsContent>
       </Tabs>
     </div>

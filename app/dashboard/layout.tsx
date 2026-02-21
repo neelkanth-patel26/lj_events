@@ -27,7 +27,7 @@ export default async function DashboardLayout({
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin'] },
+    { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin', 'mentor'] },
     { href: '/dashboard/students', label: 'Students', icon: Users, roles: ['admin'] },
     { href: '/dashboard/teams', label: 'Teams', icon: Users, roles: ['admin', 'mentor', 'student'] },
     { href: '/dashboard/judging', label: 'Judging', icon: Gavel, roles: ['mentor'] },

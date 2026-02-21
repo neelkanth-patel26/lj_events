@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,65 +9,90 @@ import { Plus, Trash2, Settings2, Save, GripVertical } from 'lucide-react'
 
 export function CriteriaBuilder() {
     const [criteria, setCriteria] = useState([
-        { id: '1', name: 'UI/UX Design', weight: 25 },
-        { id: '2', name: 'Technical Complexity', weight: 35 },
-        { id: '3', name: 'Innovation', weight: 40 },
+        { id: '1', name: 'Innovation & Creativity', maxPoints: 100 },
+        { id: '2', name: 'Technical Implementation', maxPoints: 100 },
+        { id: '3', name: 'Presentation & Communication', maxPoints: 100 },
     ])
+    const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        fetchCriteria()
+    }, [])
+
+    const fetchCriteria = async () => {
+        try {
+            const res = await fetch('/api/judging/criteria')
+            const data = await res.json()
+            if (data.length > 0) {
+                setCriteria(data.map((c: any) => ({ id: c.id, name: c.name, maxPoints: c.max_points })))
+            }
+        } catch (error) {
+            console.error('Failed to fetch criteria:', error)
+        }
+    }
+
+    const saveCriteria = async () => {
+        setLoading(true)
+        try {
+            await fetch('/api/judging/criteria', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ criteria })
+            })
+            alert('Criteria saved successfully!')
+        } catch (error) {
+            alert('Failed to save criteria')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const addCriterion = () => {
-        setCriteria([...criteria, { id: Date.now().toString(), name: '', weight: 0 }])
+        setCriteria([...criteria, { id: Date.now().toString(), name: '', maxPoints: 100 }])
     }
 
     const removeCriterion = (id: string) => {
         setCriteria(criteria.filter(c => c.id !== id))
     }
 
-    const updateCriterion = (id: string, field: 'name' | 'weight', value: string | number) => {
+    const updateCriterion = (id: string, field: 'name' | 'maxPoints', value: string | number) => {
         setCriteria(criteria.map(c => c.id === id ? { ...c, [field]: value } : c))
     }
 
-    const totalWeight = criteria.reduce((sum, c) => sum + Number(c.weight), 0)
-
     return (
-        <Card className="border-primary/20">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                        <CardTitle className="text-xl flex items-center gap-2">
-                            <Settings2 className="h-5 w-5 text-primary" />
-                            Custom Judging Rubric
-                        </CardTitle>
-                        <CardDescription>
-                            Define your evaluation parameters and their weightage.
-                        </CardDescription>
-                    </div>
-                    <Badge variant={totalWeight === 100 ? "default" : "destructive"} className="h-6">
-                        Total: {totalWeight}%
-                    </Badge>
-                </div>
+        <Card>
+            <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                    <Settings2 className="h-4 w-4" />
+                    Scoring Criteria Configuration
+                </CardTitle>
+                <CardDescription>
+                    Define evaluation criteria. Each criterion has a maximum of 100 points.
+                </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
                 <div className="space-y-3">
                     {criteria.map((c, index) => (
-                        <div key={c.id} className="flex items-center gap-3 animate-in slide-in-from-right-2 duration-300" style={{ animationDelay: `${index * 50}ms` }}>
+                        <div key={c.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                             <GripVertical className="h-4 w-4 text-muted-foreground shrink-0 cursor-grab" />
                             <div className="flex-1">
                                 <Input
-                                    placeholder="Criterion Name (e.g., Code Quality)"
+                                    placeholder="Criterion Name (e.g., Innovation & Creativity)"
                                     value={c.name}
                                     onChange={(e) => updateCriterion(c.id, 'name', e.target.value)}
-                                    className="h-9 focus:ring-primary"
+                                    className="h-9"
                                 />
                             </div>
-                            <div className="w-24 relative">
+                            <div className="w-28 relative">
                                 <Input
                                     type="number"
-                                    placeholder="Weight"
-                                    value={c.weight}
-                                    onChange={(e) => updateCriterion(c.id, 'weight', parseInt(e.target.value) || 0)}
-                                    className="h-9 pr-7 focus:ring-primary"
+                                    placeholder="Max"
+                                    value={c.maxPoints || 100}
+                                    onChange={(e) => updateCriterion(c.id, 'maxPoints', parseInt(e.target.value) || 100)}
+                                    className="h-9 pr-10"
+                                    max={100}
                                 />
-                                <span className="absolute right-2.5 top-2 text-xs text-muted-foreground">%</span>
+                                <span className="absolute right-3 top-2 text-xs text-muted-foreground">pts</span>
                             </div>
                             <Button
                                 variant="ghost"
@@ -86,17 +111,11 @@ export function CriteriaBuilder() {
                         <Plus className="h-4 w-4" />
                         Add Criterion
                     </Button>
-                    <Button className="flex-1 gap-2 bg-primary">
+                    <Button className="flex-1 gap-2" onClick={saveCriteria} disabled={loading}>
                         <Save className="h-4 w-4" />
-                        Save Rubric
+                        {loading ? 'Saving...' : 'Save Rubric'}
                     </Button>
                 </div>
-
-                {totalWeight !== 100 && (
-                    <p className="text-[10px] text-destructive font-medium text-center">
-                        * Total weight must equal 100% to save the rubric.
-                    </p>
-                )}
             </CardContent>
         </Card>
     )

@@ -8,13 +8,14 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar, Users, Trophy, Clock, MapPin, FileText, Settings, Eye, Plus, X, Search, Grid, List } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRealtime } from '@/components/realtime-provider'
 
 export default function EventsPage() {
   const { events, refreshData } = useRealtime()
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -29,6 +30,19 @@ export default function EventsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const res = await fetch('/api/auth/session')
+        const data = await res.json()
+        setUserRole(data?.user?.role || 'admin')
+      } catch {
+        setUserRole('admin')
+      }
+    }
+    checkRole()
+  }, [])
 
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -103,9 +117,11 @@ export default function EventsPage() {
           <h1 className="text-2xl md:text-3xl font-bold">Events Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Create and manage competition events</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} size="sm" className="w-fit">
-          {showForm ? <><X className="h-4 w-4 mr-2" />Cancel</> : <><Plus className="h-4 w-4 mr-2" />Create Event</>}
-        </Button>
+        {userRole === 'admin' && (
+          <Button onClick={() => setShowForm(!showForm)} size="sm" className="w-fit">
+            {showForm ? <><X className="h-4 w-4 mr-2" />Cancel</> : <><Plus className="h-4 w-4 mr-2" />Create Event</>}
+          </Button>
+        )}
       </div>
 
       {/* Stats Overview */}
@@ -141,7 +157,7 @@ export default function EventsPage() {
       </div>
 
       {/* Create Event Form */}
-      {showForm && (
+      {showForm && userRole === 'admin' && (
         <Card>
           <CardHeader className="p-3 md:p-4">
             <CardTitle className="text-lg md:text-xl flex items-center gap-2">

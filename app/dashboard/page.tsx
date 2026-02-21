@@ -5,20 +5,34 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { Calendar, Users, Trophy, UserPlus, BarChart3, TrendingUp, Clock, Award, Target, Zap, Activity, ArrowUpRight, MapPin } from 'lucide-react'
+import { Calendar, Users, Trophy, UserPlus, BarChart3, Clock, Award, Zap, Activity, ArrowUpRight, Gavel } from 'lucide-react'
 import { useRealtime } from '@/components/realtime-provider'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 
 export default function DashboardPage() {
   const { events, students, teams } = useRealtime()
+  const [userRole, setUserRole] = useState<string>('admin')
+
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const res = await fetch('/api/auth/session')
+        const data = await res.json()
+        setUserRole(data?.user?.role || 'admin')
+      } catch {
+        setUserRole('admin')
+      }
+    }
+    checkRole()
+  }, [])
 
   const stats = useMemo(() => {
     const upcomingEvents = events?.filter((event: any) => 
       new Date(event.event_date) > new Date() && event.status === 'active'
     ) || []
 
-    const recentEvents = events?.filter((event: any) => event.status === 'completed')
-      .sort((a: any, b: any) => new Date(b.event_date).getTime() - new Date(a.event_date).getTime())
+    const recentEvents = events?.filter((event: any) => event.status !== 'draft')
+      .sort((a: any, b: any) => new Date(b.created_at || b.event_date).getTime() - new Date(a.created_at || a.event_date).getTime())
       .slice(0, 3) || []
 
     const topTeams = teams?.filter((t: any) => t.total_score > 0)
@@ -30,9 +44,8 @@ export default function DashboardPage() {
     const totalTeams = teams?.length || 0
     const totalUsers = students?.length || 0
     const scoredTeams = teams?.filter((t: any) => t.total_score > 0).length || 0
+    const pendingTeams = totalTeams - scoredTeams
     const completionRate = totalTeams ? Math.round((scoredTeams / totalTeams) * 100) : 0
-    const avgScore = totalTeams ? Math.round(teams.reduce((sum: number, t: any) => sum + (t.total_score || 0), 0) / totalTeams) : 0
-    const topScore = teams?.length ? Math.max(...teams.map((t: any) => t.total_score || 0)) : 0
 
     const domains = [...new Set(teams?.map((t: any) => t.domain).filter(Boolean))] || []
     const studentsByRole = {
@@ -47,9 +60,8 @@ export default function DashboardPage() {
       totalTeams,
       totalUsers,
       completionRate,
-      avgScore,
-      topScore,
       scoredTeams,
+      pendingTeams,
       upcomingEvents,
       recentEvents,
       topTeams,
@@ -58,25 +70,196 @@ export default function DashboardPage() {
     }
   }, [events, students, teams])
 
+  // Mentor Dashboard
+  if (userRole === 'mentor') {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Mentor Dashboard</h2>
+          <p className="text-sm text-muted-foreground mt-1">Evaluate teams and view competition progress</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Calendar className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.activeEvents}</p>
+              <p className="text-xs text-muted-foreground">Active Events</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.totalTeams}</p>
+              <p className="text-xs text-muted-foreground">Total Teams</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Award className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.scoredTeams}</p>
+              <p className="text-xs text-muted-foreground">Evaluated</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Gavel className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.pendingTeams}</p>
+              <p className="text-xs text-muted-foreground">Pending</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Link href="/dashboard/judging">
+                  <Button className="w-full justify-start gap-3 h-auto py-4" variant="outline">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Gavel className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold">Start Judging</div>
+                      <div className="text-xs text-muted-foreground">Evaluate team submissions</div>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/dashboard/teams">
+                  <Button className="w-full justify-start gap-3 h-auto py-4" variant="outline">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold">View Teams</div>
+                      <div className="text-xs text-muted-foreground">Browse all teams</div>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/dashboard/leaderboard">
+                  <Button className="w-full justify-start gap-3 h-auto py-4" variant="outline">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Trophy className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <div className="font-semibold">Leaderboard</div>
+                      <div className="text-xs text-muted-foreground">View rankings</div>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Upcoming Events
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stats.upcomingEvents.length > 0 ? (
+                <div className="space-y-2">
+                  {stats.upcomingEvents.slice(0, 4).map((event: any) => {
+                    const daysLeft = Math.ceil((new Date(event.event_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                    return (
+                      <div key={event.id} className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-sm truncate">{event.name}</h4>
+                          <Badge variant={daysLeft <= 3 ? 'destructive' : 'secondary'} className="text-xs">{daysLeft}d</Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{new Date(event.event_date).toLocaleDateString()}</span>
+                          <span>{event.total_teams || 0} teams</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Clock className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No upcoming events</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4" />
+                Top Performing Teams
+              </div>
+              <Link href="/dashboard/leaderboard">
+                <Button variant="ghost" size="sm" className="h-7 text-xs">
+                  View All
+                  <ArrowUpRight className="h-3 w-3 ml-1" />
+                </Button>
+              </Link>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats.topTeams.length > 0 ? (
+              <div className="space-y-2">
+                {stats.topTeams.map((team: any, index: number) => (
+                  <div key={team.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
+                      index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                      index === 1 ? 'bg-gray-100 text-gray-700' :
+                      index === 2 ? 'bg-orange-100 text-orange-700' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      #{index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{team.team_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{team.school_name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg">{team.total_score}</p>
+                      <p className="text-xs text-muted-foreground">pts</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No scored teams yet</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Admin Dashboard
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-sm text-muted-foreground mt-1">LJ University Event Management System</p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/dashboard/events">
-            <Button size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              New Event
-            </Button>
-          </Link>
-        </div>
+        <Link href="/dashboard/events">
+          <Button size="sm">
+            <Calendar className="h-4 w-4 mr-2" />
+            New Event
+          </Button>
+        </Link>
       </div>
 
-      {/* Main Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
@@ -85,7 +268,6 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Total Events</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-4 text-center">
             <BarChart3 className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -93,7 +275,6 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Active Events</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-4 text-center">
             <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -101,7 +282,6 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">Total Teams</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-4 text-center">
             <UserPlus className="h-8 w-8 mx-auto mb-2 text-primary" />
@@ -111,9 +291,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Quick Actions & Activity */}
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* Quick Actions */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -125,25 +303,25 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-2">
               <Link href="/dashboard/events">
                 <Button className="w-full h-20 flex-col gap-2" variant="outline">
-                  <Calendar className="h-6 w-6 text-blue-600" />
+                  <Calendar className="h-6 w-6 text-gray-600" />
                   <span className="text-xs font-medium">Events</span>
                 </Button>
               </Link>
               <Link href="/dashboard/students">
                 <Button className="w-full h-20 flex-col gap-2" variant="outline">
-                  <UserPlus className="h-6 w-6 text-green-600" />
+                  <UserPlus className="h-6 w-6 text-gray-600" />
                   <span className="text-xs font-medium">Students</span>
                 </Button>
               </Link>
               <Link href="/dashboard/teams">
                 <Button className="w-full h-20 flex-col gap-2" variant="outline">
-                  <Users className="h-6 w-6 text-purple-600" />
+                  <Users className="h-6 w-6 text-gray-600" />
                   <span className="text-xs font-medium">Teams</span>
                 </Button>
               </Link>
               <Link href="/dashboard/leaderboard">
                 <Button className="w-full h-20 flex-col gap-2" variant="outline">
-                  <Trophy className="h-6 w-6 text-orange-600" />
+                  <Trophy className="h-6 w-6 text-gray-600" />
                   <span className="text-xs font-medium">Leaderboard</span>
                 </Button>
               </Link>
@@ -151,7 +329,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Upcoming Events */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center justify-between">
@@ -177,9 +354,7 @@ export default function DashboardPage() {
                       <div className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="font-semibold text-sm truncate">{event.name}</h4>
-                          <Badge variant={daysLeft <= 3 ? 'destructive' : 'secondary'} className="text-xs">
-                            {daysLeft}d
-                          </Badge>
+                          <Badge variant={daysLeft <= 3 ? 'destructive' : 'secondary'} className="text-xs">{daysLeft}d</Badge>
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>{new Date(event.event_date).toLocaleDateString()}</span>
@@ -199,7 +374,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* System Overview */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -216,7 +390,6 @@ export default function DashboardPage() {
                 </div>
                 <Progress value={stats.completionRate} className="h-2" />
               </div>
-              
               <div className="pt-2 border-t space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Students</span>
@@ -231,7 +404,6 @@ export default function DashboardPage() {
                   <span className="font-medium">{stats.studentsByRole.admins}</span>
                 </div>
               </div>
-
               <div className="pt-2 border-t">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Domains</span>
@@ -243,9 +415,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Top Teams & Recent Activity */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Top Performing Teams */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center justify-between">
@@ -294,7 +464,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center justify-between">
@@ -318,7 +487,12 @@ export default function DashboardPage() {
                     <div className="p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-semibold text-sm truncate">{event.name}</h4>
-                        <Badge variant="outline" className="text-xs">Completed</Badge>
+                        <Badge 
+                          variant={event.status === 'active' ? 'default' : event.status === 'completed' ? 'secondary' : 'outline'} 
+                          className="text-xs"
+                        >
+                          {event.status}
+                        </Badge>
                       </div>
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>{new Date(event.event_date).toLocaleDateString()}</span>

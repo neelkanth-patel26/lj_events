@@ -1,0 +1,7 @@
+email,full_name,password,group_number,school_name,domain,stall_no,enrollment_number
+student1@example.com,John Doe,password123,1,Engineering School,AI/ML,A1,2024001
+student2@example.com,Jane Smith,password456,1,Engineering School,AI/ML,A1,2024002
+student3@example.com,Bob Johnson,password789,2,Science School,Web Dev,B2,2024003
+student4@example.com,Alice Williams,password321,2,Science School,Web Dev,B2,2024004
+student5@example.com,Charlie Brown,password654,3,Computer Science,IoT,C3,2024005
+student6@example.com,Diana Prince,password987,3,Computer Science,IoT,C3,2024006

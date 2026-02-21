@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Upload, Download, Users, FileText, Search, FileSpreadsheet, Grid, List, Mail, Calendar } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Upload, Download, Users, Search, Grid, List, Mail, Calendar, Edit, Hash, UserCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useRef } from 'react'
 import useSWR from 'swr'
@@ -24,6 +25,8 @@ export default function StudentsPage() {
   const [filterRole, setFilterRole] = useState('all')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [editStudent, setEditStudent] = useState<any>(null)
+  const [editForm, setEditForm] = useState({ full_name: '', email: '', enrollment_number: '', role: '' })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileUpload = async (e: React.FormEvent) => {
@@ -50,7 +53,7 @@ export default function StudentsPage() {
       setSelectedFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
       refreshData()
-      alert(`Success! Created ${result.users} students and ${result.teams} teams`)
+      alert(result.message || `Success! Created ${result.users} students and ${result.teams} teams`)
     } catch (error: any) {
       console.error('Error importing students:', error)
       alert('Failed to import students: ' + error.message)
@@ -59,8 +62,48 @@ export default function StudentsPage() {
     }
   }
 
+  const handleEditStudent = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editStudent) return
+
+    setLoading(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('users')
+        .update({
+          full_name: editForm.full_name,
+          email: editForm.email,
+          enrollment_number: editForm.enrollment_number,
+          role: editForm.role
+        })
+        .eq('id', editStudent.id)
+
+      if (error) throw error
+
+      setEditStudent(null)
+      refreshData()
+      alert('Student updated successfully')
+    } catch (error: any) {
+      console.error('Error updating student:', error)
+      alert('Failed to update student: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openEditDialog = (student: any) => {
+    setEditStudent(student)
+    setEditForm({
+      full_name: student.full_name || '',
+      email: student.email || '',
+      enrollment_number: student.enrollment_number || '',
+      role: student.role || 'student'
+    })
+  }
+
   const downloadCSVTemplate = () => {
-    const csvContent = 'email,full_name,password,group_number,school_name,domain,stall_no\nstudent1@example.com,John Doe,password123,1,Engineering School,AI/ML,A1\nstudent2@example.com,Jane Smith,password456,1,Engineering School,AI/ML,A1\nstudent3@example.com,Bob Johnson,password789,2,Science School,Web Dev,B2'
+    const csvContent = 'email,full_name,password,group_number,school_name,domain,stall_no,enrollment_number\nstudent1@example.com,John Doe,password123,1,Engineering School,AI/ML,A1,2024001\nstudent2@example.com,Jane Smith,password456,1,Engineering School,AI/ML,A1,2024002\nstudent3@example.com,Bob Johnson,password789,2,Science School,Web Dev,B2,2024003'
     const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -72,7 +115,8 @@ export default function StudentsPage() {
 
   const filteredStudents = students?.filter((student: any) => {
     const matchesSearch = student.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         student.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                         student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         student.enrollment_number?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = filterRole === 'all' || student.role === filterRole
     return matchesSearch && matchesRole
   }) || []
@@ -108,7 +152,7 @@ export default function StudentsPage() {
         </Card>
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
-            <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
+            <UserCircle className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
             <p className="text-xl md:text-2xl font-bold">{studentStats.students}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Students</p>
           </CardContent>
@@ -129,94 +173,121 @@ export default function StudentsPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="import" className="space-y-4">
+      <Tabs defaultValue="students" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="import" className="text-xs md:text-sm">File Import</TabsTrigger>
           <TabsTrigger value="students" className="text-xs md:text-sm">All Students ({students?.length || 0})</TabsTrigger>
+          <TabsTrigger value="import" className="text-xs md:text-sm">Import Students</TabsTrigger>
         </TabsList>
         
         <TabsContent value="import">
-          <Card>
-            <CardHeader className="p-3 md:p-4">
-              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                <Upload className="h-4 w-4 md:h-5 md:w-5" />
-                Import Students from File
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-3 md:p-4 pt-0">
-              <form onSubmit={handleFileUpload} className="space-y-4">
-                <div className="grid gap-2">
-                  <Label className="text-xs md:text-sm">Select Event</Label>
-                  <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an event" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {events?.map((event: any) => (
-                        <SelectItem key={event.id} value={event.id}>
-                          {event.name} - {new Date(event.event_date).toLocaleDateString()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label className="text-xs md:text-sm">Upload File (CSV or Excel)</Label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 md:p-6">
-                    <div className="text-center">
-                      <Upload className="h-6 w-6 md:h-8 md:w-8 mx-auto text-muted-foreground mb-2" />
-                      <div className="space-y-2">
-                        <Input
-                          ref={fileInputRef}
-                          type="file"
-                          accept=".csv,.xlsx,.xls"
-                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                          className="max-w-sm mx-auto text-xs md:text-sm"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Supported formats: CSV, Excel (.xlsx, .xls)
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="p-3 md:p-4">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <Upload className="h-4 w-4 md:h-5 md:w-5" />
+                  Import Students
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 md:p-4 pt-0">
+                <form onSubmit={handleFileUpload} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs md:text-sm">Select Event *</Label>
+                    <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {events?.map((event: any) => (
+                          <SelectItem key={event.id} value={event.id}>
+                            {event.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs md:text-sm">Upload File *</Label>
+                    <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+                      <Input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv,.xlsx,.xls"
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                        className="max-w-xs mx-auto"
+                      />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        CSV or Excel (.xlsx, .xls)
+                      </p>
+                      {selectedFile && (
+                        <p className="text-sm font-medium text-green-600 mt-2">
+                          ✓ {selectedFile.name}
                         </p>
-                        {selectedFile && (
-                          <p className="text-xs md:text-sm font-medium text-green-600">
-                            Selected: {selectedFile.name}
-                          </p>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
+                  
+                  <Button 
+                    type="submit" 
+                    disabled={loading || !selectedEvent || !selectedFile} 
+                    className="w-full"
+                    size="sm"
+                  >
+                    {loading ? 'Importing...' : 'Import & Create Teams'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-muted/30">
+              <CardHeader className="p-3 md:p-4">
+                <CardTitle className="text-base md:text-lg">Instructions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 md:p-4 pt-0">
+                <div className="space-y-3 text-sm text-muted-foreground">
+                  <div>
+                    <p className="font-medium text-foreground mb-1">1. Download Template</p>
+                    <p>Click the Template button above to get the CSV format</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground mb-1">2. Fill Student Data</p>
+                    <p>Add student details: email, name, password, group number, enrollment number</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground mb-1">3. Select Event</p>
+                    <p>Choose which event these students will participate in</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground mb-1">4. Upload File</p>
+                    <p>Upload your CSV/Excel file to import students and auto-create teams</p>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <p className="text-xs"><strong>Note:</strong> Students with same group_number will be grouped into one team</p>
+                  </div>
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  disabled={loading || !selectedEvent || !selectedFile} 
-                  className="w-full text-xs md:text-sm"
-                  size="sm"
-                >
-                  {loading ? 'Importing...' : 'Import Students & Create Teams'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
-        <TabsContent value="students">
+        <TabsContent value="students" className="space-y-4">
           {/* Controls */}
           <Card>
             <CardContent className="p-3 md:p-4">
-              <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
-                <div className="relative flex-1">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <div className="flex flex-col sm:flex-row gap-3 md:items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search students..."
+                    placeholder="Search by name, email, or enrollment..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
+                    className="pl-9"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Select value={filterRole} onValueChange={setFilterRole}>
-                    <SelectTrigger className="w-full md:w-32">
+                    <SelectTrigger className="w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -251,84 +322,194 @@ export default function StudentsPage() {
 
           {/* Students Display */}
           {filteredStudents && filteredStudents.length > 0 ? (
-            viewMode === 'grid' ? (
-              <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredStudents.map((student: any) => (
-                  <Card key={student.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2 p-3 md:p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm md:text-base flex-shrink-0">
-                          {student.full_name?.charAt(0) || 'U'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm md:text-base truncate">{student.full_name}</h3>
-                          <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs">
-                            {student.role}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-3 md:p-4 pt-0">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                          <Mail className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
-                          <span className="truncate">{student.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                          <Calendar className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
-                          <span>{new Date(student.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            <>
+              <div className="flex items-center justify-between px-1">
+                <p className="text-sm text-muted-foreground">
+                  Showing {filteredStudents.length} of {students?.length || 0} students
+                </p>
               </div>
-            ) : (
-              <Card>
-                <CardContent className="p-0">
-                  <div className="space-y-1">
-                    {filteredStudents.map((student: any) => (
-                      <div key={student.id} className="flex items-center justify-between p-3 md:p-4 border-b last:border-b-0 hover:bg-muted/50 transition-colors gap-3">
-                        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                          <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xs md:text-sm flex-shrink-0">
-                            {student.full_name?.charAt(0) || 'U'}
+              
+              {viewMode === 'grid' ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredStudents.map((student: any) => (
+                    <Card key={student.id} className="hover:shadow-lg transition-all">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+                            {student.full_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-sm md:text-base truncate">{student.full_name}</div>
-                            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                              <Mail className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">{student.email}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <h3 className="font-semibold text-base truncate">{student.full_name}</h3>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEditDialog(student)}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs mb-3">
+                              {student.role}
+                            </Badge>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span className="truncate">{student.email}</span>
+                              </div>
+                              {student.enrollment_number && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Hash className="h-3.5 w-3.5 flex-shrink-0" />
+                                  <span>{student.enrollment_number}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span>{new Date(student.created_at).toLocaleDateString()}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <div className="text-right text-xs text-muted-foreground hidden md:block">
-                            <div>{new Date(student.created_at).toLocaleDateString()}</div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredStudents.map((student: any) => (
+                    <Card key={student.id} className="border-l-4 border-l-transparent">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+                            {student.full_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
-                          <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs">
-                            {student.role}
-                          </Badge>
+                          
+                          <div className="flex-1 min-w-0 grid md:grid-cols-5 gap-3 items-center">
+                            <div className="min-w-0">
+                              <div className="font-semibold text-sm mb-1">{student.full_name}</div>
+                              <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs">
+                                {student.role}
+                              </Badge>
+                            </div>
+                            
+                            <div className="md:col-span-2 min-w-0">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                                <span className="truncate">{student.email}</span>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              {student.enrollment_number ? (
+                                <div className="flex items-center gap-2">
+                                  <div className="bg-muted px-2 py-1 rounded text-xs font-mono">
+                                    {student.enrollment_number}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground italic">No enrollment</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                              <span className="hidden lg:inline">{new Date(student.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                              <span className="lg:hidden">{new Date(student.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                            </div>
+                          </div>
+                          
+                          <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => openEditDialog(student)}>
+                            <Edit className="h-4 w-4 mr-1" />
+                            <span className="hidden sm:inline">Edit</span>
+                          </Button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <Card>
-              <CardContent className="p-4 md:pt-6">
-                <div className="text-center py-6 md:py-8">
-                  <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-sm md:text-base text-muted-foreground">
-                    {searchTerm || filterRole !== 'all' ? 'No students match your filters' : 'No students found'}
+              <CardContent className="py-12">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {searchTerm || filterRole !== 'all' ? 'No students found' : 'No students yet'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {searchTerm || filterRole !== 'all' 
+                      ? 'Try adjusting your search or filters' 
+                      : 'Import students using the Import Students tab'}
                   </p>
+                  {(searchTerm || filterRole !== 'all') && (
+                    <Button variant="outline" size="sm" onClick={() => { setSearchTerm(''); setFilterRole('all') }}>
+                      Clear Filters
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editStudent} onOpenChange={(open) => !open && setEditStudent(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Student</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditStudent} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Full Name</Label>
+              <Input
+                id="edit-name"
+                value={editForm.full_name}
+                onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-enrollment">Enrollment Number</Label>
+              <Input
+                id="edit-enrollment"
+                value={editForm.enrollment_number}
+                onChange={(e) => setEditForm({ ...editForm, enrollment_number: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-role">Role</Label>
+              <Select value={editForm.role} onValueChange={(value) => setEditForm({ ...editForm, role: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? 'Saving...' : 'Save Changes'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setEditStudent(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

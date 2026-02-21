@@ -10,19 +10,35 @@ import { useState } from 'react'
 import { useRealtime } from '@/components/realtime-provider'
 
 export default function TeamsPage() {
-  const { teams } = useRealtime()
+  const { teams, events } = useRealtime()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterDomain, setFilterDomain] = useState('all')
+  const [filterEvent, setFilterEvent] = useState('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const filteredTeams = Array.isArray(teams) ? teams.filter((team: any) => {
     const matchesSearch = team.team_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          team.school_name?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesDomain = filterDomain === 'all' || team.domain === filterDomain
-    return matchesSearch && matchesDomain
+    const matchesEvent = filterEvent === 'all' || team.event_id === filterEvent
+    return matchesSearch && matchesDomain && matchesEvent
+  }).sort((a: any, b: any) => {
+    // Sort by event name, then by team name
+    const eventA = events?.find((e: any) => e.id === a.event_id)?.name || ''
+    const eventB = events?.find((e: any) => e.id === b.event_id)?.name || ''
+    if (eventA !== eventB) return eventA.localeCompare(eventB)
+    return (a.team_name || '').localeCompare(b.team_name || '')
   }) : []
 
   const domains = Array.isArray(teams) ? [...new Set(teams.map((team: any) => team.domain).filter(Boolean))] : []
+  
+  // Group teams by event
+  const teamsByEvent = filteredTeams.reduce((acc: any, team: any) => {
+    const eventId = team.event_id || 'no-event'
+    if (!acc[eventId]) acc[eventId] = []
+    acc[eventId].push(team)
+    return acc
+  }, {})
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -77,6 +93,19 @@ export default function TeamsPage() {
               />
             </div>
             <div className="flex gap-2">
+              <Select value={filterEvent} onValueChange={setFilterEvent}>
+                <SelectTrigger className="w-full md:w-48">
+                  <SelectValue placeholder="Filter by event" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Events</SelectItem>
+                  {Array.isArray(events) && events.map((event: any) => (
+                    <SelectItem key={event.id} value={event.id}>
+                      {event.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Select value={filterDomain} onValueChange={setFilterDomain}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue placeholder="Filter by domain" />
@@ -113,11 +142,26 @@ export default function TeamsPage() {
         </CardContent>
       </Card>
 
-      {/* Teams Display */}
+      {/* Teams Display - Grouped by Event */}
       {filteredTeams && filteredTeams.length > 0 ? (
-        viewMode === 'grid' ? (
+        <div className="space-y-6">
+          {Object.entries(teamsByEvent).map(([eventId, eventTeams]: [string, any]) => {
+            const event = events?.find((e: any) => e.id === eventId)
+            const eventName = event?.name || 'No Event Assigned'
+            
+            return (
+              <div key={eventId} className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-gray-600" />
+                  <h2 className="text-xl font-semibold text-gray-900">{eventName}</h2>
+                  <Badge variant="outline" className="text-gray-600">
+                    {eventTeams.length} {eventTeams.length === 1 ? 'team' : 'teams'}
+                  </Badge>
+                </div>
+                
+                {viewMode === 'grid' ? (
           <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTeams.map((team: any) => (
+            {eventTeams.map((team: any) => (
               <Card key={team.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}>
                 <CardHeader className="p-3 md:p-4">
                   <div className="flex items-start justify-between">
@@ -153,7 +197,7 @@ export default function TeamsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {filteredTeams.map((team: any) => (
+            {eventTeams.map((team: any) => (
               <Card key={team.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}>
                 <CardContent className="p-3 md:p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -189,6 +233,11 @@ export default function TeamsPage() {
             ))}
           </div>
         )
+                }
+              </div>
+            )
+          })}
+        </div>
       ) : (
         <Card>
           <CardContent className="p-4 md:pt-6">

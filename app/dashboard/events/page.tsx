@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Calendar, Users, Trophy, Clock, MapPin, FileText, Settings, Eye, Plus, X, Search, Filter } from 'lucide-react'
+import { Calendar, Users, Trophy, Clock, MapPin, FileText, Settings, Eye, Plus, X, Search, Grid, List } from 'lucide-react'
 import { useState } from 'react'
 import { useRealtime } from '@/components/realtime-provider'
 
@@ -26,8 +26,9 @@ export default function EventsPage() {
     registrationDeadline: '',
     status: 'draft'
   })
-  const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,11 +72,12 @@ export default function EventsPage() {
 
   const filteredEvents = events?.filter((event: any) => {
     if (!event) return false
-    const matchesFilter = filter === 'all' || event.status === filter
+    const matchesStatus = filterStatus === 'all' || event.status === filterStatus
     const matchesSearch = !searchTerm || 
                          event.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesFilter && matchesSearch
+                         event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         event.venue?.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesStatus && matchesSearch
   }) || []
 
   const getStatusColor = (status: string) => {
@@ -87,12 +89,11 @@ export default function EventsPage() {
     }
   }
 
-  const getEventStats = (event: any) => {
-    return {
-      teams: event.total_teams || 0,
-      maxTeams: event.max_teams || 'Unlimited',
-      daysLeft: event.event_date ? Math.ceil((new Date(event.event_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0
-    }
+  const stats = {
+    total: events?.length || 0,
+    active: events?.filter(e => e.status === 'active').length || 0,
+    completed: events?.filter(e => e.status === 'completed').length || 0,
+    totalTeams: events?.reduce((sum, e) => sum + (e.total_teams || 0), 0) || 0
   }
 
   return (
@@ -103,11 +104,7 @@ export default function EventsPage() {
           <p className="text-sm text-muted-foreground mt-1">Create and manage competition events</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)} size="sm" className="w-fit">
-          {showForm ? (
-            <><X className="h-4 w-4 mr-2" />Cancel</>
-          ) : (
-            <><Plus className="h-4 w-4 mr-2" />Create Event</>
-          )}
+          {showForm ? <><X className="h-4 w-4 mr-2" />Cancel</> : <><Plus className="h-4 w-4 mr-2" />Create Event</>}
         </Button>
       </div>
 
@@ -116,61 +113,32 @@ export default function EventsPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{events?.length || 0}</p>
+            <p className="text-xl md:text-2xl font-bold">{stats.total}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Total Events</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{events?.filter(e => e.status === 'active').length || 0}</p>
+            <p className="text-xl md:text-2xl font-bold">{stats.active}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Active Events</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{events?.reduce((sum, e) => sum + (e.total_teams || 0), 0) || 0}</p>
+            <p className="text-xl md:text-2xl font-bold">{stats.totalTeams}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Total Teams</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Clock className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{events?.filter(e => e.status === 'draft').length || 0}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Draft Events</p>
+            <p className="text-xl md:text-2xl font-bold">{stats.completed}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Completed</p>
           </CardContent>
         </Card>
       </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Events</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Create Event Form */}
       {showForm && (
@@ -182,8 +150,8 @@ export default function EventsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
-            <form onSubmit={handleCreateEvent} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-xs md:text-sm">Event Name *</Label>
                   <Input
@@ -212,11 +180,11 @@ export default function EventsPage() {
                   placeholder="Event description and rules"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
+                  rows={3}
                 />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="eventDate" className="text-xs md:text-sm">Event Date *</Label>
                   <Input
@@ -247,7 +215,7 @@ export default function EventsPage() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="maxTeams" className="text-xs md:text-sm">Max Teams</Label>
                   <Input
@@ -267,22 +235,21 @@ export default function EventsPage() {
                     onChange={(e) => setFormData({ ...formData, registrationDeadline: e.target.value })}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-xs md:text-sm">Status</Label>
+                  <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="status" className="text-xs md:text-sm">Initial Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Button type="submit" disabled={loading} size="sm">
                   {loading ? 'Creating...' : 'Create Event'}
                 </Button>
@@ -295,170 +262,221 @@ export default function EventsPage() {
         </Card>
       )}
 
-      {/* Events Grid */}
-      <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-900">Events</h2>
-          {filteredEvents.length > 0 && (
-            <Badge variant="outline" className="text-gray-600 text-xs">
-              {filteredEvents.length} of {events?.length || 0}
-            </Badge>
-          )}
-        </div>
+      {/* Controls */}
+      <Card>
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full md:w-40">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        {filteredEvents && filteredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-            {filteredEvents.map((event: any) => {
-              const stats = getEventStats(event)
-              return (
-                <Card key={event.id} className="border-gray-200 hover:shadow-lg transition-all duration-200">
-                  <CardHeader className="pb-3 p-3 md:p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2 min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <CardTitle className="text-base md:text-lg text-gray-900 truncate">{event.name}</CardTitle>
+      {/* Events Display */}
+      {filteredEvents && filteredEvents.length > 0 ? (
+        viewMode === 'grid' ? (
+          <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredEvents.map((event: any) => (
+              <Card key={event.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3 p-3 md:p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base md:text-lg truncate">{event.name}</CardTitle>
+                    <Badge className={`${getStatusColor(event.status)} text-xs flex-shrink-0`}>
+                      {event.status || 'draft'}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                      <span>{new Date(event.event_date).toLocaleDateString()}</span>
+                    </div>
+                    {event.venue && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="truncate">{event.venue}</span>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-3 md:p-4 pt-0">
+                  <div className="space-y-3">
+                    {event.description && (
+                      <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
+                        {event.description}
+                      </p>
+                    )}
+                    
+                    <div className="grid grid-cols-4 gap-2 p-2 md:p-3 bg-muted rounded-lg">
+                      <div className="text-center">
+                        <Users className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <div className="text-sm md:text-base font-bold">{event.total_teams || 0}</div>
+                        <div className="text-xs text-muted-foreground">Teams</div>
+                      </div>
+                      <div className="text-center">
+                        <Trophy className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <div className="text-sm md:text-base font-bold">{event.total_judges || 0}</div>
+                        <div className="text-xs text-muted-foreground">Judges</div>
+                      </div>
+                      <div className="text-center">
+                        <FileText className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <div className="text-sm md:text-base font-bold">{event.total_submissions || 0}</div>
+                        <div className="text-xs text-muted-foreground">Subs</div>
+                      </div>
+                      <div className="text-center">
+                        <Clock className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <div className="text-sm md:text-base font-bold">{event.completion_rate || 0}%</div>
+                        <div className="text-xs text-muted-foreground">Done</div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/dashboard/events/${event.id}`}
+                        className="text-xs"
+                      >
+                        <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/dashboard/events/${event.id}/teams`}
+                        className="text-xs"
+                      >
+                        <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        Teams
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
+                        className="text-xs"
+                      >
+                        <Settings className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filteredEvents.map((event: any) => (
+              <Card key={event.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-3 md:p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Calendar className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-sm md:text-base truncate">{event.name}</h3>
                           <Badge className={`${getStatusColor(event.status)} text-xs`}>
                             {event.status || 'draft'}
                           </Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3 md:h-4 md:w-4" />
-                            <span className="hidden sm:inline">{new Date(event.event_date).toLocaleDateString()}</span>
-                            <span className="sm:hidden">{new Date(event.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          </div>
+                        <div className="flex items-center gap-2 md:gap-4 mt-1 flex-wrap">
+                          <span className="text-xs md:text-sm text-muted-foreground">
+                            {new Date(event.event_date).toLocaleDateString()}
+                          </span>
                           {event.venue && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3 md:h-4 md:w-4" />
-                              <span className="truncate max-w-[100px] md:max-w-none">{event.venue}</span>
-                            </div>
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <MapPin className="h-3 w-3" />
+                              {event.venue}
+                            </span>
                           )}
-                          {stats.daysLeft > 0 && (
-                            <div className="flex items-center gap-1 text-orange-600">
-                              <Clock className="h-3 w-3 md:h-4 md:w-4" />
-                              {stats.daysLeft}d
-                            </div>
-                          )}
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="h-3 w-3" />
+                            {event.total_teams || 0} teams
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-3 md:p-4 pt-0">
-                    <div className="space-y-3 md:space-y-4">
-                      {event.description && (
-                        <p className="text-xs md:text-sm text-gray-600 line-clamp-2">
-                          {event.description}
-                        </p>
-                      )}
-                      
-                      {/* Stats */}
-                      <div className="grid grid-cols-2 gap-2 md:gap-4 p-3 md:p-4 bg-gray-50 rounded-lg border border-gray-100">
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <div className="bg-blue-50 p-1.5 md:p-2 rounded-lg">
-                            <Users className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <div className="text-base md:text-lg font-bold text-gray-900">{stats.teams}</div>
-                            <div className="text-xs text-gray-600">Teams</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <div className="bg-green-50 p-1.5 md:p-2 rounded-lg">
-                            <Trophy className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
-                          </div>
-                          <div>
-                            <div className="text-base md:text-lg font-bold text-gray-900">{event.total_judges || 0}</div>
-                            <div className="text-xs text-gray-600">Judges</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <div className="bg-purple-50 p-1.5 md:p-2 rounded-lg">
-                            <FileText className="h-3 w-3 md:h-4 md:w-4 text-purple-600" />
-                          </div>
-                          <div>
-                            <div className="text-base md:text-lg font-bold text-gray-900">{event.total_submissions || 0}</div>
-                            <div className="text-xs text-gray-600">Submissions</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 md:gap-3">
-                          <div className="bg-orange-50 p-1.5 md:p-2 rounded-lg">
-                            <Clock className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
-                          </div>
-                          <div>
-                            <div className="text-base md:text-lg font-bold text-gray-900">{event.completion_rate || 0}%</div>
-                            <div className="text-xs text-gray-600">Complete</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Actions */}
-                      <div className="flex flex-wrap gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.location.href = `/dashboard/events/${event.id}`}
-                          className="flex-1 min-w-0 text-xs md:text-sm"
-                        >
-                          <Eye className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                          View
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.location.href = `/dashboard/events/${event.id}/teams`}
-                          className="flex-1 min-w-0 text-xs md:text-sm"
-                        >
-                          <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                          Teams
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
-                          className="flex-1 min-w-0 text-xs md:text-sm"
-                        >
-                          <Settings className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                          Edit
-                        </Button>
-                      </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/dashboard/events/${event.id}`}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/dashboard/events/${event.id}/teams`}
+                      >
+                        <Users className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
+                      >
+                        <Settings className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })
-          }
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        ) : (
-          <Card className="border-gray-200">
-            <CardContent className="py-12">
-              <div className="text-center">
-                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {searchTerm || filter !== 'all' ? 'No events match your filters' : 'No events created yet'}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {searchTerm || filter !== 'all' 
-                    ? 'Try adjusting your search or filter criteria' 
-                    : 'Get started by creating your first event'}
-                </p>
-                {(!searchTerm && filter === 'all') ? (
-                  <Button onClick={() => setShowForm(true)} className="bg-gray-900 hover:bg-gray-800">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Event
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => { setSearchTerm(''); setFilter('all') }}
-                  >
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        )
+      ) : (
+        <Card>
+          <CardContent className="p-4 md:pt-6">
+            <div className="text-center py-6 md:py-8">
+              <Calendar className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-sm md:text-base text-muted-foreground">
+                {searchTerm || filterStatus !== 'all' ? 'No events match your filters' : 'No events found'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

@@ -1,10 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: teamId } = await params
     const supabase = await createClient()
-    const teamId = params.id
 
     // First try to get team by UUID
     let { data: team, error } = await supabase

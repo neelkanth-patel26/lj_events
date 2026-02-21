@@ -142,141 +142,141 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">{team.team_name || `Team ${groupNumber}`}</h1>
-          <p className="text-muted-foreground mt-1">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-3xl font-bold truncate">{team.team_name || `Team ${groupNumber}`}</h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1 truncate">
             {team.school_name || 'LJ University'} • {event?.name || 'No Event'} • Group {groupNumber}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+          <Button variant="outline" onClick={() => router.back()} size="sm">
+            <ArrowLeft className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Back</span>
           </Button>
-          <Button onClick={handleEdit}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Team
+          <Button onClick={handleEdit} size="sm">
+            <Edit className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Edit Team</span>
           </Button>
         </div>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card>
-          <CardContent className="p-6 text-center">
-            <Users className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-3xl font-bold">{memberCount}</p>
-            <p className="text-sm text-muted-foreground">Members</p>
+          <CardContent className="p-3 md:p-6 text-center">
+            <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
+            <p className="text-xl md:text-3xl font-bold">{memberCount}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Members</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6 text-center">
-            <Trophy className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-3xl font-bold">{team.total_score || 0}</p>
-            <p className="text-sm text-muted-foreground">Score</p>
+          <CardContent className="p-3 md:p-6 text-center">
+            <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
+            <p className="text-xl md:text-3xl font-bold">{team.total_score || 0}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Score</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6 text-center">
-            <MapPin className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-2xl font-bold">{team.stall_no || 'N/A'}</p>
-            <p className="text-sm text-muted-foreground">Stall</p>
+          <CardContent className="p-3 md:p-6 text-center">
+            <MapPin className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
+            <p className="text-lg md:text-2xl font-bold truncate">{team.stall_no || 'N/A'}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Stall</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6 text-center">
-            <FileText className="h-8 w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-xl font-bold">{team.domain || 'N/A'}</p>
-            <p className="text-sm text-muted-foreground">Domain</p>
+          <CardContent className="p-3 md:p-6 text-center">
+            <FileText className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
+            <p className="text-base md:text-xl font-bold truncate">{team.domain || 'N/A'}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Domain</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Team Members */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
         {/* Team Details */}
         <Card className="lg:col-span-1">
-          <CardHeader>
+          <CardHeader className="p-3 md:p-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Team Details</CardTitle>
+              <CardTitle className="text-base md:text-lg">Team Details</CardTitle>
               <Button onClick={handleEdit} variant="ghost" size="sm">
                 <Edit className="h-4 w-4" />
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="p-3 md:p-4 pt-0 space-y-3">
             {event && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Event</p>
-                <p className="text-base font-medium">{event.name}</p>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">Event</p>
+                <p className="text-sm md:text-base font-medium truncate">{event.name}</p>
               </div>
             )}
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Team Name</p>
-              <p className="text-lg font-semibold">{team.team_name}</p>
+              <p className="text-xs md:text-sm font-medium text-muted-foreground">Team Name</p>
+              <p className="text-base md:text-lg font-semibold truncate">{team.team_name}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">School</p>
-              <p className="text-base font-medium">{team.school_name || 'LJ University'}</p>
+              <p className="text-xs md:text-sm font-medium text-muted-foreground">School</p>
+              <p className="text-sm md:text-base font-medium truncate">{team.school_name || 'LJ University'}</p>
             </div>
             {team.domain && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Domain</p>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">Domain</p>
                 <Badge variant="secondary" className="text-xs">{team.domain}</Badge>
               </div>
             )}
             {team.stall_no && (
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Stall Location</p>
-                <p className="text-base font-medium">{team.stall_no}</p>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">Stall Location</p>
+                <p className="text-sm md:text-base font-medium">{team.stall_no}</p>
               </div>
             )}
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Team ID</p>
-              <p className="text-xs font-mono bg-muted p-2 rounded break-all">{team.id}</p>
+              <p className="text-xs md:text-sm font-medium text-muted-foreground">Team ID</p>
+              <p className="text-[10px] md:text-xs font-mono bg-muted p-2 rounded break-all">{team.id}</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Team Members */}
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Team Members ({memberCount})</CardTitle>
-              <Button onClick={() => setShowAddMember(true)}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Member
+          <CardHeader className="p-3 md:p-4">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-base md:text-lg">Team Members ({memberCount})</CardTitle>
+              <Button onClick={() => setShowAddMember(true)} size="sm">
+                <UserPlus className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Add Member</span>
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 md:p-4 pt-0">
             {memberCount > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {team.team_members.map((member: any, index: number) => (
-                  <div key={member.id} className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  <div key={member.id} className="flex items-center gap-2 md:gap-4 p-3 md:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-full flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0">
                       {member.users?.full_name?.charAt(0) || (index + 1)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-base">{member.users?.full_name || 'Unknown Member'}</p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-4 w-4" />
+                      <p className="font-semibold text-sm md:text-base truncate">{member.users?.full_name || 'Unknown Member'}</p>
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 text-xs md:text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1 min-w-0">
+                          <Mail className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
                           <span className="truncate">{member.users?.email || 'No email'}</span>
                         </div>
                         {member.users?.enrollment_number && (
                           <div className="flex items-center gap-1">
-                            <Hash className="h-4 w-4" />
-                            <span>{member.users.enrollment_number}</span>
+                            <Hash className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                            <span className="truncate">{member.users.enrollment_number}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Badge variant={member.role === 'leader' ? 'default' : 'secondary'}>
+                    <div className="flex flex-col md:flex-row items-end md:items-center gap-1 md:gap-2 flex-shrink-0">
+                      <Badge variant={member.role === 'leader' ? 'default' : 'secondary'} className="text-xs">
                         {member.role || 'Member'}
                       </Badge>
                       <Button 
@@ -284,6 +284,7 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                         size="sm" 
                         onClick={() => handleRemoveMember(member.id)}
                         disabled={loading}
+                        className="h-8 w-8 p-0"
                       >
                         <X className="h-4 w-4 text-red-600" />
                       </Button>
@@ -292,11 +293,11 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">No members found</p>
-                <p className="text-sm text-muted-foreground mb-4">This team doesn't have any members assigned yet.</p>
-                <Button onClick={() => setShowAddMember(true)}>
+              <div className="text-center py-8 md:py-12">
+                <Users className="h-12 w-12 md:h-16 md:w-16 mx-auto text-muted-foreground mb-3 md:mb-4" />
+                <p className="text-base md:text-lg font-medium text-muted-foreground mb-2">No members found</p>
+                <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4 px-4">This team doesn't have any members assigned yet.</p>
+                <Button onClick={() => setShowAddMember(true)} size="sm">
                   <UserPlus className="h-4 w-4 mr-2" />
                   Add First Member
                 </Button>
@@ -362,7 +363,7 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
 
       {/* Add Member Dialog */}
       <Dialog open={showAddMember} onOpenChange={setShowAddMember}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Team Member</DialogTitle>
           </DialogHeader>
@@ -376,19 +377,19 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                 className="pl-10"
               />
             </div>
-            <div className="max-h-96 overflow-y-auto space-y-2">
+            <div className="max-h-[50vh] md:max-h-96 overflow-y-auto space-y-2">
               {availableUsers.length > 0 ? (
                 availableUsers.map((user: any) => (
-                  <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold flex-shrink-0">
+                  <div key={user.id} className="flex items-center justify-between gap-2 p-2 md:p-3 border rounded-lg hover:bg-muted/50">
+                    <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm md:text-base flex-shrink-0">
                         {user.full_name?.charAt(0) || 'U'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold truncate">{user.full_name}</p>
-                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                        <p className="text-sm md:text-base font-semibold truncate">{user.full_name}</p>
+                        <p className="text-xs md:text-sm text-muted-foreground truncate">{user.email}</p>
                         {user.enrollment_number && (
-                          <p className="text-xs text-muted-foreground">{user.enrollment_number}</p>
+                          <p className="text-[10px] md:text-xs text-muted-foreground">{user.enrollment_number}</p>
                         )}
                       </div>
                     </div>
@@ -396,13 +397,14 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                       size="sm" 
                       onClick={() => handleAddMember(user.id)}
                       disabled={loading}
+                      className="flex-shrink-0"
                     >
                       Add
                     </Button>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-6 md:py-8 text-xs md:text-sm text-muted-foreground px-4">
                   {searchUser ? 'No students found matching your search' : 'No available students to add'}
                 </div>
               )}

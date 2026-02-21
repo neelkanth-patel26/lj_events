@@ -10,15 +10,23 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Upload, Download, Users, Search, Grid, List, Mail, Calendar, Edit, Hash, UserCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import useSWR from 'swr'
 import { useRealtime } from '@/components/realtime-provider'
+import { useRealtimeData } from '@/hooks/useRealtimeData'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 export default function StudentsPage() {
   const { students, refreshData } = useRealtime()
-  const { data: events } = useSWR('/api/events', fetcher)
+  const { data: events, mutate: mutateEvents } = useSWR('/api/events', fetcher)
+  
+  const handleDataChange = useCallback(() => {
+    refreshData()
+    mutateEvents()
+  }, [refreshData, mutateEvents])
+  
+  useRealtimeData(handleDataChange, ['users', 'events'])
   const [loading, setLoading] = useState(false)
   const [selectedEvent, setSelectedEvent] = useState('')
   const [searchTerm, setSearchTerm] = useState('')

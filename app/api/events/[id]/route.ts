@@ -72,3 +72,36 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Failed to fetch event' }, { status: 500 })
   }
 }
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+    const supabase = await createClient()
+    const body = await request.json()
+
+    const { error } = await supabase
+      .from('events')
+      .update({
+        name: body.name,
+        description: body.description,
+        event_date: body.eventDate,
+        status: body.status,
+        venue: body.venue,
+        start_time: body.startTime,
+        end_time: body.endTime,
+        max_teams: body.maxTeams,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Update error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error('Error updating event:', error)
+    return NextResponse.json({ error: 'Failed to update event' }, { status: 500 })
+  }
+}

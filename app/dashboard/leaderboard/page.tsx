@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Trophy, Medal, Award, TrendingUp, Users, Target, Download, RefreshCw, Grid, List, MapPin } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import useSWR from 'swr'
+import { useRealtimeData } from '@/hooks/useRealtimeData'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
@@ -19,6 +20,12 @@ export default function LeaderboardPage() {
     selectedEvent ? `/api/leaderboard?eventId=${selectedEvent}` : null,
     (url) => fetch(url, { cache: 'no-store' }).then(r => r.json())
   )
+  
+  const handleDataChange = useCallback(() => {
+    mutate()
+  }, [mutate])
+  
+  useRealtimeData(handleDataChange, ['teams', 'leaderboard'])
 
   const calculateRankings = async () => {
     if (!selectedEvent) return

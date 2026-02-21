@@ -52,14 +52,18 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          max_teams: formData.maxTeams ? parseInt(formData.maxTeams) : null
+          maxTeams: formData.maxTeams ? parseInt(formData.maxTeams) : null
         }),
       })
 
-      if (!response.ok) throw new Error('Failed to update event')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update event')
+      }
       router.push('/dashboard/events')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating event:', error)
+      alert('Failed to update event: ' + error.message)
     } finally {
       setLoading(false)
     }

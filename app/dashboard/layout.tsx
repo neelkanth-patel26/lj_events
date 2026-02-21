@@ -11,7 +11,8 @@ import {
   Gavel,
   Trophy,
   LogOut,
-  User
+  User,
+  Settings2
 } from 'lucide-react'
 
 export default async function DashboardLayout({
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
     { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin', 'mentor'] },
     { href: '/dashboard/students', label: 'Students', icon: Users, roles: ['admin'] },
     { href: '/dashboard/teams', label: 'Teams', icon: Users, roles: ['admin', 'mentor', 'student'] },
+    { href: '/dashboard/criteria', label: 'Criteria', icon: Settings2, roles: ['admin'] },
     { href: '/dashboard/judging', label: 'Judging', icon: Gavel, roles: ['mentor'] },
     { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy, roles: ['admin', 'mentor', 'student'] },
   ]

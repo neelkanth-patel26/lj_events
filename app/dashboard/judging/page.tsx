@@ -5,6 +5,7 @@ import { GroupEvaluation } from '@/components/mentor/group-evaluation'
 import { Gavel, Settings2, Users } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getAssignedGroups } from '@/app/actions/events'
+import { CriteriaViewer } from '@/components/mentor/criteria-viewer'
 
 export default async function JudgingPage() {
   const user = await getCurrentUser()
@@ -14,13 +15,14 @@ export default async function JudgingPage() {
   }
 
   const initialGroups = await getAssignedGroups()
+  const isAdmin = user.role === 'admin'
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Judging Suite</h2>
-          <p className="text-sm text-muted-foreground mt-1">Evaluate teams and manage scoring criteria</p>
+          <p className="text-sm text-muted-foreground mt-1">Evaluate teams and view scoring criteria</p>
         </div>
       </div>
 
@@ -53,7 +55,7 @@ export default async function JudgingPage() {
         </TabsContent>
 
         <TabsContent value="criteria">
-          <CriteriaBuilder />
+          {isAdmin ? <CriteriaBuilder /> : <CriteriaViewer />}
         </TabsContent>
       </Tabs>
     </div>

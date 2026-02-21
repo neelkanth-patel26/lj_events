@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator'
 import { Calendar, Users, Trophy, Clock, MapPin, Settings, ArrowLeft, FileText, Target, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import useSWR from 'swr'
+import { useCallback } from 'react'
+import { useRealtimeData } from '@/hooks/useRealtimeData'
 
 const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r => r.json())
 
@@ -15,7 +17,13 @@ export default function EventDetailsPage() {
   const router = useRouter()
   const eventId = params.id
 
-  const { data: event, isLoading } = useSWR(`/api/events/${eventId}`, fetcher)
+  const { data: event, isLoading, mutate } = useSWR(`/api/events/${eventId}`, fetcher)
+  
+  const handleDataChange = useCallback(() => {
+    mutate()
+  }, [mutate])
+  
+  useRealtimeData(handleDataChange, ['events', 'teams'])
 
   if (isLoading) {
     return (

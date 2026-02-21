@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Users, Mail, ArrowLeft, MapPin, School, Trophy, Calendar, Edit, Hash, FileText, UserPlus, X, Search } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { useState, use } from 'react'
+import { useState, use, useCallback } from 'react'
 import useSWR from 'swr'
 import { createClient } from '@/lib/supabase/client'
+import { useRealtimeData } from '@/hooks/useRealtimeData'
 
 const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r => r.json())
 
@@ -18,8 +19,16 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
   const { id: teamId } = use(params)
   const router = useRouter()
   const { data: team, error, mutate } = useSWR(`/api/teams/${teamId}`, fetcher)
-  const { data: eventsData } = useSWR('/api/events', fetcher)
-  const { data: usersData } = useSWR('/api/users', fetcher)
+  const { data: eventsData, mutate: mutateEvents } = useSWR('/api/events', fetcher)
+  const { data: usersData, mutate: mutateUsers } = useSWR('/api/users', fetcher)
+  
+  const handleDataChange = useCallback(() => {
+    mutate()
+    mutateEvents()
+    mutateUsers()
+  }, [mutate, mutateEvents, mutateUsers])
+  
+  useRealtimeData(handleDataChange, ['teams', 'team_members', 'users', 'events'])
   const [showEdit, setShowEdit] = useState(false)
   const [showAddMember, setShowAddMember] = useState(false)
   const [loading, setLoading] = useState(false)

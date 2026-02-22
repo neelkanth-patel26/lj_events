@@ -405,8 +405,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Neelkanth Patel**
 - GitHub: [@neelkanth-patel26](https://github.com/neelkanth-patel26)
+  
 **Urmi Thakkar**
+
 **Reese Whiteman**
+
 **Jay Shah**
 
 ---

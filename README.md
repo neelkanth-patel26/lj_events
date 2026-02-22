@@ -404,13 +404,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Author
 
 **Neelkanth Patel**
-- GitHub: [@neelkanth-patel26](https://github.com/neelkanth-patel26)
-  
+- GitHub: [@neelkanth-patel26](https://github.com/neelkanth-patel26)  
 **Urmi Thakkar**
-
+- Instagram: [@urmi_thakkar26](https://www.instagram.com/urmi_thakkar_26)
 **Reese Whiteman**
-
+- Instagram: [@reese_whiteman26](https://www.instagram.com/reese.whiteman28)
 **Jay Shah**
+- No Public account
 
 ---
 

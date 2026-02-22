@@ -13,200 +13,168 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       min-height: 100vh;
-      background: hsl(0 0% 100%);
-      color: hsl(222.2 84% 4.9%);
-      overflow-x: hidden;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+      position: relative;
     }
-    .header {
-      border-bottom: 1px solid hsl(214.3 31.8% 91.4%);
-      background: hsl(0 0% 100%);
-      padding: 1.5rem;
-      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      animation: slideDown 0.5s ease-out;
+    .bg-animated {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      opacity: 0.03;
     }
-    .header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(to right, hsl(221.2 83.2% 53.3%), hsl(221.2 83.2% 53.3% / 0.6));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+    .grid-line {
+      position: absolute;
+      background: #fff;
+    }
+    .grid-line.horizontal {
+      width: 100%;
+      height: 1px;
+      animation: slideRight 20s linear infinite;
+    }
+    .grid-line.vertical {
+      width: 1px;
+      height: 100%;
+      animation: slideDown 15s linear infinite;
     }
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-      animation: fadeIn 0.6s ease-out 0.2s both;
-    }
-    .card {
-      background: hsl(0 0% 100%);
-      border: 1px solid hsl(214.3 31.8% 91.4%);
-      border-radius: 0.75rem;
-      padding: 3rem 2rem;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
       text-align: center;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      animation: scaleIn 0.5s ease-out 0.3s both;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 4rem;
+      opacity: 0;
+      animation: fadeIn 0.8s ease-out 0.2s forwards;
     }
     .icon-wrapper {
       position: relative;
-      width: 140px;
-      height: 140px;
-      margin: 0 auto 2rem;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 3rem;
+      opacity: 0;
+      animation: fadeIn 0.8s ease-out 0.4s forwards;
     }
     .icon {
-      width: 140px;
-      height: 140px;
-      background: linear-gradient(135deg, hsl(221.2 83.2% 53.3% / 0.15), hsl(221.2 83.2% 53.3% / 0.05));
-      border-radius: 50%;
+      width: 120px;
+      height: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 70px;
-      animation: bounce 2s ease-in-out infinite;
       position: relative;
       z-index: 2;
     }
-    .pulse-ring {
+    .icon svg {
+      width: 80px;
+      height: 80px;
+      stroke: #fff;
+      stroke-width: 1.5;
+      fill: none;
+      animation: float 3s ease-in-out infinite;
+    }
+    .icon-ring {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 140px;
-      height: 140px;
-      border: 3px solid hsl(221.2 83.2% 53.3% / 0.3);
+      width: 120px;
+      height: 120px;
+      border: 1px solid #fff;
       border-radius: 50%;
-      animation: pulse 2s ease-out infinite;
+      opacity: 0.2;
+      animation: ripple 3s ease-out infinite;
     }
-    .pulse-ring:nth-child(2) {
-      animation-delay: 0.5s;
+    .icon-ring:nth-child(2) {
+      animation-delay: 1s;
     }
-    h2 {
-      font-size: 2rem;
+    .icon-ring:nth-child(3) {
+      animation-delay: 2s;
+    }
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
       margin-bottom: 1rem;
-      font-weight: 700;
-      color: hsl(222.2 84% 4.9%);
-      animation: fadeInUp 0.6s ease-out 0.5s both;
-    }
-    p {
-      font-size: 1rem;
-      color: hsl(215.4 16.3% 46.9%);
-      line-height: 1.6;
-      margin-bottom: 2rem;
-      animation: fadeInUp 0.6s ease-out 0.6s both;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease-out 0.6s forwards;
     }
     .status {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: hsl(0 84.2% 60.2% / 0.1);
-      border: 1px solid hsl(0 84.2% 60.2% / 0.2);
-      border-radius: 2rem;
       font-size: 0.875rem;
-      color: hsl(0 84.2% 40%);
-      margin-bottom: 2rem;
-      animation: fadeInUp 0.6s ease-out 0.7s both;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease-out 0.8s forwards;
     }
     .status-dot {
-      width: 8px;
-      height: 8px;
-      background: hsl(0 84.2% 60.2%);
+      width: 6px;
+      height: 6px;
+      background: #fff;
       border-radius: 50%;
-      animation: blink 1.5s ease-in-out infinite;
+      animation: pulse-dot 2s ease-in-out infinite;
     }
     button {
-      background: hsl(221.2 83.2% 53.3%);
-      color: hsl(210 40% 98%);
-      border: none;
-      padding: 0.875rem 2.5rem;
+      background: transparent;
+      color: #fff;
+      border: 1px solid #fff;
+      padding: 1rem 3rem;
       font-size: 0.875rem;
-      font-weight: 600;
-      border-radius: 0.5rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 6px -1px hsl(221.2 83.2% 53.3% / 0.3);
-      animation: fadeInUp 0.6s ease-out 0.8s both;
       position: relative;
       overflow: hidden;
-    }
-    button:hover {
-      background: hsl(221.2 83.2% 48%);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px -2px hsl(221.2 83.2% 53.3% / 0.4);
-    }
-    button:active {
-      transform: translateY(0);
+      opacity: 0;
+      animation: fadeInUp 0.8s ease-out 1s forwards;
     }
     button::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      transition: left 0.3s ease;
+      z-index: -1;
     }
     button:hover::before {
-      width: 300px;
-      height: 300px;
+      left: 0;
     }
-    .tips {
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid hsl(214.3 31.8% 91.4%);
-      animation: fadeInUp 0.6s ease-out 0.9s both;
+    button:hover {
+      color: #000;
     }
-    .tips h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: hsl(222.2 84% 4.9%);
-    }
-    .tips ul {
-      list-style: none;
-      text-align: left;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .tips li {
-      padding: 0.75rem 0;
-      color: hsl(215.4 16.3% 46.9%);
-      font-size: 0.875rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .tips li::before {
-      content: '✓';
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      background: hsl(142.1 76.2% 36.3% / 0.1);
-      color: hsl(142.1 76.2% 36.3%);
-      border-radius: 50%;
-      font-size: 12px;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    @keyframes slideDown {
-      from {
-        transform: translateY(-100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+    .footer {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      opacity: 0.4;
+      opacity: 0;
+      animation: fadeIn 0.8s ease-out 1.2s forwards;
     }
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
       to {
         opacity: 1;
       }
@@ -221,17 +189,7 @@
         transform: translateY(0);
       }
     }
-    @keyframes scaleIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    @keyframes bounce {
+    @keyframes float {
       0%, 100% {
         transform: translateY(0);
       }
@@ -239,17 +197,17 @@
         transform: translateY(-10px);
       }
     }
-    @keyframes pulse {
+    @keyframes ripple {
       0% {
         transform: translate(-50%, -50%) scale(1);
-        opacity: 0.8;
+        opacity: 0.2;
       }
       100% {
-        transform: translate(-50%, -50%) scale(1.5);
+        transform: translate(-50%, -50%) scale(2);
         opacity: 0;
       }
     }
-    @keyframes blink {
+    @keyframes pulse-dot {
       0%, 100% {
         opacity: 1;
       }
@@ -257,94 +215,88 @@
         opacity: 0.3;
       }
     }
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: hsl(222.2 84% 4.9%);
-        color: hsl(210 40% 98%);
+    @keyframes slideRight {
+      from {
+        transform: translateX(-100%);
       }
-      .header {
-        background: hsl(222.2 84% 4.9%);
-        border-bottom-color: hsl(217.2 32.6% 17.5%);
+      to {
+        transform: translateX(100%);
       }
-      .card {
-        background: hsl(222.2 84% 4.9%);
-        border-color: hsl(217.2 32.6% 17.5%);
+    }
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
       }
-      h2, .tips h3 {
-        color: hsl(210 40% 98%);
-      }
-      p, .tips li {
-        color: hsl(215 20.2% 65.1%);
-      }
-      .tips {
-        border-top-color: hsl(217.2 32.6% 17.5%);
+      to {
+        transform: translateY(100%);
       }
     }
     @media (max-width: 640px) {
-      .header {
-        padding: 1rem;
-      }
-      .header h1 {
-        font-size: 1.25rem;
-      }
-      .container {
-        padding: 1.5rem 1rem;
-      }
-      .card {
-        padding: 2rem 1.5rem;
-      }
-      h2 {
-        font-size: 1.5rem;
+      h1 {
+        font-size: 1.75rem;
       }
       .icon-wrapper {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
       }
       .icon {
-        width: 100px;
-        height: 100px;
-        font-size: 50px;
+        width: 80px;
+        height: 80px;
       }
-      .pulse-ring {
-        width: 100px;
-        height: 100px;
+      .icon svg {
+        width: 50px;
+        height: 50px;
+      }
+      .icon-ring {
+        width: 80px;
+        height: 80px;
+      }
+      button {
+        padding: 0.875rem 2rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>LJ University</h1>
+  <div class="bg-animated">
+    <div class="grid-line horizontal" style="top: 20%"></div>
+    <div class="grid-line horizontal" style="top: 40%"></div>
+    <div class="grid-line horizontal" style="top: 60%"></div>
+    <div class="grid-line horizontal" style="top: 80%"></div>
+    <div class="grid-line vertical" style="left: 20%"></div>
+    <div class="grid-line vertical" style="left: 40%"></div>
+    <div class="grid-line vertical" style="left: 60%"></div>
+    <div class="grid-line vertical" style="left: 80%"></div>
   </div>
+  
   <div class="container">
-    <div class="card">
-      <div class="icon-wrapper">
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring"></div>
-        <div class="icon">📡</div>
-      </div>
-      <h2>You're Offline</h2>
-      <div class="status">
-        <span class="status-dot"></span>
-        <span>No Internet Connection</span>
-      </div>
-      <p>It looks like you've lost your internet connection. Please check your network and try again.</p>
-      <button onclick="window.location.reload()">
-        <span style="position: relative; z-index: 1;">Try Again</span>
-      </button>
-      <div class="tips">
-        <h3>Troubleshooting Tips</h3>
-        <ul>
-          <li>Check your WiFi or mobile data connection</li>
-          <li>Make sure airplane mode is turned off</li>
-          <li>Try restarting your router</li>
-          <li>Contact your network administrator if the issue persists</li>
-        </ul>
+    <div class="logo">LJ UNIVERSITY</div>
+    
+    <div class="icon-wrapper">
+      <div class="icon-ring"></div>
+      <div class="icon-ring"></div>
+      <div class="icon-ring"></div>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
       </div>
     </div>
+    
+    <h1>Connection Lost</h1>
+    
+    <div class="status">
+      <span class="status-dot"></span>
+      <span>Offline Mode</span>
+    </div>
+    
+    <button onclick="window.location.reload()">Reconnect</button>
+    
+    <div class="footer">Attempting to reconnect automatically...</div>
   </div>
+  
   <script>
-    // Auto-retry connection every 30 seconds
     let retryCount = 0;
     const maxRetries = 10;
     
@@ -352,17 +304,16 @@
       if (navigator.onLine && retryCount < maxRetries) {
         retryCount++;
         fetch('/', { method: 'HEAD', cache: 'no-cache' })
-          .then(() => {
-            window.location.reload();
-          })
-          .catch(() => {
-            console.log('Still offline, retry', retryCount);
-          });
+          .then(() => window.location.reload())
+          .catch(() => console.log('Retry', retryCount));
       }
     }
     
-    // Check connection every 30 seconds
     setInterval(checkConnection, 30000);
+    window.addEventListener('online', () => setTimeout(() => window.location.reload(), 1000));
+  </script>
+</body>
+</html>   setInterval(checkConnection, 30000);
     
     // Listen for online event
     window.addEventListener('online', () => {

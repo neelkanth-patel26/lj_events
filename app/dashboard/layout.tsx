@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import PWAInitializer from '@/components/pwa-initializer'
 import { NavLink } from '@/components/nav-link'
 import { Toaster } from '@/components/ui/toaster'
+import { OrientationLock } from '@/components/orientation-lock'
 import {
   LayoutDashboard,
   Calendar,
@@ -46,6 +47,7 @@ export default async function DashboardLayout({
   return (
     <>
       <PWAInitializer />
+      <OrientationLock />
       <RealtimeProvider>
         <div className="min-h-screen bg-background flex flex-col md:flex-row">
         {/* Desktop Sidebar */}

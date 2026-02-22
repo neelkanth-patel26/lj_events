@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Users, Mail, ArrowLeft, MapPin, School, Trophy, Calendar, Edit, Hash, FileText, UserPlus, X, Search } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
-import { useState, use, useCallback } from 'react'
+import { useState, use, useCallback, useEffect } from 'react'
 import useSWR from 'swr'
 import { createClient } from '@/lib/supabase/client'
 import { useRealtimeData } from '@/hooks/useRealtimeData'
@@ -21,6 +21,21 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
   const { data: team, error, mutate } = useSWR(`/api/teams/${teamId}`, fetcher)
   const { data: eventsData, mutate: mutateEvents } = useSWR('/api/events', fetcher)
   const { data: usersData, mutate: mutateUsers } = useSWR('/api/users', fetcher)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const res = await fetch('/api/auth/me')
+        const data = await res.json()
+        setUserRole(data?.role || null)
+      } catch (error) {
+        console.error('Error fetching role:', error)
+        setUserRole(null)
+      }
+    }
+    fetchUserRole()
+  }, [])
   
   const handleDataChange = useCallback(() => {
     mutate()
@@ -140,6 +155,8 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
     (u.full_name?.toLowerCase().includes(searchUser.toLowerCase()) || 
      u.email?.toLowerCase().includes(searchUser.toLowerCase()))
   )
+  
+  const isAdmin = userRole === 'admin'
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -156,10 +173,12 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
             <ArrowLeft className="h-4 w-4 md:mr-2" />
             <span className="hidden md:inline">Back</span>
           </Button>
-          <Button onClick={handleEdit} size="sm">
-            <Edit className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Edit Team</span>
-          </Button>
+          {isAdmin && (
+            <Button onClick={handleEdit} size="sm">
+              <Edit className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Edit Team</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -202,9 +221,11 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
           <CardHeader className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base md:text-lg">Team Details</CardTitle>
-              <Button onClick={handleEdit} variant="ghost" size="sm">
-                <Edit className="h-4 w-4" />
-              </Button>
+              {isAdmin && (
+                <Button onClick={handleEdit} variant="ghost" size="sm">
+                  <Edit className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0 space-y-3">
@@ -246,10 +267,12 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
           <CardHeader className="p-3 md:p-4">
             <div className="flex items-center justify-between gap-2">
               <CardTitle className="text-base md:text-lg">Team Members ({memberCount})</CardTitle>
-              <Button onClick={() => setShowAddMember(true)} size="sm">
-                <UserPlus className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Add Member</span>
-              </Button>
+              {isAdmin && (
+                <Button onClick={() => setShowAddMember(true)} size="sm">
+                  <UserPlus className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Add Member</span>
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="p-3 md:p-4 pt-0">
@@ -279,15 +302,17 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                       <Badge variant={member.role === 'leader' ? 'default' : 'secondary'} className="text-xs">
                         {member.role || 'Member'}
                       </Badge>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleRemoveMember(member.id)}
-                        disabled={loading}
-                        className="h-8 w-8 p-0"
-                      >
-                        <X className="h-4 w-4 text-red-600" />
-                      </Button>
+                      {isAdmin && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleRemoveMember(member.id)}
+                          disabled={loading}
+                          className="h-8 w-8 p-0"
+                        >
+                          <X className="h-4 w-4 text-red-600" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -297,10 +322,12 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                 <Users className="h-12 w-12 md:h-16 md:w-16 mx-auto text-muted-foreground mb-3 md:mb-4" />
                 <p className="text-base md:text-lg font-medium text-muted-foreground mb-2">No members found</p>
                 <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4 px-4">This team doesn't have any members assigned yet.</p>
-                <Button onClick={() => setShowAddMember(true)} size="sm">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add First Member
-                </Button>
+                {isAdmin && (
+                  <Button onClick={() => setShowAddMember(true)} size="sm">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add First Member
+                  </Button>
+                )}
               </div>
             )}
           </CardContent>

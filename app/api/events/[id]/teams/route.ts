@@ -6,53 +6,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const supabase = await createClient()
 
-    // Get teams with member counts
+    // Get teams with member counts via team_members
     const { data: teams, error } = await supabase
       .from('teams')
       .select(`
         *,
-        users!inner(count)
+        team_members(count)
       `)
       .eq('event_id', id)
 
-    if (error) {
-      console.error('Error fetching teams:', error)
-      // Fallback to basic team data if join fails
-      const { data: basicTeams, error: basicError } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('event_id', id)
-      
-      if (basicError) throw basicError
-      
-      // Get member counts separately
-      const teamsWithCounts = await Promise.all(
-        (basicTeams || []).map(async (team) => {
-          const { count } = await supabase
-            .from('users')
-            .select('*', { count: 'exact', head: true })
-            .eq('team_id', team.id)
-          
-          return {
-            ...team,
-            member_count: count || 0
-          }
-        })
-      )
-      
-      return NextResponse.json(teamsWithCounts, {
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
-      })
-    }
+    if (error) throw error
 
     // Process teams data to include member counts
     const processedTeams = (teams || []).map(team => ({
       ...team,
-      member_count: team.users?.length || 0
+      member_count: team.team_members?.[0]?.count || 0
     }))
 
     return NextResponse.json(processedTeams, {

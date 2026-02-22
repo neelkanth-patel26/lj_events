@@ -32,6 +32,8 @@ CREATE TABLE public.events (
   total_judges integer DEFAULT 0,
   total_submissions integer DEFAULT 0,
   completion_rate numeric DEFAULT 0,
+  evaluation_open boolean DEFAULT true,
+  leaderboard_visible boolean DEFAULT false,
   CONSTRAINT events_pkey PRIMARY KEY (id),
   CONSTRAINT events_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id)
 );
@@ -72,6 +74,7 @@ CREATE TABLE public.mentor_profiles (
   branch character varying,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  designation character varying,
   CONSTRAINT mentor_profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT mentor_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
@@ -151,5 +154,6 @@ CREATE TABLE public.users (
   updated_at timestamp with time zone DEFAULT now(),
   password_hash text NOT NULL,
   enrollment_number character varying,
+  department character varying,
   CONSTRAINT users_pkey PRIMARY KEY (id)
 );

@@ -11,7 +11,8 @@ import {
   Gavel,
   Trophy,
   LogOut,
-  User
+  User,
+  Shield
 } from 'lucide-react'
 
 interface DashboardSidebarProps {
@@ -23,11 +24,13 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin'] },
+    { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin', 'mentor'] },
     { href: '/dashboard/students', label: 'Students', icon: Users, roles: ['admin'] },
     { href: '/dashboard/teams', label: 'Teams', icon: Users, roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/judging', label: 'Judging', icon: Gavel, roles: ['mentor'] },
-    { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy, roles: ['admin', 'mentor', 'student'] },
+    { href: '/dashboard/judging', label: 'Judging', icon: Gavel, roles: ['admin', 'mentor'] },
+    { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy, roles: ['admin'] },
+    { href: '/dashboard/mentors', label: 'Mentors', icon: Users, roles: ['admin'] },
+    { href: '/dashboard/admins', label: 'Admins', icon: Shield, roles: ['admin'] },
   ]
 
   const filteredNav = navItems.filter(item => item.roles.includes(user.role))

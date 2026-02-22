@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { useState, use } from 'react'
-import { ArrowLeft, Plus, Users, Trophy, School, X } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useState, use, useEffect } from 'react'
+import { ArrowLeft, Plus, Users, Trophy, School, X, Pencil } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 
@@ -18,12 +19,28 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
   const { data: teams, mutate, isLoading } = useSWR(`/api/events/${eventId}/teams`, fetcher)
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [editingTeam, setEditingTeam] = useState<any>(null)
   const [formData, setFormData] = useState({
     teamName: '',
     schoolName: '',
   })
 
-  const handleCreateTeam = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const res = await fetch('/api/auth/me')
+        const data = await res.json()
+        setUserRole(data?.role || null)
+      } catch (error) {
+        console.error('Error fetching role:', error)
+        setUserRole(null)
+      }
+    }
+    checkRole()
+  }, [])
+
+const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
@@ -46,7 +63,34 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  if (isLoading) {
+  const handleEditTeam = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingTeam) return
+    setLoading(true)
+
+    try {
+      const response = await fetch(`/api/teams/${editingTeam.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          team_name: formData.teamName,
+          school_name: formData.schoolName,
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update team')
+
+      setEditingTeam(null)
+      setFormData({ teamName: '', schoolName: '' })
+      mutate()
+    } catch (error) {
+      console.error('Error updating team:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (isLoading || !userRole) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -70,18 +114,20 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <Button onClick={() => setShowForm(!showForm)} size="sm">
-            {showForm ? (
-              <><X className="h-4 w-4 mr-2" />Cancel</>
-            ) : (
-              <><Plus className="h-4 w-4 mr-2" />Add Team</>
-            )}
-          </Button>
+          {userRole === 'admin' && (
+            <Button onClick={() => setShowForm(!showForm)} size="sm">
+              {showForm ? (
+                <><X className="h-4 w-4 mr-2" />Cancel</>
+              ) : (
+                <><Plus className="h-4 w-4 mr-2" />Add Team</>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Add Team Form */}
-      {showForm && (
+      {/* Add Team Form - Admin Only */}
+      {showForm && userRole === 'admin' && (
         <Card>
           <CardHeader className="p-3 md:p-4">
             <CardTitle className="text-lg md:text-xl flex items-center gap-2">
@@ -158,7 +204,7 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
                       <span className="text-xs md:text-sm font-medium">Score</span>
                     </div>
                     <span className="text-base md:text-lg font-bold">
-                      {team.total_score || 0}
+                      {userRole === 'mentor' || userRole === 'student' ? '***' : (team.total_score || 0)}
                     </span>
                   </div>
                   
@@ -172,14 +218,28 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
                     </span>
                   </div>
                   
-                  <div className="pt-2 border-t">
+                  <div className="pt-2 border-t flex gap-2">
+                    {userRole === 'admin' && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 text-xs md:text-sm"
+                        onClick={() => {
+                          setEditingTeam(team)
+                          setFormData({ teamName: team.team_name, schoolName: team.school_name || '' })
+                        }}
+                      >
+                        <Pencil className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                    )}
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="w-full text-xs md:text-sm"
+                      className="flex-1 text-xs md:text-sm"
                       onClick={() => router.push(`/dashboard/teams/${team.id}/members`)}
                     >
-                      View Details
+                      View
                     </Button>
                   </div>
                 </div>
@@ -194,14 +254,52 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
               <Users className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-base md:text-lg font-medium mb-2">No teams registered yet</h3>
               <p className="text-sm text-muted-foreground mb-4">Get started by adding the first team to this event.</p>
-              <Button onClick={() => setShowForm(true)} size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add First Team
-              </Button>
+              {userRole === 'admin' && (
+                <Button onClick={() => setShowForm(true)} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Team
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Team Dialog */}
+      <Dialog open={!!editingTeam} onOpenChange={(open) => !open && setEditingTeam(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Team</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditTeam} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-teamName">Team Name *</Label>
+              <Input
+                id="edit-teamName"
+                value={formData.teamName}
+                onChange={(e) => setFormData({ ...formData, teamName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-schoolName">School Name</Label>
+              <Input
+                id="edit-schoolName"
+                value={formData.schoolName}
+                onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Saving...' : 'Save Changes'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setEditingTeam(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

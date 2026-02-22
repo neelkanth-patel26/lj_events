@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Calendar, Users, Trophy, Clock, MapPin, Settings, ArrowLeft, FileText, Target, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Calendar, Users, Trophy, Clock, MapPin, Settings, ArrowLeft, FileText, Target, AlertCircle, CheckCircle2, Lock, Unlock } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRealtimeData } from '@/hooks/useRealtimeData'
 
 const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r => r.json())
@@ -16,14 +16,48 @@ export default function EventDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const eventId = params.id
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   const { data: event, isLoading, mutate } = useSWR(`/api/events/${eventId}`, fetcher)
+  
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data } = await supabase.from('users').select('role').eq('id', user.id).single()
+          setUserRole(data?.role || null)
+        }
+      } catch (error) {
+        console.error('Error fetching role:', error)
+        setUserRole(null)
+      }
+    }
+    checkRole()
+  }, [])
   
   const handleDataChange = useCallback(() => {
     mutate()
   }, [mutate])
   
   useRealtimeData(handleDataChange, ['events', 'teams'])
+
+  const toggleLeaderboard = async () => {
+    try {
+      const res = await fetch(`/api/events/${eventId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leaderboard_visible: !event.leaderboard_visible })
+      })
+      if (res.ok) {
+        mutate()
+      }
+    } catch (error) {
+      console.error('Error toggling leaderboard:', error)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -109,10 +143,12 @@ export default function EventDetailsPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <Button onClick={() => router.push(`/dashboard/events/${eventId}/edit`)} size="sm">
-          <Settings className="h-4 w-4 mr-2" />
-          Edit Event
-        </Button>
+        {userRole === 'admin' && (
+          <Button onClick={() => router.push(`/dashboard/events/${eventId}/edit`)} size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Edit Event
+          </Button>
+        )}
       </div>
       
       <div className="space-y-3">
@@ -155,7 +191,7 @@ export default function EventDetailsPage() {
           )}
         </div>
         
-        {(daysLeft > 0 || registrationDaysLeft > 0) && (
+        {(daysLeft > 0 || registrationDaysLeft > 0) && userRole === 'admin' && (
           <div className="flex flex-wrap gap-2 md:gap-4">
             {daysLeft > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 md:px-4 md:py-2">
@@ -323,15 +359,31 @@ export default function EventDetailsPage() {
                   <Users className="h-4 w-4 mr-2" />
                   View Teams
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start text-sm"
-                  size="sm"
-                  onClick={() => router.push(`/dashboard/events/${eventId}/edit`)}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Edit Event
-                </Button>
+                {userRole === 'admin' && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-sm"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/events/${eventId}/edit`)}
+                    >
+                      <Settings className="h-4 w-4 mr-2" />
+                      Edit Event
+                    </Button>
+                    <Button 
+                      variant={event.leaderboard_visible ? "default" : "outline"}
+                      className="w-full justify-start text-sm"
+                      size="sm"
+                      onClick={toggleLeaderboard}
+                    >
+                      {event.leaderboard_visible ? (
+                        <><Unlock className="h-4 w-4 mr-2" />Leaderboard Visible</>
+                      ) : (
+                        <><Lock className="h-4 w-4 mr-2" />Leaderboard Locked</>
+                      )}
+                    </Button>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

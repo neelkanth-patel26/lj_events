@@ -4,6 +4,11 @@ export async function middleware(request: NextRequest) {
   const session = request.cookies.get('user_session')
   const { pathname } = request.nextUrl
 
+  // Allow root path
+  if (pathname === '/') {
+    return NextResponse.next()
+  }
+
   // Redirect to login if accessing protected routes without session
   if (!session && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/auth/login', request.url))

@@ -4,27 +4,93 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Trophy, Medal, Award, TrendingUp, Users, Target, Download, Grid, List, MapPin } from 'lucide-react'
-import { useState, useCallback } from 'react'
+import { Trophy, Medal, Award, TrendingUp, Users, Target, Download, Grid, List, MapPin, Lock, Unlock } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
 import useSWR from 'swr'
 import { useRealtimeData } from '@/hooks/useRealtimeData'
+import { redirect } from 'next/navigation'
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 export default function LeaderboardPage() {
+  const [userRole, setUserRole] = useState<string | null>(null)
   const { data: events } = useSWR('/api/events', fetcher)
   const [selectedEvent, setSelectedEvent] = useState<string>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [isLeaderboardVisible, setIsLeaderboardVisible] = useState(false)
+  const [togglingVisibility, setTogglingVisibility] = useState(false)
+  const [loadingVisibility, setLoadingVisibility] = useState(false)
   const { data: rankings, mutate } = useSWR(
     selectedEvent ? `/api/leaderboard?eventId=${selectedEvent}` : null,
     (url) => fetch(url, { cache: 'no-store' }).then(r => r.json())
   )
   
+  useEffect(() => {
+    const checkRole = async () => {
+      const res = await fetch('/api/auth/me')
+      const data = await res.json()
+      setUserRole(data?.role)
+    }
+    checkRole()
+  }, [])
+
+  useEffect(() => {
+    const checkVisibility = async () => {
+      if (selectedEvent) {
+        setLoadingVisibility(true)
+        const res = await fetch(`/api/events/${selectedEvent}`)
+        const event = await res.json()
+        setIsLeaderboardVisible(event?.leaderboard_visible || false)
+        setLoadingVisibility(false)
+      }
+    }
+    checkVisibility()
+  }, [selectedEvent])
+
   const handleDataChange = useCallback(() => {
     mutate()
   }, [mutate])
   
   useRealtimeData(handleDataChange, ['teams', 'leaderboard'])
+
+  if (!userRole) return null
+
+  if (userRole === 'mentor') {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="max-w-md">
+          <CardContent className="p-8 text-center">
+            <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+            <p className="text-muted-foreground">You don't have permission to view the leaderboard.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const toggleLeaderboardVisibility = async () => {
+    if (!selectedEvent || userRole !== 'admin') return
+    
+    setTogglingVisibility(true)
+    try {
+      const response = await fetch(`/api/events/${selectedEvent}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leaderboard_visible: !isLeaderboardVisible })
+      })
+
+      if (!response.ok) throw new Error('Failed to update visibility')
+
+      setIsLeaderboardVisible(!isLeaderboardVisible)
+      mutate()
+    } catch (error) {
+      console.error('Error toggling visibility:', error)
+      alert('Failed to update leaderboard visibility')
+    } finally {
+      setTogglingVisibility(false)
+    }
+  }
 
   const exportLeaderboard = async () => {
     if (!rankings || !selectedEvent) return
@@ -72,12 +138,29 @@ export default function LeaderboardPage() {
           <h1 className="text-2xl md:text-3xl font-bold">Leaderboard</h1>
           <p className="text-sm text-muted-foreground mt-1">View team rankings and scores</p>
         </div>
-        {rankings && rankings.length > 0 && (
-          <Button onClick={exportLeaderboard} variant="outline" size="sm" className="w-fit">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {userRole === 'admin' && selectedEvent && (
+            <Button 
+              onClick={toggleLeaderboardVisibility} 
+              variant={isLeaderboardVisible ? "default" : "outline"}
+              size="sm" 
+              disabled={togglingVisibility}
+              className="w-fit"
+            >
+              {isLeaderboardVisible ? (
+                <><Unlock className="h-4 w-4 mr-2" />Public</>
+              ) : (
+                <><Lock className="h-4 w-4 mr-2" />Private</>
+              )}
+            </Button>
+          )}
+          {rankings && rankings.length > 0 && (isLeaderboardVisible || userRole === 'admin') && (
+            <Button onClick={exportLeaderboard} variant="outline" size="sm" className="w-fit">
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats Overview */}
@@ -92,7 +175,7 @@ export default function LeaderboardPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{topScore}</p>
+            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || isLeaderboardVisible ? topScore : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
         </Card>
@@ -106,7 +189,7 @@ export default function LeaderboardPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <TrendingUp className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{rankings?.filter((t: any) => (t.total_score || 0) > 0).length || 0}</p>
+            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || isLeaderboardVisible ? (rankings?.filter((t: any) => (t.total_score || 0) > 0).length || 0) : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Scored</p>
           </CardContent>
         </Card>
@@ -153,7 +236,30 @@ export default function LeaderboardPage() {
       </Card>
 
       {/* Rankings Display */}
-      {rankings && rankings.length > 0 ? (
+      {loadingVisibility ? (
+        <Card>
+          <CardContent className="p-4 md:pt-6">
+            <div className="text-center py-6 md:py-8">
+              <div className="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Loading leaderboard status...
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : !isLeaderboardVisible && selectedEvent && userRole !== 'admin' ? (
+        <Card>
+          <CardContent className="p-4 md:pt-6">
+            <div className="text-center py-6 md:py-8">
+              <Trophy className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Leaderboard Locked</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
+                The leaderboard for this event is not yet available.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : rankings && rankings.length > 0 ? (
         viewMode === 'grid' ? (
           <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
             {rankings.map((team: any, index: number) => {

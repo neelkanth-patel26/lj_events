@@ -33,6 +33,7 @@ interface Team {
     description?: string
     member_count?: number
     total_score?: number
+    my_score?: number
     members?: any[]
     stall_no?: string
     domain?: string
@@ -50,9 +51,12 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
     const [criteria, setCriteria] = useState<Criterion[]>([])
     const [scores, setScores] = useState<Record<string, number | ''>>({})
     const [loading, setLoading] = useState(false)
+    const [loadingTeams, setLoadingTeams] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
     useEffect(() => {
+        fetchCurrentUser()
         fetchEvents()
     }, [])
     
@@ -66,13 +70,24 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
     useRealtimeData(handleDataChange, ['teams', 'team_members', 'evaluation_criteria', 'events'])
 
     useEffect(() => {
-        if (selectedEvent) {
+        if (selectedEvent && currentUserId) {
             fetchTeams(selectedEvent)
             fetchCriteria()
             setSelectedTeam(null)
             setScores({})
         }
-    }, [selectedEvent])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedEvent, currentUserId])
+
+    const fetchCurrentUser = async () => {
+        try {
+            const res = await fetch('/api/auth/me')
+            const data = await res.json()
+            setCurrentUserId(data?.id || null)
+        } catch (error) {
+            console.error('Failed to fetch user:', error)
+        }
+    }
 
     const fetchEvents = async () => {
         try {
@@ -85,20 +100,32 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
     }
 
     const fetchTeams = async (eventId: string) => {
+        if (!currentUserId) return
+        
+        setLoadingTeams(true)
         try {
             const res = await fetch(`/api/events/${eventId}/teams`)
             const data = await res.json()
             console.log('Fetched teams:', data)
             
-            // Fetch member count for each team
+            // Fetch member count and mentor's score for each team
             const teamsWithMembers = await Promise.all(
                 (data || []).map(async (team: any) => {
                     try {
                         const membersRes = await fetch(`/api/teams/${team.id}/members`)
                         const members = await membersRes.json()
-                        return { ...team, member_count: members?.length || 0, members }
+                        
+                        // Fetch mentor's score for this team
+                        let myScore = 0
+                        const scoresRes = await fetch(`/api/judging/scores/${team.id}?judgeId=${currentUserId}`)
+                        if (scoresRes.ok) {
+                            const scoresData = await scoresRes.json()
+                            myScore = scoresData.reduce((sum: number, s: any) => sum + (s.score || 0), 0)
+                        }
+                        
+                        return { ...team, member_count: members?.length || 0, members, my_score: myScore }
                     } catch {
-                        return { ...team, member_count: 0, members: [] }
+                        return { ...team, member_count: 0, members: [], my_score: 0 }
                     }
                 })
             )
@@ -107,6 +134,8 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
         } catch (error) {
             console.error('Failed to fetch teams:', error)
             setTeams([])
+        } finally {
+            setLoadingTeams(false)
         }
     }
 
@@ -261,9 +290,9 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                 })
             }
             
-            const totalScore = result.totalScore || calculateTotal()
+            const myScore = calculateTotal()
             setTeams(teams.map(t => 
-                t.id === selectedTeam.id ? { ...t, total_score: totalScore } : t
+                t.id === selectedTeam.id ? { ...t, my_score: myScore } : t
             ))
             
             setScores({})
@@ -323,7 +352,33 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                 </CardContent>
             </Card>
 
-            {selectedEvent && filteredTeams.length > 0 && (
+            {selectedEvent && loadingTeams && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <Card key={i} className="animate-pulse">
+                            <CardHeader className="pb-3 space-y-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="flex gap-1.5">
+                                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                        </div>
+                                    </div>
+                                    <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                <div className="h-3 bg-gray-200 rounded w-full"></div>
+                                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                                <div className="h-8 bg-gray-200 rounded w-full mt-4"></div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
+            {selectedEvent && filteredTeams.length > 0 && !loadingTeams && (
                 <div>
                     <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                         <Users className="h-5 w-5 text-primary" />
@@ -364,10 +419,10 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                             <Users className="h-5 w-5 text-primary" />
                                         </div>
                                     </div>
-                                    {team.total_score !== undefined && team.total_score > 0 && (
+                                    {team.my_score !== undefined && team.my_score > 0 && (
                                         <div className="flex items-center justify-between p-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-                                            <span className="text-xs font-semibold text-muted-foreground">Current Score</span>
-                                            <span className="text-lg font-black text-primary">{team.total_score}</span>
+                                            <span className="text-xs font-semibold text-muted-foreground">My Score</span>
+                                            <span className="text-lg font-black text-primary">{team.my_score}</span>
                                         </div>
                                     )}
                                 </CardHeader>
@@ -426,27 +481,11 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                         </div>
                                     )}
                                     <div className="pt-2">
-                                        <Button 
-                                            variant={selectedTeam?.id === team.id ? "default" : "outline"} 
-                                            size="sm" 
-                                            className="w-full font-semibold text-xs h-8"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setSelectedTeam(team)
-                                                setScores({})
-                                            }}
-                                        >
-                                            {selectedTeam?.id === team.id ? (
-                                                <><CheckCircle2 className="h-3 w-3 mr-1.5" />Selected</>
-                                            ) : (
-                                                <><Award className="h-3 w-3 mr-1.5" />Evaluate</>
-                                            )}
-                                        </Button>
-                                        {team.total_score !== undefined && team.total_score > 0 && (
+                                        {team.my_score !== undefined && team.my_score > 0 ? (
                                             <Button 
                                                 variant="ghost" 
                                                 size="sm" 
-                                                className="w-full mt-1.5 text-[10px] h-7"
+                                                className="w-full text-[10px] h-7"
                                                 onClick={(e) => {
                                                     e.stopPropagation()
                                                     setSelectedTeam(team)
@@ -454,6 +493,23 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                                 }}
                                             >
                                                 Edit Score
+                                            </Button>
+                                        ) : (
+                                            <Button 
+                                                variant={selectedTeam?.id === team.id ? "default" : "outline"} 
+                                                size="sm" 
+                                                className="w-full font-semibold text-xs h-8"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setSelectedTeam(team)
+                                                    setScores({})
+                                                }}
+                                            >
+                                                {selectedTeam?.id === team.id ? (
+                                                    <><CheckCircle2 className="h-3 w-3 mr-1.5" />Selected</>
+                                                ) : (
+                                                    <><Award className="h-3 w-3 mr-1.5" />Evaluate</>
+                                                )}
                                             </Button>
                                         )}
                                     </div>
@@ -464,7 +520,7 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                 </div>
             )}
 
-            {selectedEvent && filteredTeams.length === 0 && (
+            {selectedEvent && filteredTeams.length === 0 && !loadingTeams && (
                 <Card>
                     <CardContent className="p-8 text-center text-muted-foreground">
                         <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />

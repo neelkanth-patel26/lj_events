@@ -34,11 +34,12 @@ export default function EventsPage() {
   useEffect(() => {
     const checkRole = async () => {
       try {
-        const res = await fetch('/api/auth/session')
+        const res = await fetch('/api/auth/me')
         const data = await res.json()
-        setUserRole(data?.user?.role || 'admin')
-      } catch {
-        setUserRole('admin')
+        setUserRole(data?.role || null)
+      } catch (error) {
+        console.error('Error fetching role:', error)
+        setUserRole(null)
       }
     }
     checkRole()
@@ -384,7 +385,7 @@ export default function EventsPage() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className={`grid gap-2 ${userRole === 'admin' ? 'grid-cols-3' : 'grid-cols-2'}`}>
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -403,15 +404,17 @@ export default function EventsPage() {
                         <Users className="h-3 w-3 md:h-4 md:w-4 mr-1" />
                         Teams
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
-                        className="text-xs"
-                      >
-                        <Settings className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-                        Edit
-                      </Button>
+                      {userRole === 'admin' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
+                          className="text-xs"
+                        >
+                          <Settings className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                          Edit
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -467,13 +470,15 @@ export default function EventsPage() {
                       >
                         <Users className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
+                      {userRole === 'admin' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.location.href = `/dashboard/events/${event.id}/edit`}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

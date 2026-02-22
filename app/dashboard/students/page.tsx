@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Upload, Download, Users, Search, Grid, List, Mail, Calendar, Edit, Hash, UserCircle } from 'lucide-react'
+import { Upload, Download, Users, Search, Grid, List, Mail, Calendar, Edit, Hash, UserCircle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useRef, useCallback } from 'react'
 import useSWR from 'swr'
@@ -32,7 +32,7 @@ export default function StudentsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [editStudent, setEditStudent] = useState<any>(null)
   const [editForm, setEditForm] = useState({ full_name: '', email: '', enrollment_number: '', role: '', department: '' })
   const [showAddDialog, setShowAddDialog] = useState(false)
@@ -124,6 +124,29 @@ export default function StudentsPage() {
       alert('Student added successfully')
     } catch (error: any) {
       alert('Failed to add student: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteStudent = async (studentId: string, studentName: string) => {
+    if (!confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) return
+
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/students/delete?id=${studentId}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete student')
+      }
+
+      refreshData()
+      alert('Student deleted successfully')
+    } catch (error: any) {
+      alert('Failed to delete student: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -390,9 +413,14 @@ export default function StudentsPage() {
                                 <h3 className="font-semibold text-base truncate">{student.full_name}</h3>
                                 {isSpecial && <span className="text-xs text-primary font-semibold">⭐ Platform Developer</span>}
                               </div>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEditDialog(student)}>
-                                <Edit className="h-4 w-4" />
-                              </Button>
+                              <div className="flex gap-1">
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEditDialog(student)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleDeleteStudent(student.id, student.full_name)}>
+                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                </Button>
+                              </div>
                             </div>
                             <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs mb-3">
                               {student.role}
@@ -477,10 +505,15 @@ export default function StudentsPage() {
                             </div>
                           </div>
                           
-                          <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => openEditDialog(student)}>
-                            <Edit className="h-4 w-4 mr-1" />
-                            <span className="hidden sm:inline">Edit</span>
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => openEditDialog(student)}>
+                              <Edit className="h-4 w-4 mr-1" />
+                              <span className="hidden sm:inline">Edit</span>
+                            </Button>
+                            <Button variant="outline" size="sm" className="flex-shrink-0" onClick={() => handleDeleteStudent(student.id, student.full_name)}>
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>

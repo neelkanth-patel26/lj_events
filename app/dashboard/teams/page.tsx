@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Users, Search, Grid, List, MapPin, Trophy, Calendar } from 'lucide-react'
-import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Users, Search, Grid, List, MapPin, Trophy, Calendar, Plus, ChevronDown, ChevronUp, Mail, Phone } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { useRealtime } from '@/components/realtime-provider'
 
 export default function TeamsPage() {
@@ -15,6 +17,36 @@ export default function TeamsPage() {
   const [filterDomain, setFilterDomain] = useState('all')
   const [filterEvent, setFilterEvent] = useState('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [showAddTeam, setShowAddTeam] = useState(false)
+  const [selectedEventId, setSelectedEventId] = useState('')
+  const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set())
+  const [unlockedEvents, setUnlockedEvents] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const res = await fetch('/api/auth/me')
+        const data = await res.json()
+        setUserRole(data?.role || 'admin')
+      } catch (error) {
+        console.error('Error fetching role:', error)
+        setUserRole('admin')
+      }
+    }
+    fetchRole()
+  }, [])
+
+  useEffect(() => {
+    if (events && events.length > 0) {
+      const unlocked = new Set(
+        events
+          .filter((e: any) => e.leaderboard_visible === true)
+          .map((e: any) => e.id)
+      )
+      setUnlockedEvents(unlocked)
+    }
+  }, [events])
 
   const filteredTeams = Array.isArray(teams) ? teams.filter((team: any) => {
     const matchesSearch = team.team_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -23,7 +55,6 @@ export default function TeamsPage() {
     const matchesEvent = filterEvent === 'all' || team.event_id === filterEvent
     return matchesSearch && matchesDomain && matchesEvent
   }).sort((a: any, b: any) => {
-    // Sort by event name, then by team name
     const eventA = events?.find((e: any) => e.id === a.event_id)?.name || ''
     const eventB = events?.find((e: any) => e.id === b.event_id)?.name || ''
     if (eventA !== eventB) return eventA.localeCompare(eventB)
@@ -32,7 +63,6 @@ export default function TeamsPage() {
 
   const domains = Array.isArray(teams) ? [...new Set(teams.map((team: any) => team.domain).filter(Boolean))] : []
   
-  // Group teams by event
   const teamsByEvent = filteredTeams.reduce((acc: any, team: any) => {
     const eventId = team.event_id || 'no-event'
     if (!acc[eventId]) acc[eventId] = []
@@ -40,14 +70,42 @@ export default function TeamsPage() {
     return acc
   }, {})
 
+  // Initialize all events as collapsed when filter is 'all'
+  useEffect(() => {
+    if (filterEvent === 'all' && Object.keys(teamsByEvent).length > 0) {
+      setCollapsedEvents(new Set(Object.keys(teamsByEvent)))
+    } else {
+      setCollapsedEvents(new Set())
+    }
+  }, [filterEvent])
+
+  const toggleEventCollapse = (eventId: string) => {
+    setCollapsedEvents(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(eventId)) {
+        newSet.delete(eventId)
+      } else {
+        newSet.add(eventId)
+      }
+      return newSet
+    })
+  }
+
   return (
     <div className="space-y-4 md:space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Teams Management</h1>
-        <p className="text-sm text-muted-foreground mt-1">View and manage team information</p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold">Teams Management</h1>
+          <p className="text-sm text-muted-foreground mt-1">View and manage team information</p>
+        </div>
+        {userRole === 'admin' && (
+          <Button onClick={() => setShowAddTeam(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Team
+          </Button>
+        )}
       </div>
 
-      {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
@@ -59,7 +117,7 @@ export default function TeamsPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{Array.isArray(teams) && teams.length ? Math.max(...teams.map((team: any) => team.total_score || 0)) : 0}</p>
+            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id)) ? (Array.isArray(teams) && teams.length ? Math.max(...teams.map((team: any) => team.total_score || 0)) : 0) : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
         </Card>
@@ -73,13 +131,12 @@ export default function TeamsPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{Array.isArray(teams) && teams.length ? (teams.reduce((sum: number, team: any) => sum + (team.total_score || 0), 0) / teams.length).toFixed(0) : 0}</p>
+            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id)) ? (Array.isArray(teams) && teams.length ? (teams.reduce((sum: number, team: any) => sum + (team.total_score || 0), 0) / teams.length).toFixed(0) : 0) : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Avg Score</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Controls */}
       <Card>
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
@@ -142,7 +199,6 @@ export default function TeamsPage() {
         </CardContent>
       </Card>
 
-      {/* Teams Display - Grouped by Event */}
       {filteredTeams && filteredTeams.length > 0 ? (
         <div className="space-y-6">
           {Object.entries(teamsByEvent).map(([eventId, eventTeams]: [string, any]) => {
@@ -151,7 +207,15 @@ export default function TeamsPage() {
             
             return (
               <div key={eventId} className="space-y-4">
-                <div className="flex items-center gap-3">
+                <div 
+                  className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                  onClick={() => filterEvent === 'all' && toggleEventCollapse(eventId)}
+                >
+                  {filterEvent === 'all' && (
+                    collapsedEvents.has(eventId) ? 
+                      <ChevronDown className="h-5 w-5 text-gray-600" /> : 
+                      <ChevronUp className="h-5 w-5 text-gray-600" />
+                  )}
                   <Calendar className="h-5 w-5 text-gray-600" />
                   <h2 className="text-xl font-semibold text-gray-900">{eventName}</h2>
                   <Badge variant="outline" className="text-gray-600">
@@ -159,8 +223,9 @@ export default function TeamsPage() {
                   </Badge>
                 </div>
                 
-                {viewMode === 'grid' ? (
-          <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {(!collapsedEvents.has(eventId) || filterEvent !== 'all') && (
+                  viewMode === 'grid' ? (
+                    <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
             {eventTeams.map((team: any) => (
               <Card key={team.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}>
                 <CardHeader className="p-3 md:p-4">
@@ -169,7 +234,7 @@ export default function TeamsPage() {
                       <CardTitle className="text-base md:text-lg truncate">{team.team_name}</CardTitle>
                       <CardDescription className="text-xs md:text-sm truncate">{team.school_name}</CardDescription>
                     </div>
-                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">{team.total_score || 0}</Badge>
+                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">{userRole === 'admin' || unlockedEvents.has(team.event_id) ? (team.total_score || 0) : '***'}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-3 md:p-4 pt-0">
@@ -190,13 +255,31 @@ export default function TeamsPage() {
                       <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                       <span className="text-xs md:text-sm">{team.team_size || 0} members</span>
                     </div>
+                    {team.contact_email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                        <span className="text-xs md:text-sm truncate" title={team.contact_email}>{team.contact_email}</span>
+                      </div>
+                    )}
+                    {team.contact_phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                        <span className="text-xs md:text-sm">{team.contact_phone}</span>
+                      </div>
+                    )}
+                    <div className="pt-2 border-t mt-2">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>ID: {team.id.slice(0, 8)}</span>
+                        <span>{new Date(team.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2">
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
             {eventTeams.map((team: any) => (
               <Card key={team.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}>
                 <CardContent className="p-3 md:p-4">
@@ -220,20 +303,32 @@ export default function TeamsPage() {
                             <Users className="h-3 w-3" />
                             {team.team_size || 0}
                           </span>
+                          {team.contact_email && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Mail className="h-3 w-3" />
+                              {team.contact_email}
+                            </span>
+                          )}
+                          {team.contact_phone && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Phone className="h-3 w-3" />
+                              {team.contact_phone}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-lg md:text-xl font-bold">{team.total_score || 0}</div>
+                      <div className="text-lg md:text-xl font-bold">{userRole === 'admin' || unlockedEvents.has(team.event_id) ? (team.total_score || 0) : '***'}</div>
                       <div className="text-xs text-muted-foreground">Score</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )
-                }
+                      ))}
+                    </div>
+                  )
+                )}
               </div>
             )
           })}
@@ -250,6 +345,47 @@ export default function TeamsPage() {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={showAddTeam} onOpenChange={setShowAddTeam}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Event to Add Team</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Event</Label>
+              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose an event" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.isArray(events) && events.map((event: any) => (
+                    <SelectItem key={event.id} value={event.id}>
+                      {event.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => {
+                  if (selectedEventId) {
+                    window.location.href = `/dashboard/events/${selectedEventId}/teams`
+                  }
+                }} 
+                disabled={!selectedEventId}
+                className="flex-1"
+              >
+                Continue
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddTeam(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

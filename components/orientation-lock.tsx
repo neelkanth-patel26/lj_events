@@ -1,68 +1,28 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export function OrientationLock() {
-  useEffect(() => {
-    // Add CSS to completely block landscape mode on mobile
-    const style = document.createElement('style')
-    style.id = 'orientation-lock-style'
-    style.innerHTML = `
-      @media screen and (max-width: 768px) and (orientation: landscape) {
-        html, body {
-          overflow: hidden !important;
-          position: fixed !important;
-          width: 100% !important;
-          height: 100% !important;
-        }
-        body > * {
-          display: none !important;
-        }
-        body::before {
-          content: '' !important;
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: 0 !important;
-          background: #000 !important;
-          z-index: 999999 !important;
-          display: block !important;
-        }
-        body::after {
-          content: '📱 Please rotate to portrait mode' !important;
-          position: fixed !important;
-          top: 50% !important;
-          left: 50% !important;
-          transform: translate(-50%, -50%) !important;
-          z-index: 9999999 !important;
-          font-size: 20px !important;
-          font-weight: bold !important;
-          text-align: center !important;
-          padding: 30px !important;
-          color: #fff !important;
-          display: block !important;
-          width: 80% !important;
-          line-height: 1.5 !important;
-        }
-      }
-    `
-    document.head.appendChild(style)
+  const [isLandscape, setIsLandscape] = useState(false)
 
-    // Try to lock orientation using Screen Orientation API
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isLandscapeMode = window.innerWidth < 768 && window.innerWidth > window.innerHeight
+      setIsLandscape(isLandscapeMode)
+    }
+
+    checkOrientation()
+    window.addEventListener('resize', checkOrientation)
+    window.addEventListener('orientationchange', checkOrientation)
+
+    // Try to lock orientation
     const lockOrientation = async () => {
       try {
         if (window.screen?.orientation?.lock) {
-          await window.screen.orientation.lock('portrait')
-        } else if ((window.screen as any).lockOrientation) {
-          (window.screen as any).lockOrientation('portrait')
-        } else if ((window.screen as any).mozLockOrientation) {
-          (window.screen as any).mozLockOrientation('portrait')
-        } else if ((window.screen as any).msLockOrientation) {
-          (window.screen as any).msLockOrientation('portrait')
+          await window.screen.orientation.lock('portrait-primary')
         }
       } catch (error) {
-        // Orientation lock failed, CSS fallback will handle it
+        // Fallback to overlay blocking
       }
     }
 
@@ -71,12 +31,42 @@ export function OrientationLock() {
     }
 
     return () => {
-      const styleEl = document.getElementById('orientation-lock-style')
-      if (styleEl) {
-        document.head.removeChild(styleEl)
-      }
+      window.removeEventListener('resize', checkOrientation)
+      window.removeEventListener('orientationchange', checkOrientation)
     }
   }, [])
 
-  return null
+  if (!isLandscape) return null
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#000',
+        zIndex: 999999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        padding: '20px',
+      }}
+    >
+      <div style={{ fontSize: '48px', marginBottom: '20px' }}>📱</div>
+      <div
+        style={{
+          color: '#fff',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          lineHeight: '1.5',
+        }}
+      >
+        Please rotate your device to portrait mode
+      </div>
+    </div>
+  )
 }

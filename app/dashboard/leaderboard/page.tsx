@@ -121,7 +121,7 @@ export default function LeaderboardPage() {
                 <SelectValue placeholder="Select an event" />
               </SelectTrigger>
               <SelectContent>
-                {events?.map((event: any) => (
+                {Array.isArray(events) && events.map((event: any) => (
                   <SelectItem key={event.id} value={event.id}>
                     {event.name}
                   </SelectItem>

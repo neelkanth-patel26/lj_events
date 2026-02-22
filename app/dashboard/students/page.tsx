@@ -364,7 +364,7 @@ export default function StudentsPage() {
                       <SelectItem value="admin">Admins</SelectItem>
                     </SelectContent>
                   </Select>
-                  <div className="flex border rounded-md">
+                  <div className="hidden md:flex border rounded-md">
                     <Button
                       variant={viewMode === 'grid' ? 'default' : 'ghost'}
                       size="sm"
@@ -397,7 +397,7 @@ export default function StudentsPage() {
               </div>
               
               {viewMode === 'grid' ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
                   {filteredStudents.map((student: any) => {
                     const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
                     return (

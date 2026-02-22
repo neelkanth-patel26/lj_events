@@ -176,7 +176,7 @@ export default function TeamsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <div className="flex border rounded-md">
+              <div className="hidden md:flex border rounded-md">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"

@@ -16,11 +16,11 @@ import {
   MoreHorizontal
 } from 'lucide-react'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 import { useState } from 'react'
 
 interface DashboardSidebarProps {
@@ -166,13 +166,13 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
         )}
       </nav>
 
-      {/* More Dialog */}
-      <Dialog open={moreDialogOpen} onOpenChange={setMoreDialogOpen}>
-        <DialogContent className="bottom-20 top-auto translate-y-0 max-w-sm">
-          <DialogHeader>
-            <DialogTitle>More Options</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
+      {/* More Sheet */}
+      <Sheet open={moreDialogOpen} onOpenChange={setMoreDialogOpen}>
+        <SheetContent side="bottom" className="h-auto max-h-[80vh] pb-20">
+          <SheetHeader>
+            <SheetTitle>More Options</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-2 mt-4">
             {filteredNav.slice(3).map((item) => {
               const isActive = pathname === item.href
               return (
@@ -192,8 +192,8 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
               )
             })}
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

@@ -13,8 +13,10 @@ import {
   Trophy,
   LogOut,
   User,
-  Settings2
+  Settings2,
+  MoreHorizontal
 } from 'lucide-react'
+import { MobileMoreMenu } from '@/components/mobile-more-menu'
 
 export default async function DashboardLayout({
   children,
@@ -28,15 +30,15 @@ export default async function DashboardLayout({
   }
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin', 'mentor'] },
-    { href: '/dashboard/students', label: 'Students', icon: Users, roles: ['admin'] },
-    { href: '/dashboard/mentors', label: 'Mentors', icon: User, roles: ['admin'] },
-    { href: '/dashboard/teams', label: 'Teams', icon: Users, roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/criteria', label: 'Criteria', icon: Settings2, roles: ['admin'] },
-    { href: '/dashboard/judging', label: 'Judging', icon: Gavel, roles: ['mentor'] },
-    { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy, roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/profile', label: 'Profile', icon: User, roles: ['mentor'] },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, iconName: 'LayoutDashboard', roles: ['admin', 'mentor', 'student'] },
+    { href: '/dashboard/events', label: 'Events', icon: Calendar, iconName: 'Calendar', roles: ['admin', 'mentor'] },
+    { href: '/dashboard/students', label: 'Students', icon: Users, iconName: 'Users', roles: ['admin'] },
+    { href: '/dashboard/mentors', label: 'Mentors', icon: User, iconName: 'User', roles: ['admin'] },
+    { href: '/dashboard/teams', label: 'Teams', icon: Users, iconName: 'Users', roles: ['admin', 'mentor', 'student'] },
+    { href: '/dashboard/criteria', label: 'Criteria', icon: Settings2, iconName: 'Settings2', roles: ['admin'] },
+    { href: '/dashboard/judging', label: 'Judging', icon: Gavel, iconName: 'Gavel', roles: ['mentor'] },
+    { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy, iconName: 'Trophy', roles: ['admin', 'mentor', 'student'] },
+    { href: '/dashboard/profile', label: 'Profile', icon: User, iconName: 'User', roles: ['mentor'] },
   ]
 
   const filteredNav = navItems.filter(item => item.roles.includes(user.role))
@@ -104,7 +106,7 @@ export default async function DashboardLayout({
 
         {/* Mobile Bottom Nav */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-card/95 backdrop-blur-lg h-16 flex items-center justify-around px-3 z-50 shadow-lg">
-          {filteredNav.map((item) => (
+          {filteredNav.slice(0, 3).map((item) => (
             <NavLink
               key={item.href}
               href={item.href}
@@ -116,6 +118,14 @@ export default async function DashboardLayout({
               </span>
             </NavLink>
           ))}
+          {filteredNav.length > 3 && (
+            <MobileMoreMenu items={filteredNav.slice(3).map(item => ({
+              href: item.href,
+              label: item.label,
+              iconName: item.iconName,
+              roles: item.roles
+            }))} />
+          )}
         </nav>
         </div>
       </RealtimeProvider>

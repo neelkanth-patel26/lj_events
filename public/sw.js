@@ -49,14 +49,18 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome extensions and non-http requests
   if (!url.protocol.startsWith('http')) return
 
+  // Skip API calls for offline page
+  const isApiCall = url.pathname.startsWith('/api/')
+  const isAuthCall = url.pathname.includes('/auth/')
+  
   event.respondWith(
     fetch(request)
       .then(response => {
         // Clone response for caching
         const responseClone = response.clone()
         
-        // Cache successful responses
-        if (response.ok && response.type === 'basic') {
+        // Cache successful responses (except API calls)
+        if (response.ok && response.type === 'basic' && !isApiCall) {
           caches.open(DYNAMIC_CACHE).then(cache => {
             cache.put(request, responseClone)
           })
@@ -69,9 +73,20 @@ self.addEventListener('fetch', (event) => {
         return caches.match(request).then(cached => {
           if (cached) return cached
           
-          // Return offline page for navigation
-          if (request.mode === 'navigate') {
+          // Return offline page for navigation requests
+          if (request.mode === 'navigate' || request.destination === 'document') {
             return caches.match('/offline.html')
+          }
+          
+          // Return offline response for API calls
+          if (isApiCall) {
+            return new Response(
+              JSON.stringify({ error: 'No internet connection' }),
+              { 
+                status: 503,
+                headers: { 'Content-Type': 'application/json' }
+              }
+            )
           }
           
           return new Response('Offline', { status: 503 })

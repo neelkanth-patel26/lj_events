@@ -15,12 +15,14 @@
       min-height: 100vh;
       background: hsl(0 0% 100%);
       color: hsl(222.2 84% 4.9%);
+      overflow-x: hidden;
     }
     .header {
       border-bottom: 1px solid hsl(214.3 31.8% 91.4%);
       background: hsl(0 0% 100%);
       padding: 1.5rem;
       box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      animation: slideDown 0.5s ease-out;
     }
     .header h1 {
       font-size: 1.5rem;
@@ -34,51 +36,226 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem 1rem;
+      animation: fadeIn 0.6s ease-out 0.2s both;
     }
     .card {
       background: hsl(0 0% 100%);
       border: 1px solid hsl(214.3 31.8% 91.4%);
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
       padding: 3rem 2rem;
       text-align: center;
-      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      animation: scaleIn 0.5s ease-out 0.3s both;
+    }
+    .icon-wrapper {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 2rem;
     }
     .icon {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 2rem;
-      background: hsl(221.2 83.2% 53.3% / 0.1);
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(135deg, hsl(221.2 83.2% 53.3% / 0.15), hsl(221.2 83.2% 53.3% / 0.05));
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 60px;
+      font-size: 70px;
+      animation: bounce 2s ease-in-out infinite;
+      position: relative;
+      z-index: 2;
+    }
+    .pulse-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 140px;
+      border: 3px solid hsl(221.2 83.2% 53.3% / 0.3);
+      border-radius: 50%;
+      animation: pulse 2s ease-out infinite;
+    }
+    .pulse-ring:nth-child(2) {
+      animation-delay: 0.5s;
     }
     h2 {
       font-size: 2rem;
       margin-bottom: 1rem;
       font-weight: 700;
       color: hsl(222.2 84% 4.9%);
+      animation: fadeInUp 0.6s ease-out 0.5s both;
     }
     p {
       font-size: 1rem;
       color: hsl(215.4 16.3% 46.9%);
       line-height: 1.6;
       margin-bottom: 2rem;
+      animation: fadeInUp 0.6s ease-out 0.6s both;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: hsl(0 84.2% 60.2% / 0.1);
+      border: 1px solid hsl(0 84.2% 60.2% / 0.2);
+      border-radius: 2rem;
+      font-size: 0.875rem;
+      color: hsl(0 84.2% 40%);
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.6s ease-out 0.7s both;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: hsl(0 84.2% 60.2%);
+      border-radius: 50%;
+      animation: blink 1.5s ease-in-out infinite;
     }
     button {
       background: hsl(221.2 83.2% 53.3%);
       color: hsl(210 40% 98%);
       border: none;
-      padding: 0.75rem 2rem;
+      padding: 0.875rem 2.5rem;
       font-size: 0.875rem;
       font-weight: 600;
       border-radius: 0.5rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px -1px hsl(221.2 83.2% 53.3% / 0.3);
+      animation: fadeInUp 0.6s ease-out 0.8s both;
+      position: relative;
+      overflow: hidden;
     }
     button:hover {
       background: hsl(221.2 83.2% 48%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px -2px hsl(221.2 83.2% 53.3% / 0.4);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    .tips {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid hsl(214.3 31.8% 91.4%);
+      animation: fadeInUp 0.6s ease-out 0.9s both;
+    }
+    .tips h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: hsl(222.2 84% 4.9%);
+    }
+    .tips ul {
+      list-style: none;
+      text-align: left;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .tips li {
+      padding: 0.75rem 0;
+      color: hsl(215.4 16.3% 46.9%);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .tips li::before {
+      content: '✓';
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: hsl(142.1 76.2% 36.3% / 0.1);
+      color: hsl(142.1 76.2% 36.3%);
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    @keyframes pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+      }
+    }
+    @keyframes blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.3;
+      }
     }
     @media (prefers-color-scheme: dark) {
       body {
@@ -93,11 +270,44 @@
         background: hsl(222.2 84% 4.9%);
         border-color: hsl(217.2 32.6% 17.5%);
       }
-      h2 {
+      h2, .tips h3 {
         color: hsl(210 40% 98%);
       }
-      p {
+      p, .tips li {
         color: hsl(215 20.2% 65.1%);
+      }
+      .tips {
+        border-top-color: hsl(217.2 32.6% 17.5%);
+      }
+    }
+    @media (max-width: 640px) {
+      .header {
+        padding: 1rem;
+      }
+      .header h1 {
+        font-size: 1.25rem;
+      }
+      .container {
+        padding: 1.5rem 1rem;
+      }
+      .card {
+        padding: 2rem 1.5rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+      .icon-wrapper {
+        width: 100px;
+        height: 100px;
+      }
+      .icon {
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+      }
+      .pulse-ring {
+        width: 100px;
+        height: 100px;
       }
     }
   </style>
@@ -108,11 +318,56 @@
   </div>
   <div class="container">
     <div class="card">
-      <div class="icon">📡</div>
+      <div class="icon-wrapper">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div class="icon">📡</div>
+      </div>
       <h2>You're Offline</h2>
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>No Internet Connection</span>
+      </div>
       <p>It looks like you've lost your internet connection. Please check your network and try again.</p>
-      <button onclick="window.location.reload()">Try Again</button>
+      <button onclick="window.location.reload()">
+        <span style="position: relative; z-index: 1;">Try Again</span>
+      </button>
+      <div class="tips">
+        <h3>Troubleshooting Tips</h3>
+        <ul>
+          <li>Check your WiFi or mobile data connection</li>
+          <li>Make sure airplane mode is turned off</li>
+          <li>Try restarting your router</li>
+          <li>Contact your network administrator if the issue persists</li>
+        </ul>
+      </div>
     </div>
   </div>
+  <script>
+    // Auto-retry connection every 30 seconds
+    let retryCount = 0;
+    const maxRetries = 10;
+    
+    function checkConnection() {
+      if (navigator.onLine && retryCount < maxRetries) {
+        retryCount++;
+        fetch('/', { method: 'HEAD', cache: 'no-cache' })
+          .then(() => {
+            window.location.reload();
+          })
+          .catch(() => {
+            console.log('Still offline, retry', retryCount);
+          });
+      }
+    }
+    
+    // Check connection every 30 seconds
+    setInterval(checkConnection, 30000);
+    
+    // Listen for online event
+    window.addEventListener('online', () => {
+      setTimeout(() => window.location.reload(), 1000);
+    });
+  </script>
 </body>
 </html>

@@ -8,7 +8,7 @@
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
-  "orientation": "any",
+  "orientation": "portrait",
   "dir": "ltr",
   "lang": "en",
   "categories": ["productivity", "education", "business"],

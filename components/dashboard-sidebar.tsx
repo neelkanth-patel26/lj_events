@@ -12,8 +12,16 @@ import {
   Trophy,
   LogOut,
   User,
-  Shield
+  Shield,
+  MoreHorizontal
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { useState } from 'react'
 
 interface DashboardSidebarProps {
   user: any
@@ -21,6 +29,7 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const [moreDialogOpen, setMoreDialogOpen] = useState(false)
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'mentor', 'student'] },
@@ -127,7 +136,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-white dark:bg-slate-900 h-16 flex items-center justify-around px-2 z-50 safe-area-bottom">
-        {filteredNav.map((item) => {
+        {filteredNav.slice(0, 3).map((item) => {
           const isActive = pathname === item.href
           return (
             <Link
@@ -144,7 +153,47 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             </Link>
           )
         })}
+        {filteredNav.length > 3 && (
+          <button
+            onClick={() => setMoreDialogOpen(true)}
+            className="flex flex-col items-center justify-center flex-1 gap-1 py-2 px-1 rounded-lg transition-colors"
+          >
+            <MoreHorizontal className="h-5 w-5 text-gray-600" />
+            <span className="text-[10px] font-medium text-gray-600 uppercase tracking-wider">
+              More
+            </span>
+          </button>
+        )}
       </nav>
+
+      {/* More Dialog */}
+      <Dialog open={moreDialogOpen} onOpenChange={setMoreDialogOpen}>
+        <DialogContent className="bottom-20 top-auto translate-y-0 max-w-sm">
+          <DialogHeader>
+            <DialogTitle>More Options</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {filteredNav.slice(3).map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMoreDialogOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 ${
+                    isActive ? 'bg-gray-100 dark:bg-gray-800' : ''
+                  }`}
+                >
+                  <div className="h-8 w-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <item.icon className="h-4 w-4 text-gray-600" />
+                  </div>
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

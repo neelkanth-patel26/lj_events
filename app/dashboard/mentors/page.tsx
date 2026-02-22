@@ -236,46 +236,46 @@ export default function MentorsPage() {
   )
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Mentor Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage mentor accounts</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Mentor Management</h1>
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">Manage mentor accounts</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowAddDialog(true)} size="sm">
+          <Button onClick={() => setShowAddDialog(true)} size="sm" className="flex-1 md:flex-none">
             <Plus className="h-4 w-4 mr-2" />
             Add Mentor
           </Button>
-          <Button onClick={downloadCSVTemplate} variant="outline" size="sm">
+          <Button onClick={downloadCSVTemplate} variant="outline" size="sm" className="flex-1 md:flex-none">
             <Download className="h-4 w-4 mr-2" />
-            Template
+            <span className="hidden sm:inline">Template</span>
           </Button>
         </div>
       </div>
 
       <Card>
-        <CardContent className="p-4 text-center">
-          <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-          <p className="text-2xl font-bold">{mentors.length}</p>
-          <p className="text-sm text-muted-foreground">Total Mentors</p>
+        <CardContent className="p-3 md:p-4 text-center">
+          <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
+          <p className="text-xl md:text-2xl font-bold">{mentors.length}</p>
+          <p className="text-xs md:text-sm text-muted-foreground">Total Mentors</p>
         </CardContent>
       </Card>
 
       <Tabs defaultValue="mentors" className="space-y-4">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="mentors">All Mentors ({mentors.length})</TabsTrigger>
-          <TabsTrigger value="import">Import Mentors</TabsTrigger>
+          <TabsTrigger value="mentors" className="text-xs md:text-sm">All Mentors ({mentors.length})</TabsTrigger>
+          <TabsTrigger value="import" className="text-xs md:text-sm">Import Mentors</TabsTrigger>
         </TabsList>
         
         <TabsContent value="import">
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4">Import Mentors</h3>
+              <CardContent className="p-3 md:p-4">
+                <h3 className="font-semibold mb-4 text-sm md:text-base">Import Mentors</h3>
                 <form onSubmit={handleFileUpload} className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Upload File *</Label>
+                    <Label className="text-xs md:text-sm">Upload File *</Label>
                     <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                       <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
                       <Input
@@ -291,16 +291,16 @@ export default function MentorsPage() {
                       )}
                     </div>
                   </div>
-                  <Button type="submit" disabled={loading || !selectedFile} className="w-full">
+                  <Button type="submit" disabled={loading || !selectedFile} className="w-full" size="sm">
                     {loading ? 'Importing...' : 'Import Mentors'}
                   </Button>
                 </form>
               </CardContent>
             </Card>
             <Card className="bg-muted/30">
-              <CardContent className="p-4">
-                <h3 className="font-semibold mb-4">Instructions</h3>
-                <div className="space-y-3 text-sm text-muted-foreground">
+              <CardContent className="p-3 md:p-4">
+                <h3 className="font-semibold mb-4 text-sm md:text-base">Instructions</h3>
+                <div className="space-y-3 text-xs md:text-sm text-muted-foreground">
                   <div>
                     <p className="font-medium text-foreground mb-1">1. Download Template</p>
                     <p>Click Template button to get CSV format</p>
@@ -321,8 +321,8 @@ export default function MentorsPage() {
         
         <TabsContent value="mentors" className="space-y-4">
       <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-2">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -332,57 +332,59 @@ export default function MentorsPage() {
                 className="pl-9"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={() => setViewMode('list')} className={viewMode === 'list' ? 'bg-accent' : ''}>
-              <List className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'bg-accent' : ''}>
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => setViewMode('list')} className={viewMode === 'list' ? 'bg-accent' : ''}>
+                <List className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => setViewMode('grid')} className={viewMode === 'grid' ? 'bg-accent' : ''}>
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {filteredMentors.length > 0 ? (
         viewMode === 'list' ? (
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           {filteredMentors.map((mentor: any) => (
             <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md flex-shrink-0">
+              <CardContent className="p-3 md:p-4">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-md flex-shrink-0">
                     {mentor.full_name?.charAt(0)?.toUpperCase() || 'M'}
                   </div>
                   
-                  <div className="flex-1 min-w-0 grid md:grid-cols-3 gap-3">
+                  <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
                     <div>
-                      <div className="font-semibold text-base mb-1">{mentor.full_name}</div>
+                      <div className="font-semibold text-sm md:text-base mb-1">{mentor.full_name}</div>
                       <Badge variant="secondary" className="text-xs">Mentor</Badge>
                     </div>
                     
                     <div className="md:col-span-2 space-y-1">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Mail className="h-4 w-4 flex-shrink-0" />
+                      <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                        <Mail className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
                         <span className="truncate">{mentor.email}</span>
                       </div>
                       {mentor.department && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Building className="h-4 w-4 flex-shrink-0" />
+                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                          <Building className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
                           <span className="truncate">{mentor.department}</span>
                         </div>
                       )}
                     </div>
                   </div>
                   
-                  <div className="flex gap-2 flex-shrink-0">
-                    <Button variant="outline" size="sm" onClick={() => openProfileDialog(mentor)}>
+                  <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 flex-shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => openProfileDialog(mentor)} className="h-8 px-2 md:px-3">
                       <Eye className="h-4 w-4 md:mr-1" />
                       <span className="hidden md:inline">View</span>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(mentor)}>
+                    <Button variant="outline" size="sm" onClick={() => openEditDialog(mentor)} className="h-8 px-2 md:px-3">
                       <Edit className="h-4 w-4 md:mr-1" />
                       <span className="hidden md:inline">Edit</span>
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDeleteMentor(mentor.id, mentor.full_name)}>
+                    <Button variant="outline" size="sm" onClick={() => handleDeleteMentor(mentor.id, mentor.full_name)} className="h-8 px-2">
                       <Trash2 className="h-4 w-4 text-red-600" />
                     </Button>
                   </div>
@@ -392,17 +394,17 @@ export default function MentorsPage() {
           ))}
         </div>
         ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredMentors.map((mentor: any) => (
             <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
+              <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center text-white font-bold text-2xl md:text-3xl shadow-lg">
                     {mentor.full_name?.charAt(0)?.toUpperCase() || 'M'}
                   </div>
                   
                   <div className="space-y-2 w-full">
-                    <div className="font-semibold text-lg">{mentor.full_name}</div>
+                    <div className="font-semibold text-base md:text-lg">{mentor.full_name}</div>
                     <Badge variant="secondary" className="text-xs">Mentor</Badge>
                     
                     <div className="space-y-1.5 pt-2">
@@ -420,13 +422,13 @@ export default function MentorsPage() {
                   </div>
                   
                   <div className="grid grid-cols-3 gap-2 w-full pt-2">
-                    <Button variant="outline" size="sm" onClick={() => openProfileDialog(mentor)} className="h-9">
+                    <Button variant="outline" size="sm" onClick={() => openProfileDialog(mentor)} className="h-8 md:h-9 px-2">
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(mentor)} className="h-9">
+                    <Button variant="outline" size="sm" onClick={() => openEditDialog(mentor)} className="h-8 md:h-9 px-2">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDeleteMentor(mentor.id, mentor.full_name)} className="h-9">
+                    <Button variant="outline" size="sm" onClick={() => handleDeleteMentor(mentor.id, mentor.full_name)} className="h-8 md:h-9 px-2">
                       <Trash2 className="h-4 w-4 text-red-600" />
                     </Button>
                   </div>
@@ -438,9 +440,9 @@ export default function MentorsPage() {
         )
       ) : (
         <Card>
-          <CardContent className="py-12 text-center">
-            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No mentors found</h3>
+          <CardContent className="py-8 md:py-12 text-center">
+            <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-base md:text-lg font-semibold mb-2">No mentors found</h3>
           </CardContent>
         </Card>
       )}

@@ -331,7 +331,7 @@ export default function EventsPage() {
       {/* Events Display */}
       {filteredEvents && filteredEvents.length > 0 ? (
         viewMode === 'grid' ? (
-          <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {filteredEvents.map((event: any) => (
               <Card key={event.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3 p-3 md:p-4">

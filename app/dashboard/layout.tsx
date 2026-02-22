@@ -4,6 +4,7 @@ import { RealtimeProvider } from '@/components/realtime-provider'
 import { redirect } from 'next/navigation'
 import PWAInitializer from '@/components/pwa-initializer'
 import { NavLink } from '@/components/nav-link'
+import { Toaster } from '@/components/ui/toaster'
 import {
   LayoutDashboard,
   Calendar,
@@ -30,6 +31,7 @@ export default async function DashboardLayout({
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'mentor', 'student'] },
     { href: '/dashboard/events', label: 'Events', icon: Calendar, roles: ['admin', 'mentor'] },
     { href: '/dashboard/students', label: 'Students', icon: Users, roles: ['admin'] },
+    { href: '/dashboard/mentors', label: 'Mentors', icon: User, roles: ['admin'] },
     { href: '/dashboard/teams', label: 'Teams', icon: Users, roles: ['admin', 'mentor', 'student'] },
     { href: '/dashboard/criteria', label: 'Criteria', icon: Settings2, roles: ['admin'] },
     { href: '/dashboard/judging', label: 'Judging', icon: Gavel, roles: ['mentor'] },
@@ -116,6 +118,7 @@ export default async function DashboardLayout({
         </nav>
         </div>
       </RealtimeProvider>
+      <Toaster />
     </>
   )
 }

@@ -211,6 +211,7 @@ The system uses Supabase authentication with custom user management:
 Built with **shadcn/ui** and **Radix UI** for:
 - Accessible components
 - Consistent design system
+- Dark mode support
 - Responsive layouts
 - Smooth animations
 

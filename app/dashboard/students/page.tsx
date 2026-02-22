@@ -34,7 +34,9 @@ export default function StudentsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [editStudent, setEditStudent] = useState<any>(null)
-  const [editForm, setEditForm] = useState({ full_name: '', email: '', enrollment_number: '', role: '' })
+  const [editForm, setEditForm] = useState({ full_name: '', email: '', enrollment_number: '', role: '', department: '' })
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', enrollment_number: '', role: 'student', department: '' })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileUpload = async (e: React.FormEvent) => {
@@ -83,7 +85,8 @@ export default function StudentsPage() {
           full_name: editForm.full_name,
           email: editForm.email,
           enrollment_number: editForm.enrollment_number,
-          role: editForm.role
+          role: editForm.role,
+          department: editForm.department || null
         })
         .eq('id', editStudent.id)
 
@@ -100,18 +103,45 @@ export default function StudentsPage() {
     }
   }
 
+  const handleAddStudent = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      const response = await fetch('/api/students/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addForm)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to add student')
+      }
+
+      setShowAddDialog(false)
+      setAddForm({ full_name: '', email: '', password: '', enrollment_number: '', role: 'student', department: '' })
+      refreshData()
+      alert('Student added successfully')
+    } catch (error: any) {
+      alert('Failed to add student: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const openEditDialog = (student: any) => {
     setEditStudent(student)
     setEditForm({
       full_name: student.full_name || '',
       email: student.email || '',
       enrollment_number: student.enrollment_number || '',
-      role: student.role || 'student'
+      role: student.role || 'student',
+      department: student.department || ''
     })
   }
 
   const downloadCSVTemplate = () => {
-    const csvContent = 'email,full_name,password,group_number,school_name,domain,stall_no,enrollment_number\nstudent1@example.com,John Doe,password123,1,Engineering School,AI/ML,A1,2024001\nstudent2@example.com,Jane Smith,password456,1,Engineering School,AI/ML,A1,2024002\nstudent3@example.com,Bob Johnson,password789,2,Science School,Web Dev,B2,2024003'
+    const csvContent = 'email,full_name,password,group_number,school_name,domain,stall_no,enrollment_number,department\nstudent1@example.com,John Doe,password123,1,Engineering School,AI/ML,A1,2024001,Computer Engineering\nstudent2@example.com,Jane Smith,password456,1,Engineering School,AI/ML,A1,2024002,Computer Engineering\nstudent3@example.com,Bob Johnson,password789,2,Science School,Web Dev,B2,2024003,Information Technology'
     const blob = new Blob([csvContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -126,13 +156,21 @@ export default function StudentsPage() {
                          student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          student.enrollment_number?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = filterRole === 'all' || student.role === filterRole
-    return matchesSearch && matchesRole
+    const isNotMentor = student.role !== 'mentor'
+    return matchesSearch && matchesRole && isNotMentor
+  }).sort((a: any, b: any) => {
+    // Sort by enrollment number
+    if (a.enrollment_number && b.enrollment_number) {
+      return a.enrollment_number.localeCompare(b.enrollment_number)
+    }
+    if (a.enrollment_number) return -1
+    if (b.enrollment_number) return 1
+    return a.full_name?.localeCompare(b.full_name) || 0
   }) || []
 
   const studentStats = {
-    total: students?.length || 0,
+    total: students?.filter((s: any) => s.role !== 'mentor').length || 0,
     students: students?.filter((s: any) => s.role === 'student').length || 0,
-    mentors: students?.filter((s: any) => s.role === 'mentor').length || 0,
     admins: students?.filter((s: any) => s.role === 'admin').length || 0
   }
 
@@ -143,14 +181,20 @@ export default function StudentsPage() {
           <h1 className="text-2xl md:text-3xl font-bold">Student Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Import and manage student accounts</p>
         </div>
-        <Button onClick={downloadCSVTemplate} variant="outline" size="sm" className="w-fit">
-          <Download className="h-4 w-4 mr-2" />
-          Template
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowAddDialog(true)} size="sm" className="w-fit">
+            <Users className="h-4 w-4 mr-2" />
+            Add Student
+          </Button>
+          <Button onClick={downloadCSVTemplate} variant="outline" size="sm" className="w-fit">
+            <Download className="h-4 w-4 mr-2" />
+            Template
+          </Button>
+        </div>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
@@ -163,13 +207,6 @@ export default function StudentsPage() {
             <UserCircle className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
             <p className="text-xl md:text-2xl font-bold">{studentStats.students}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Students</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 md:p-4 text-center">
-            <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{studentStats.mentors}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Mentors</p>
           </CardContent>
         </Card>
         <Card>
@@ -205,7 +242,7 @@ export default function StudentsPage() {
                         <SelectValue placeholder="Choose event" />
                       </SelectTrigger>
                       <SelectContent>
-                        {events?.map((event: any) => (
+                        {Array.isArray(events) && events.map((event: any) => (
                           <SelectItem key={event.id} value={event.id}>
                             {event.name}
                           </SelectItem>
@@ -301,7 +338,6 @@ export default function StudentsPage() {
                     <SelectContent>
                       <SelectItem value="all">All Roles</SelectItem>
                       <SelectItem value="student">Students</SelectItem>
-                      <SelectItem value="mentor">Mentors</SelectItem>
                       <SelectItem value="admin">Admins</SelectItem>
                     </SelectContent>
                   </Select>
@@ -339,16 +375,21 @@ export default function StudentsPage() {
               
               {viewMode === 'grid' ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {filteredStudents.map((student: any) => (
-                    <Card key={student.id} className="hover:shadow-lg transition-all">
+                  {filteredStudents.map((student: any) => {
+                    const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
+                    return (
+                    <Card key={student.id} className={`hover:shadow-lg transition-all ${isSpecial ? 'ring-2 ring-primary bg-gradient-to-br from-primary/5 to-primary/10' : ''}`}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+                          <div className={`w-12 h-12 ${isSpecial ? 'bg-gradient-to-br from-primary to-primary/70' : 'bg-gradient-to-br from-primary/20 to-primary/5'} rounded-full flex items-center justify-center ${isSpecial ? 'text-white' : 'text-primary'} font-bold text-lg flex-shrink-0`}>
                             {student.full_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-2">
-                              <h3 className="font-semibold text-base truncate">{student.full_name}</h3>
+                              <div>
+                                <h3 className="font-semibold text-base truncate">{student.full_name}</h3>
+                                {isSpecial && <span className="text-xs text-primary font-semibold">⭐ Platform Developer</span>}
+                              </div>
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEditDialog(student)}>
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -367,6 +408,12 @@ export default function StudentsPage() {
                                   <span>{student.enrollment_number}</span>
                                 </div>
                               )}
+                              {student.department && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <UserCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                                  <span>{student.department}</span>
+                                </div>
+                              )}
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                                 <span>{new Date(student.created_at).toLocaleDateString()}</span>
@@ -376,21 +423,26 @@ export default function StudentsPage() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                  )})}
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredStudents.map((student: any) => (
-                    <Card key={student.id} className="border-l-4 border-l-transparent">
+                  {filteredStudents.map((student: any) => {
+                    const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
+                    return (
+                    <Card key={student.id} className={`border-l-4 ${isSpecial ? 'border-l-primary bg-gradient-to-r from-primary/5 to-transparent' : 'border-l-transparent'}`}>
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
+                          <div className={`w-12 h-12 ${isSpecial ? 'bg-gradient-to-br from-primary to-primary/70' : 'bg-gradient-to-br from-primary/20 to-primary/5'} rounded-lg flex items-center justify-center ${isSpecial ? 'text-white' : 'text-primary'} font-bold text-lg flex-shrink-0`}>
                             {student.full_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
                           
                           <div className="flex-1 min-w-0 grid md:grid-cols-5 gap-3 items-center">
                             <div className="min-w-0">
-                              <div className="font-semibold text-sm mb-1">{student.full_name}</div>
+                              <div className="font-semibold text-sm mb-1">
+                                {student.full_name}
+                                {isSpecial && <span className="ml-2 text-xs text-primary font-semibold">⭐ Platform Developer</span>}
+                              </div>
                               <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs">
                                 {student.role}
                               </Badge>
@@ -406,12 +458,15 @@ export default function StudentsPage() {
                             <div>
                               {student.enrollment_number ? (
                                 <div className="flex items-center gap-2">
-                                  <div className="bg-muted px-2 py-1 rounded text-xs font-mono">
+                                  <div className={`px-2 py-1 rounded text-xs font-mono ${isSpecial ? 'bg-primary text-white' : 'bg-muted'}`}>
                                     {student.enrollment_number}
                                   </div>
                                 </div>
                               ) : (
                                 <span className="text-xs text-muted-foreground italic">No enrollment</span>
+                              )}
+                              {student.department && (
+                                <div className="text-xs text-muted-foreground mt-1">{student.department}</div>
                               )}
                             </div>
                             
@@ -429,7 +484,7 @@ export default function StudentsPage() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                  )})}
                 </div>
               )}
             </>
@@ -495,6 +550,15 @@ export default function StudentsPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="edit-department">Department</Label>
+              <Input
+                id="edit-department"
+                value={editForm.department}
+                onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                placeholder="e.g. Computer Engineering"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="edit-role">Role</Label>
               <Select value={editForm.role} onValueChange={(value) => setEditForm({ ...editForm, role: value })}>
                 <SelectTrigger>
@@ -512,6 +576,84 @@ export default function StudentsPage() {
                 {loading ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button type="button" variant="outline" onClick={() => setEditStudent(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Student</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddStudent} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="add-name">Full Name</Label>
+              <Input
+                id="add-name"
+                value={addForm.full_name}
+                onChange={(e) => setAddForm({ ...addForm, full_name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-email">Email</Label>
+              <Input
+                id="add-email"
+                type="email"
+                value={addForm.email}
+                onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-password">Password</Label>
+              <Input
+                id="add-password"
+                type="password"
+                value={addForm.password}
+                onChange={(e) => setAddForm({ ...addForm, password: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-enrollment">Enrollment Number</Label>
+              <Input
+                id="add-enrollment"
+                value={addForm.enrollment_number}
+                onChange={(e) => setAddForm({ ...addForm, enrollment_number: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-department">Department</Label>
+              <Input
+                id="add-department"
+                value={addForm.department}
+                onChange={(e) => setAddForm({ ...addForm, department: e.target.value })}
+                placeholder="e.g. Computer Engineering"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="add-role">Role</Label>
+              <Select value={addForm.role} onValueChange={(value) => setAddForm({ ...addForm, role: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="mentor">Mentor</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Button type="submit" disabled={loading} className="flex-1">
+                {loading ? 'Adding...' : 'Add Student'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
                 Cancel
               </Button>
             </div>

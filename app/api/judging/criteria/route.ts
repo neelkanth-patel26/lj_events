@@ -1,19 +1,21 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const eventId = searchParams.get('eventId')
   
-  if (!user) {
+  const adminClient = createAdminClient()
+  
+  if (!eventId) {
     return NextResponse.json([])
   }
 
-  const { data, error } = await supabase
-    .from('judging_criteria')
+  const { data, error } = await adminClient
+    .from('evaluation_criteria')
     .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: true })
+    .eq('event_id', eventId)
+    .order('display_order', { ascending: true })
 
   if (error) {
     return NextResponse.json([])
@@ -23,29 +25,36 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  try {
+    const { eventId, criteria } = await request.json()
+    
+    if (!eventId) {
+      return NextResponse.json({ error: 'Event ID required' }, { status: 400 })
+    }
 
-  const { criteria } = await request.json()
+    const adminClient = createAdminClient()
 
-  await supabase.from('judging_criteria').delete().eq('user_id', user.id)
+    // Insert new criteria
+    const insertData = criteria.map((c: any, index: number) => ({
+      event_id: eventId,
+      criteria_name: c.criteria_name || c.name,
+      max_score: c.max_score || c.maxPoints,
+      display_order: index
+    }))
+    
+    const { data, error } = await adminClient
+      .from('evaluation_criteria')
+      .insert(insertData)
+      .select()
 
-  const { data, error } = await supabase
-    .from('judging_criteria')
-    .insert(criteria.map((c: any) => ({
-      user_id: user.id,
-      name: c.name,
-      max_points: c.maxPoints
-    })))
-    .select()
+    if (error) {
+      console.error('Insert error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
-  if (error) {
+    return NextResponse.json(data)
+  } catch (error: any) {
+    console.error('Criteria save error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
-  return NextResponse.json(data)
 }

@@ -23,7 +23,22 @@ export async function GET(request: NextRequest) {
 
     if (teamError) throw teamError
 
-    const teamsWithScores = teams.map((team: any) => ({
+    // Fetch members for each team
+    const teamsWithMembers = await Promise.all(
+      teams.map(async (team: any) => {
+        const { data: members } = await supabase
+          .from('team_members')
+          .select('users:user_id(full_name)')
+          .eq('team_id', team.id)
+        
+        return {
+          ...team,
+          members: members?.map(m => ({ full_name: m.users?.full_name })) || []
+        }
+      })
+    )
+
+    const teamsWithScores = teamsWithMembers.map((team: any) => ({
       ...team,
       total_score: team.total_score || 0
     }))

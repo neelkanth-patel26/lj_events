@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Trophy, Medal, Award, TrendingUp, Users, Target, Download, RefreshCw, Grid, List, MapPin } from 'lucide-react'
+import { Trophy, Medal, Award, TrendingUp, Users, Target, Download, Grid, List, MapPin } from 'lucide-react'
 import { useState, useCallback } from 'react'
 import useSWR from 'swr'
 import { useRealtimeData } from '@/hooks/useRealtimeData'
@@ -14,7 +14,6 @@ const fetcher = (url: string) => fetch(url).then(r => r.json())
 export default function LeaderboardPage() {
   const { data: events } = useSWR('/api/events', fetcher)
   const [selectedEvent, setSelectedEvent] = useState<string>('')
-  const [calculating, setCalculating] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const { data: rankings, mutate } = useSWR(
     selectedEvent ? `/api/leaderboard?eventId=${selectedEvent}` : null,
@@ -26,23 +25,6 @@ export default function LeaderboardPage() {
   }, [mutate])
   
   useRealtimeData(handleDataChange, ['teams', 'leaderboard'])
-
-  const calculateRankings = async () => {
-    if (!selectedEvent) return
-    setCalculating(true)
-    try {
-      await fetch(`/api/leaderboard/calculate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId: selectedEvent }),
-      })
-      mutate()
-    } catch (error) {
-      console.error('Error calculating rankings:', error)
-    } finally {
-      setCalculating(false)
-    }
-  }
 
   const exportLeaderboard = async () => {
     if (!rankings || !selectedEvent) return
@@ -146,34 +128,26 @@ export default function LeaderboardPage() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex gap-2">
-              {selectedEvent && (
-                <Button onClick={calculateRankings} disabled={calculating} variant="outline" size="sm">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${calculating ? 'animate-spin' : ''}`} />
-                  Refresh
+            {rankings && rankings.length > 0 && (
+              <div className="flex border rounded-md">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="rounded-r-none"
+                >
+                  <Grid className="h-4 w-4" />
                 </Button>
-              )}
-              {rankings && rankings.length > 0 && (
-                <div className="flex border rounded-md">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="rounded-r-none"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="rounded-l-none"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="rounded-l-none"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -204,6 +178,16 @@ export default function LeaderboardPage() {
                   </CardHeader>
                   <CardContent className="p-3 md:p-4 pt-0">
                     <div className="space-y-2">
+                      {team.members && team.members.length > 0 && (
+                        <div className="space-y-1">
+                          <span className="text-xs font-semibold text-muted-foreground">Members:</span>
+                          {team.members.map((member: any, idx: number) => (
+                            <div key={idx} className="text-xs pl-2">
+                              • {member.full_name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       {team.domain && (
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">Domain:</span>
@@ -246,6 +230,11 @@ export default function LeaderboardPage() {
                             <Badge variant="outline" className="text-xs">#{rank}</Badge>
                           </div>
                           <p className="text-xs md:text-sm text-muted-foreground truncate">{team.school_name}</p>
+                          {team.members && team.members.length > 0 && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {team.members.map((m: any) => m.full_name).join(', ')}
+                            </div>
+                          )}
                           <div className="flex items-center gap-2 md:gap-4 mt-1 flex-wrap">
                             {team.domain && <Badge variant="secondary" className="text-xs">{team.domain}</Badge>}
                             {team.stall_no && (

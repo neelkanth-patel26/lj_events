@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     const text = await file.text()
     const lines = text.trim().split('\n')
     const data = lines.slice(1).map(line => {
-      const [email, name, password, group, school, domain, stall, enrollment] = line.split(',')
+      const [email, name, password, group, school, domain, stall, enrollment, department] = line.split(',')
       return { 
         email: email?.trim(), 
         name: name?.trim(), 
@@ -24,7 +24,8 @@ export async function POST(request: NextRequest) {
         school: school?.trim(), 
         domain: domain?.trim(), 
         stall: stall?.trim(),
-        enrollment: enrollment?.trim()
+        enrollment: enrollment?.trim(),
+        department: department?.trim()
       }
     })
 
@@ -50,7 +51,8 @@ export async function POST(request: NextRequest) {
           .from('users')
           .update({
             full_name: row.name,
-            enrollment_number: row.enrollment
+            enrollment_number: row.enrollment,
+            department: row.department || null
           })
           .eq('id', existingUser.id)
         results.updated++
@@ -62,7 +64,8 @@ export async function POST(request: NextRequest) {
           full_name: row.name,
           password_hash: row.password,
           role: 'student',
-          enrollment_number: row.enrollment
+          enrollment_number: row.enrollment,
+          department: row.department || null
         }).select().single()
 
         if (user) {

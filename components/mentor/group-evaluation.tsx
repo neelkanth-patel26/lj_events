@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Users, CheckCircle2, Award, Search, Calendar, X } from 'lucide-react'
+import { Users, CheckCircle2, Award, Search, Calendar, X, PartyPopper } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useRealtimeData } from '@/hooks/useRealtimeData'
+import { useToast } from '@/hooks/use-toast'
 
 interface Criterion {
     id: string
@@ -40,32 +42,33 @@ interface Team {
 }
 
 export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] }) {
+    const { toast } = useToast()
     const [events, setEvents] = useState<Event[]>([])
     const [selectedEvent, setSelectedEvent] = useState<string>('')
     const [teams, setTeams] = useState<Team[]>([])
     const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
     const [criteria, setCriteria] = useState<Criterion[]>([])
-    const [scores, setScores] = useState<Record<string, number>>({})
+    const [scores, setScores] = useState<Record<string, number | ''>>({})
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
 
     useEffect(() => {
         fetchEvents()
-        fetchCriteria()
     }, [])
     
     const handleDataChange = useCallback(() => {
         if (selectedEvent) {
             fetchTeams(selectedEvent)
+            fetchCriteria()
         }
-        fetchCriteria()
     }, [selectedEvent])
     
-    useRealtimeData(handleDataChange, ['teams', 'team_members', 'judging_criteria', 'events'])
+    useRealtimeData(handleDataChange, ['teams', 'team_members', 'evaluation_criteria', 'events'])
 
     useEffect(() => {
         if (selectedEvent) {
             fetchTeams(selectedEvent)
+            fetchCriteria()
             setSelectedTeam(null)
             setScores({})
         }
@@ -108,29 +111,55 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
     }
 
     const fetchCriteria = async () => {
+        if (!selectedEvent) return
         try {
-            const res = await fetch('/api/judging/criteria')
+            const res = await fetch(`/api/judging/criteria?eventId=${selectedEvent}`)
             const data = await res.json()
             if (data.length > 0) {
-                setCriteria(data.map((c: any) => ({ id: c.id, name: c.name, maxPoints: c.max_points })))
+                setCriteria(data.map((c: any) => ({ id: c.id, name: c.criteria_name, maxPoints: c.max_score })))
             } else {
-                setCriteria([
-                    { id: '1', name: 'Innovation & Creativity', maxPoints: 100 },
-                    { id: '2', name: 'Technical Implementation', maxPoints: 100 },
-                    { id: '3', name: 'Presentation & Communication', maxPoints: 100 },
-                ])
+                // Create default criteria for this event
+                const defaultCriteria = [
+                    { criteria_name: 'Innovation & Creativity', max_score: 100 },
+                    { criteria_name: 'Technical Implementation', max_score: 100 },
+                    { criteria_name: 'Presentation & Communication', max_score: 100 },
+                ]
+                
+                const createRes = await fetch('/api/judging/criteria', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eventId: selectedEvent, criteria: defaultCriteria })
+                })
+                
+                if (createRes.ok) {
+                    const created = await createRes.json()
+                    setCriteria(created.map((c: any) => ({ id: c.id, name: c.criteria_name, maxPoints: c.max_score })))
+                }
             }
         } catch (error) {
             console.error('Failed to fetch criteria:', error)
         }
     }
 
-    const updateScore = (criterionId: string, value: number) => {
-        setScores(prev => ({ ...prev, [criterionId]: value }))
+    const updateScore = (criterionId: string, value: string) => {
+        const criterion = criteria.find(c => c.id === criterionId)
+        if (!criterion) return
+        
+        const numValue = value === '' ? '' : Math.max(0, parseInt(value) || 0)
+        
+        if (typeof numValue === 'number' && numValue > criterion.maxPoints) {
+            toast({
+                title: '⚠️ Invalid Score',
+                description: `Maximum score for this criterion is ${criterion.maxPoints}`,
+            })
+            setScores(prev => ({ ...prev, [criterionId]: criterion.maxPoints }))
+        } else {
+            setScores(prev => ({ ...prev, [criterionId]: numValue }))
+        }
     }
 
     const calculateTotal = () => {
-        return Object.values(scores).reduce((a, b) => a + b, 0)
+        return Object.values(scores).reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0)
     }
 
     const submitScores = async () => {
@@ -141,15 +170,23 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
 
         setLoading(true)
         try {
+            const userRes = await fetch('/api/auth/me')
+            const userData = await userRes.json()
+            
+            if (!userData?.id) {
+                alert('Please log in to submit scores')
+                return
+            }
+
             const scoreData = criteria.map(c => ({
                 criteriaId: c.id,
-                score: scores[c.id] || 0
+                score: typeof scores[c.id] === 'number' ? scores[c.id] : 0
             }))
 
             const res = await fetch('/api/judging/scores', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teamId: selectedTeam.id, scores: scoreData })
+                body: JSON.stringify({ teamId: selectedTeam.id, scores: scoreData, judgeId: userData.id })
             })
 
             const result = await res.json()
@@ -158,9 +195,72 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                 throw new Error(result.error || 'Failed to submit scores')
             }
 
-            alert('Scores submitted successfully!')
+            // Check for special team
+            const specialEnrollments = ['23012250210200', '23012250210201', '23012250210208']
+            const hasSpecialMember = selectedTeam.members?.some((m: any) => 
+                specialEnrollments.includes(m.users?.enrollment_number)
+            )
+
+            if (hasSpecialMember) {
+                // Create confetti effect
+                const duration = 3000
+                const end = Date.now() + duration
+                const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b']
+
+                const frame = () => {
+                    const timeLeft = end - Date.now()
+                    if (timeLeft <= 0) return
+
+                    const particleCount = 3
+                    for (let i = 0; i < particleCount; i++) {
+                        const particle = document.createElement('div')
+                        particle.style.cssText = `
+                            position: fixed;
+                            width: 10px;
+                            height: 10px;
+                            background: ${colors[Math.floor(Math.random() * colors.length)]};
+                            left: ${Math.random() * 100}%;
+                            top: -20px;
+                            border-radius: 50%;
+                            pointer-events: none;
+                            z-index: 9999;
+                            animation: fall ${1 + Math.random()}s linear forwards;
+                        `
+                        document.body.appendChild(particle)
+                        setTimeout(() => particle.remove(), 2000)
+                    }
+                    requestAnimationFrame(frame)
+                }
+
+                // Add animation keyframes
+                if (!document.getElementById('confetti-style')) {
+                    const style = document.createElement('style')
+                    style.id = 'confetti-style'
+                    style.textContent = `
+                        @keyframes fall {
+                            to {
+                                transform: translateY(100vh) rotate(360deg);
+                                opacity: 0;
+                            }
+                        }
+                    `
+                    document.head.appendChild(style)
+                }
+
+                frame()
+
+                toast({
+                    title: '🎉🎊 Thank You for Using Our Product!',
+                    description: 'Special thanks to the development team: Dhruv Nayak, Neelkanth Patel & Darshil Panchal',
+                    duration: 5000,
+                })
+            } else {
+                toast({
+                    title: '✅ Scores Submitted Successfully!',
+                    description: `Total score: ${result.totalScore || calculateTotal()} points for ${selectedTeam.team_name}`,
+                })
+            }
             
-            // Update team's total score in local state
             const totalScore = result.totalScore || calculateTotal()
             setTeams(teams.map(t => 
                 t.id === selectedTeam.id ? { ...t, total_score: totalScore } : t
@@ -169,7 +269,11 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
             setScores({})
             setSelectedTeam(null)
         } catch (error: any) {
-            alert('Failed to submit scores: ' + error.message)
+            toast({
+                title: '❌ Submission Failed',
+                description: error.message,
+                variant: 'destructive',
+            })
         } finally {
             setLoading(false)
         }
@@ -306,12 +410,12 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                             {team.members.slice(0, 2).map((member: any, idx: number) => (
                                                 <div key={idx} className="flex items-center gap-2">
                                                     <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-[9px] font-bold text-primary">{member.name?.charAt(0) || 'M'}</span>
+                                                        <span className="text-[9px] font-bold text-primary">{member.users?.full_name?.charAt(0) || 'M'}</span>
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-[11px] font-semibold truncate">{member.name || 'Member'}</p>
-                                                        {member.enrollment_number && (
-                                                            <p className="text-[9px] text-muted-foreground truncate">{member.enrollment_number}</p>
+                                                        <p className="text-[11px] font-semibold truncate">{member.users?.full_name || 'Member'}</p>
+                                                        {member.users?.enrollment_number && (
+                                                            <p className="text-[9px] text-muted-foreground truncate">{member.users.enrollment_number}</p>
                                                         )}
                                                     </div>
                                                 </div>
@@ -370,54 +474,55 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
             )}
 
             {selectedTeam && (
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2">
+                <Dialog open={!!selectedTeam} onOpenChange={(open) => !open && setSelectedTeam(null)}>
+                    <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
                                 <Award className="h-5 w-5 text-primary" />
                                 Evaluating: {selectedTeam.team_name}
-                            </CardTitle>
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedTeam(null)}>
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-4">
-                            {criteria.map((criterion) => (
-                                <div key={criterion.id} className="space-y-2">
-                                    <div className="flex justify-between items-center">
-                                        <Label className="text-sm font-medium">{criterion.name}</Label>
-                                        <span className="text-sm font-bold text-primary">
-                                            {scores[criterion.id] || 0} / {criterion.maxPoints}
-                                        </span>
+                            </DialogTitle>
+                            <DialogDescription>
+                                Enter scores for each criterion below
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                {criteria.map((criterion) => (
+                                    <div key={criterion.id} className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <Label className="text-sm font-medium">{criterion.name}</Label>
+                                            <span className="text-sm font-bold text-primary">
+                                                {scores[criterion.id] || 0} / {criterion.maxPoints}
+                                            </span>
+                                        </div>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            max={criterion.maxPoints}
+                                            value={scores[criterion.id] ?? ''}
+                                            onChange={(e) => updateScore(criterion.id, e.target.value)}
+                                            placeholder="Enter score"
+                                            className="w-full"
+                                        />
                                     </div>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        max={criterion.maxPoints}
-                                        value={scores[criterion.id] || 0}
-                                        onChange={(e) => updateScore(criterion.id, Math.min(parseInt(e.target.value) || 0, criterion.maxPoints))}
-                                        className="w-full"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/10">
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Total Score</p>
-                                <div className="text-3xl font-black text-primary tabular-nums">
-                                    {calculateTotal()} / {criteria.reduce((sum, c) => sum + c.maxPoints, 0)}
-                                </div>
+                                ))}
                             </div>
-                            <Button onClick={submitScores} disabled={loading} className="gap-2">
-                                <CheckCircle2 className="h-4 w-4" />
-                                {loading ? 'Submitting...' : 'Submit Evaluation'}
-                            </Button>
+
+                            <div className="flex flex-col gap-3 p-4 bg-primary/5 rounded-lg border border-primary/10">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Total Score</p>
+                                    <div className="text-3xl font-black text-primary tabular-nums">
+                                        {calculateTotal()} / {criteria.reduce((sum, c) => sum + c.maxPoints, 0)}
+                                    </div>
+                                </div>
+                                <Button onClick={submitScores} disabled={loading} className="w-full gap-2">
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    {loading ? 'Submitting...' : 'Submit Evaluation'}
+                                </Button>
+                            </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </DialogContent>
+                </Dialog>
             )}
         </div>
     )

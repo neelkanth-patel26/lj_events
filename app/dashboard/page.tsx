@@ -21,13 +21,10 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           const { data } = await supabase.from('users').select('role').eq('id', user.id).single()
-          setUserRole(data?.role || 'admin')
-        } else {
-          setUserRole('admin')
+          setUserRole(data?.role || 'student')
         }
       } catch (error) {
         console.error('Error fetching role:', error)
-        setUserRole('admin')
       }
     }
     checkRole()

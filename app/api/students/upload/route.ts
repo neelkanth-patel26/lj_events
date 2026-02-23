@@ -46,11 +46,13 @@ export async function POST(request: NextRequest) {
       let userId = existingUser?.id
 
       if (existingUser) {
-        // Update existing user
+        // Update existing user including password
+        const passwordHash = row.password ? Buffer.from(row.password).toString('base64') : null
         await supabase
           .from('users')
           .update({
             full_name: row.name,
+            password_hash: passwordHash,
             enrollment_number: row.enrollment,
             department: row.department || null
           })

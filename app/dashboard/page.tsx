@@ -357,87 +357,35 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-4 w-4" />
-                Top Performing Teams
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            System Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm">Completion Rate</span>
+                <span className="text-sm font-bold">{stats.completionRate}%</span>
               </div>
-              <Link href="/dashboard/leaderboard">
-                <Button variant="ghost" size="sm" className="h-7 text-xs">
-                  View All
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Button>
-              </Link>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats.topTeams.length > 0 ? (
-              <div className="space-y-2">
-                {stats.topTeams.map((team: any, index: number) => (
-                  <Link key={team.id} href={`/dashboard/teams/${team.id}/members`}>
-                    <div className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
-                        index === 0 ? 'bg-gray-900 text-white' :
-                        index === 1 ? 'bg-gray-700 text-white' :
-                        index === 2 ? 'bg-gray-500 text-white' :
-                        'bg-muted text-muted-foreground'
-                      }`}>
-                        #{index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm truncate">{team.team_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{team.school_name}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-lg">{team.total_score}</p>
-                        <p className="text-xs text-muted-foreground">pts</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+              <Progress value={stats.completionRate} className="h-2" />
+            </div>
+            <div className="pt-2 border-t space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Upcoming Events</span>
+                <span className="font-medium">{stats.upcomingEvents.length}</span>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No scored teams yet</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Activity className="h-4 w-4" />
-              System Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm">Completion Rate</span>
-                  <span className="text-sm font-bold">{stats.completionRate}%</span>
-                </div>
-                <Progress value={stats.completionRate} className="h-2" />
-              </div>
-              <div className="pt-2 border-t space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Upcoming Events</span>
-                  <span className="font-medium">{stats.upcomingEvents.length}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total Domains</span>
-                  <span className="font-medium">{stats.domains.length}</span>
-                </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Total Domains</span>
+                <span className="font-medium">{stats.domains.length}</span>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

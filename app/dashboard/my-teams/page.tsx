@@ -19,26 +19,50 @@ export default function MyTeamsPage() {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         
-        if (user) {
-          const { data: teamMembers } = await supabase
-            .from('team_members')
-            .select('team_id, teams(*, events(*))')
-            .eq('user_id', user.id)
+        if (!user) return
+
+        // Try both auth.id and users.id
+        let teamMembers = null
+        
+        // First try with auth user id
+        const { data: tm1 } = await supabase
+          .from('team_members')
+          .select('team_id, teams(*, events(*))')
+          .eq('user_id', user.id)
+        
+        if (tm1 && tm1.length > 0) {
+          teamMembers = tm1
+        } else {
+          // Try with public users id
+          const { data: userData } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', user.email)
+            .single()
           
-          if (teamMembers && teamMembers.length > 0) {
-            const teamsWithMembers = await Promise.all(
-              teamMembers.map(async (tm: any) => {
-                const { data: members } = await supabase
-                  .from('team_members')
-                  .select('id, role, user_id, users(id, full_name, email, enrollment_number)')
-                  .eq('team_id', tm.team_id)
-                
-                return { ...tm.teams, members: members || [], event: tm.teams.events }
-              })
-            )
+          if (userData) {
+            const { data: tm2 } = await supabase
+              .from('team_members')
+              .select('team_id, teams(*, events(*))')
+              .eq('user_id', userData.id)
             
-            setUserTeams(teamsWithMembers)
+            if (tm2) teamMembers = tm2
           }
+        }
+        
+        if (teamMembers && teamMembers.length > 0) {
+          const teamsWithMembers = await Promise.all(
+            teamMembers.map(async (tm: any) => {
+              const { data: members } = await supabase
+                .from('team_members')
+                .select('id, role, user_id, users(id, full_name, email, enrollment_number)')
+                .eq('team_id', tm.team_id)
+              
+              return { ...tm.teams, members: members || [], event: tm.teams.events }
+            })
+          )
+          
+          setUserTeams(teamsWithMembers)
         }
       } catch (error) {
         console.error('Error fetching teams:', error)

@@ -58,11 +58,12 @@ export async function POST(request: NextRequest) {
         results.updated++
         userId = existingUser.id
       } else {
-        // Create new user
+        // Create new user with encoded password
+        const passwordHash = row.password ? Buffer.from(row.password).toString('base64') : null
         const { data: user } = await supabase.from('users').insert({
           email: row.email,
           full_name: row.name,
-          password_hash: row.password,
+          password_hash: passwordHash,
           role: 'student',
           enrollment_number: row.enrollment,
           department: row.department || null

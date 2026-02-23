@@ -49,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#ffffff" />
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
@@ -56,15 +57,12 @@ export default function RootLayout({
               if (theme) {
                 document.documentElement.classList.add(theme);
               }
-              document.documentElement.style.backgroundColor = theme === 'dark' ? '#000000' : '#ffffff';
-              const metaTheme = document.querySelector('meta[name="theme-color"]');
-              if (metaTheme) {
-                metaTheme.setAttribute('content', theme === 'dark' ? '#000000' : '#ffffff');
-              }
+              const color = theme === 'dark' ? '#000000' : '#ffffff';
+              document.documentElement.style.backgroundColor = color;
+              document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
             })()
           `
         }} />
-        <meta name="theme-color" content="#ffffff" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

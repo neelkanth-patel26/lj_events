@@ -1,5 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { cookies } from 'next/headers'
+
+export async function GET(request: NextRequest) {
+  try {
+    const cookieStore = await cookies()
+    const userSession = cookieStore.get('user_session')
+    
+    if (!userSession) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    const user = JSON.parse(userSession.value)
+
+    const { data, error } = await adminClient
+      .from('mentor_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      throw error
+    }
+
+    return NextResponse.json(data || {})
+  } catch (error: any) {
+    console.error('Profile fetch error:', error)
+    return NextResponse.json({ error: error.message || 'Failed to fetch profile' }, { status: 500 })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

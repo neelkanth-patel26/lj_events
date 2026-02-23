@@ -172,11 +172,11 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
       <div className="space-y-4 md:space-y-6 pb-4 animate-pulse">
         <div className="grid grid-cols-3 gap-3 md:gap-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-gray-100 rounded-xl h-28 md:h-36"></div>
+            <div key={i} className="bg-gray-100 dark:bg-neutral-800 rounded-xl h-28 md:h-36"></div>
           ))}
         </div>
-        <div className="bg-gray-100 rounded-xl h-64"></div>
-        <div className="bg-gray-100 rounded-xl h-96"></div>
+        <div className="bg-gray-100 dark:bg-neutral-800 rounded-xl h-64"></div>
+        <div className="bg-gray-100 dark:bg-neutral-800 rounded-xl h-96"></div>
       </div>
     )
   }
@@ -185,43 +185,43 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
     <div className="space-y-6 md:space-y-8 pb-6">
       {/* Stats Section */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 md:p-6">
             <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-gray-100 flex items-center justify-center">
-                <Users className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+                <Users className="h-6 w-6 md:h-7 md:w-7 text-gray-700 dark:text-neutral-300" />
               </div>
               <div>
-                <p className="text-2xl md:text-3xl font-bold text-gray-900">{stats.totalTeams}</p>
-                <p className="text-xs md:text-sm text-gray-600 font-medium mt-1">Total Teams</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{stats.totalTeams}</p>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-neutral-400 font-medium mt-1">Total Teams</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 md:p-6">
             <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-gray-100 flex items-center justify-center">
-                <CheckCircle2 className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+                <CheckCircle2 className="h-6 w-6 md:h-7 md:w-7 text-gray-700 dark:text-neutral-300" />
               </div>
               <div>
-                <p className="text-2xl md:text-3xl font-bold text-gray-900">{stats.assignedTeams}</p>
-                <p className="text-xs md:text-sm text-gray-600 font-medium mt-1">Assigned</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{stats.assignedTeams}</p>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-neutral-400 font-medium mt-1">Assigned</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 md:p-6">
             <div className="flex flex-col items-center text-center space-y-2">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-gray-100 flex items-center justify-center">
-                <UserPlus className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+                <UserPlus className="h-6 w-6 md:h-7 md:w-7 text-gray-700 dark:text-neutral-300" />
               </div>
               <div>
-                <p className="text-2xl md:text-3xl font-bold text-gray-900">{stats.unassigned}</p>
-                <p className="text-xs md:text-sm text-gray-600 font-medium mt-1">Pending</p>
+                <p className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{stats.unassigned}</p>
+                <p className="text-xs md:text-sm text-gray-600 dark:text-neutral-400 font-medium mt-1">Pending</p>
               </div>
             </div>
           </CardContent>
@@ -229,11 +229,11 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
       </div>
 
       {/* Assignment Form */}
-      <Card className="border shadow-sm">
-        <CardHeader className="border-b bg-gray-50 p-4 md:p-6">
-          <CardTitle className="flex items-center gap-3 text-base md:text-xl">
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-900 flex items-center justify-center">
-              <UserPlus className="h-4 w-4 md:h-5 md:w-5 text-white" />
+      <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
+        <CardHeader className="border-b bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 p-4 md:p-6">
+          <CardTitle className="flex items-center gap-3 text-base md:text-xl dark:text-white">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center">
+              <UserPlus className="h-4 w-4 md:h-5 md:w-5 text-white dark:text-gray-900" />
             </div>
             <span className="font-semibold">Assign Mentors to Team</span>
           </CardTitle>
@@ -241,14 +241,14 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
         <CardContent className="p-4 md:p-6 space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-900">Select Team</label>
+              <label className="text-sm font-semibold text-gray-900 dark:text-white">Select Team</label>
               <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-                <SelectTrigger className="h-11 md:h-12 border-2">
+                <SelectTrigger className="h-11 md:h-12 border-2 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
                   <SelectValue placeholder="Choose a team" />
                 </SelectTrigger>
-                <SelectContent className="max-h-[250px]">
+                <SelectContent className="max-h-[250px] dark:bg-neutral-800 dark:border-neutral-700">
                   {teams.map(team => (
-                    <SelectItem key={team.id} value={team.id} className="py-3">
+                    <SelectItem key={team.id} value={team.id} className="py-3 dark:text-white dark:focus:bg-neutral-700">
                       <div className="flex items-center justify-between w-full gap-3">
                         <span>{team.team_name}</span>
                         {assignments[team.id]?.length > 0 && (
@@ -264,29 +264,29 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-900">Add Mentors</label>
+              <label className="text-sm font-semibold text-gray-900 dark:text-white">Add Mentors</label>
               <Select value="" onValueChange={(value) => {
                 if (value && !selectedMentors.includes(value)) {
                   setSelectedMentors([...selectedMentors, value])
                 }
               }}>
-                <SelectTrigger className="h-11 md:h-12 border-2">
+                <SelectTrigger className="h-11 md:h-12 border-2 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
                   <SelectValue placeholder="Select mentors" />
                 </SelectTrigger>
-                <SelectContent className="max-h-[250px]">
+                <SelectContent className="max-h-[250px] dark:bg-neutral-800 dark:border-neutral-700">
                   {mentors.filter(m => !selectedMentors.includes(m.id)).map(mentor => (
-                    <SelectItem key={mentor.id} value={mentor.id} className="py-3">
+                    <SelectItem key={mentor.id} value={mentor.id} className="py-3 dark:text-white dark:focus:bg-neutral-700">
                       {mentor.full_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedMentors.length > 0 && (
-                <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border">
+                <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-neutral-800 rounded-lg border dark:border-neutral-700">
                   {selectedMentors.map(mentorId => {
                     const mentor = mentors.find(m => m.id === mentorId)
                     return mentor ? (
-                      <Badge key={mentorId} className="bg-gray-900 hover:bg-gray-800 px-3 py-1.5 flex items-center gap-2">
+                      <Badge key={mentorId} className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-gray-900 px-3 py-1.5 flex items-center gap-2">
                         {mentor.full_name}
                         <button onClick={() => setSelectedMentors(selectedMentors.filter(id => id !== mentorId))} className="hover:bg-white/20 rounded-full p-0.5">
                           <X className="h-3 w-3" />
@@ -302,7 +302,7 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
           <Button 
             onClick={assignJudge} 
             disabled={!selectedTeam || selectedMentors.length === 0 || loading} 
-            className="w-full h-11 md:h-12 font-semibold bg-gray-900 hover:bg-gray-800"
+            className="w-full h-11 md:h-12 font-semibold bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-neutral-100"
           >
             {loading ? (
               <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Assigning...</>
@@ -314,33 +314,33 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
       </Card>
 
       {/* Teams Grid */}
-      <Card className="border shadow-sm">
-        <CardHeader className="border-b bg-gray-50 p-4 md:p-6">
+      <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
+        <CardHeader className="border-b bg-gray-50 dark:bg-neutral-800 dark:border-neutral-700 p-4 md:p-6">
           <div className="space-y-3">
-            <CardTitle className="flex items-center gap-3 text-base md:text-xl">
-              <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-900 flex items-center justify-center">
-                <Users className="h-4 w-4 md:h-5 md:w-5 text-white" />
+            <CardTitle className="flex items-center gap-3 text-base md:text-xl dark:text-white">
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center">
+                <Users className="h-4 w-4 md:h-5 md:w-5 text-white dark:text-gray-900" />
               </div>
               <span className="font-semibold">Teams & Assignments</span>
             </CardTitle>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-neutral-500" />
                 <Input
                   placeholder="Search teams..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-11 border-2"
+                  className="pl-10 h-11 border-2 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
                 />
               </div>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="h-11 border-2">
+                <SelectTrigger className="h-11 border-2 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Teams</SelectItem>
-                  <SelectItem value="assigned">Assigned</SelectItem>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectContent className="dark:bg-neutral-800 dark:border-neutral-700">
+                  <SelectItem value="all" className="dark:text-white dark:focus:bg-neutral-700">All Teams</SelectItem>
+                  <SelectItem value="assigned" className="dark:text-white dark:focus:bg-neutral-700">Assigned</SelectItem>
+                  <SelectItem value="unassigned" className="dark:text-white dark:focus:bg-neutral-700">Unassigned</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -355,12 +355,12 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
               </div>
             ) : (
               filteredTeams.map(team => (
-                <Card key={team.id} className="border-2 hover:border-gray-400 hover:shadow-md transition-all">
+                <Card key={team.id} className="border-2 hover:border-gray-400 dark:hover:border-neutral-600 hover:shadow-md transition-all dark:bg-neutral-800 dark:border-neutral-700">
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-sm md:text-base mb-2 line-clamp-2">
+                          <h3 className="font-semibold text-sm md:text-base mb-2 line-clamp-2 dark:text-white">
                             {team.team_name}
                           </h3>
                           <div className="flex flex-wrap gap-1.5">
@@ -383,7 +383,7 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
                             Unassigned
                           </Badge>
                         ) : assignments[team.id]?.length > 0 ? (
-                          <Badge className="bg-gray-900 text-xs flex-shrink-0">
+                          <Badge className="bg-gray-900 dark:bg-white dark:text-gray-900 text-xs flex-shrink-0">
                             {assignments[team.id].length}
                           </Badge>
                         ) : null}
@@ -393,8 +393,8 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
                         {assignments[team.id]?.length > 0 ? (
                           <div className="space-y-1.5">
                             {assignments[team.id].map(assignment => (
-                              <div key={assignment.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group">
-                                <span className="text-xs md:text-sm font-medium truncate flex-1">{assignment.judge.full_name}</span>
+                              <div key={assignment.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-gray-50 dark:bg-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-600 transition-colors group">
+                                <span className="text-xs md:text-sm font-medium truncate flex-1 dark:text-white">{assignment.judge.full_name}</span>
                                 <button
                                   onClick={() => removeJudge(assignment.id, team.id)}
                                   className="opacity-0 group-hover:opacity-100 hover:bg-red-100 text-red-600 rounded-full p-1 transition-all"
@@ -405,8 +405,8 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
                             ))}
                           </div>
                         ) : (
-                          <div className="flex items-center justify-center h-16 border-2 border-dashed rounded-lg">
-                            <span className="text-xs text-gray-400">No mentors assigned</span>
+                          <div className="flex items-center justify-center h-16 border-2 border-dashed rounded-lg dark:border-neutral-600">
+                            <span className="text-xs text-gray-400 dark:text-neutral-500">No mentors assigned</span>
                           </div>
                         )}
                       </div>

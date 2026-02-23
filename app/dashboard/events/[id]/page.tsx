@@ -153,7 +153,7 @@ export default function EventDetailsPage() {
       
       <div className="space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-2xl md:text-3xl font-bold">{event.name}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{event.name}</h1>
           <Badge className={`${getStatusColor(event.status)} flex items-center gap-1 text-xs`}>
             {getStatusIcon(event.status)}
             {event.status || 'Draft'}
@@ -213,10 +213,10 @@ export default function EventDetailsPage() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{event.total_teams || 0}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{event.total_teams || 0}</p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Teams</p>
             {event.max_teams && (
               <p className="text-xs text-muted-foreground">of {event.max_teams}</p>
@@ -224,26 +224,26 @@ export default function EventDetailsPage() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{event.total_judges || 0}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{event.total_judges || 0}</p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Judges</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <FileText className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{event.total_submissions || 0}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{event.total_submissions || 0}</p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Submissions</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Target className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{event.completion_rate || 0}%</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{event.completion_rate || 0}%</p>
             <p className="text-xs md:text-sm text-muted-foreground mt-1">Complete</p>
           </CardContent>
         </Card>
@@ -253,9 +253,9 @@ export default function EventDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Main Information */}
         <div className="lg:col-span-2 space-y-4 md:space-y-6">
-          <Card>
+          <Card className="dark:bg-neutral-900 dark:border-neutral-800">
             <CardHeader className="p-3 md:p-4">
-              <CardTitle className="text-lg md:text-xl">Event Description</CardTitle>
+              <CardTitle className="text-lg md:text-xl dark:text-white">Event Description</CardTitle>
             </CardHeader>
             <CardContent className="p-3 md:p-4 pt-0">
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
@@ -266,9 +266,9 @@ export default function EventDetailsPage() {
 
           {/* Schedule Information */}
           {(event.start_time || event.end_time || registrationDeadline) && (
-            <Card>
+            <Card className="dark:bg-neutral-900 dark:border-neutral-800">
               <CardHeader className="p-3 md:p-4">
-                <CardTitle className="text-lg md:text-xl">Schedule & Timing</CardTitle>
+                <CardTitle className="text-lg md:text-xl dark:text-white">Schedule & Timing</CardTitle>
               </CardHeader>
               <CardContent className="p-3 md:p-4 pt-0">
                 <div className="space-y-3">
@@ -306,9 +306,9 @@ export default function EventDetailsPage() {
 
         {/* Sidebar Information */}
         <div className="space-y-4 md:space-y-6">
-          <Card>
+          <Card className="dark:bg-neutral-900 dark:border-neutral-800">
             <CardHeader className="p-3 md:p-4">
-              <CardTitle className="text-base md:text-lg">Event Details</CardTitle>
+              <CardTitle className="text-base md:text-lg dark:text-white">Event Details</CardTitle>
             </CardHeader>
             <CardContent className="p-3 md:p-4 pt-0">
               <div className="space-y-3">
@@ -344,9 +344,9 @@ export default function EventDetailsPage() {
           </Card>
 
           {/* Quick Actions */}
-          <Card>
+          <Card className="dark:bg-neutral-900 dark:border-neutral-800">
             <CardHeader className="p-3 md:p-4">
-              <CardTitle className="text-base md:text-lg">Quick Actions</CardTitle>
+              <CardTitle className="text-base md:text-lg dark:text-white">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-3 md:p-4 pt-0">
               <div className="space-y-2">

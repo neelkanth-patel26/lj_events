@@ -20,17 +20,17 @@ export default async function JudgingPage() {
   return (
     <div className="space-y-6 pb-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl md:text-3xl font-bold">Team Evaluation</h1>
+        <h1 className="text-2xl md:text-3xl font-bold dark:text-white">Team Evaluation</h1>
         <p className="text-sm text-muted-foreground">Score teams and view criteria</p>
       </div>
 
       <Tabs defaultValue="teams" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2 h-11">
-          <TabsTrigger value="teams" className="gap-2">
+        <TabsList className="grid w-full max-w-md grid-cols-2 h-11 dark:bg-neutral-900 dark:border-neutral-800">
+          <TabsTrigger value="teams" className="gap-2 dark:data-[state=active]:bg-neutral-800">
             <Users className="h-4 w-4" />
             Teams
           </TabsTrigger>
-          <TabsTrigger value="criteria" className="gap-2">
+          <TabsTrigger value="criteria" className="gap-2 dark:data-[state=active]:bg-neutral-800">
             <Settings2 className="h-4 w-4" />
             Criteria
           </TabsTrigger>

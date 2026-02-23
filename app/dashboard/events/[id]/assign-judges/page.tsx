@@ -17,7 +17,7 @@ export default function AssignJudgesPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold">Assign Mentors to Teams</h1>
+        <h1 className="text-3xl font-bold dark:text-white">Assign Mentors to Teams</h1>
       </div>
       
       <TeamJudgeAssignment eventId={eventId} />

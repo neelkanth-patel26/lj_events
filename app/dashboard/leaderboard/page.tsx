@@ -121,7 +121,7 @@ export default function LeaderboardPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Leaderboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Leaderboard</h1>
           <p className="text-sm text-muted-foreground mt-1">View team rankings and scores</p>
         </div>
         <div className="flex gap-2">
@@ -151,38 +151,38 @@ export default function LeaderboardPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{rankings?.length || 0}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{rankings?.length || 0}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Total Teams</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || isLeaderboardVisible ? topScore : '***'}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{userRole === 'admin' || isLeaderboardVisible ? topScore : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Target className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{avgScore}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{avgScore}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Avg Score</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <TrendingUp className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || isLeaderboardVisible ? (rankings?.filter((t: any) => (t.total_score || 0) > 0).length || 0) : '***'}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{userRole === 'admin' || isLeaderboardVisible ? (rankings?.filter((t: any) => (t.total_score || 0) > 0).length || 0) : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Scored</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Controls */}
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
             <Select value={selectedEvent} onValueChange={setSelectedEvent}>
@@ -253,13 +253,13 @@ export default function LeaderboardPage() {
               const rankIcon = getRankIcon(rank)
               
               return (
-                <Card key={team.id} className="hover:shadow-md transition-shadow">
+                <Card key={team.id} className="hover:shadow-md transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
                   <CardHeader className="p-3 md:p-4">
                     <div className="flex items-start justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           {rankIcon && <div className="flex-shrink-0">{rankIcon}</div>}
-                          <CardTitle className="text-base md:text-lg truncate">
+                          <CardTitle className="text-base md:text-lg truncate dark:text-white">
                             {team.team_name}
                           </CardTitle>
                         </div>
@@ -292,9 +292,9 @@ export default function LeaderboardPage() {
                           <span className="text-xs md:text-sm">{team.stall_no}</span>
                         </div>
                       )}
-                      <div className="flex items-center justify-between pt-2 border-t">
+                      <div className="flex items-center justify-between pt-2 border-t dark:border-neutral-800">
                         <span className="text-xs text-muted-foreground">Score</span>
-                        <span className="text-lg md:text-xl font-bold">{team.total_score || 0}</span>
+                        <span className="text-lg md:text-xl font-bold dark:text-white">{team.total_score || 0}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -309,16 +309,16 @@ export default function LeaderboardPage() {
               const rankIcon = getRankIcon(rank)
               
               return (
-                <Card key={team.id} className="hover:shadow-md transition-shadow">
+                <Card key={team.id} className="hover:shadow-md transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
                   <CardContent className="p-3 md:p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                        <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                          {rankIcon || <span className="font-bold text-sm md:text-base">#{rank}</span>}
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          {rankIcon || <span className="font-bold text-sm md:text-base dark:text-white">#{rank}</span>}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-sm md:text-base truncate">{team.team_name}</h3>
+                            <h3 className="font-semibold text-sm md:text-base truncate dark:text-white">{team.team_name}</h3>
                             <Badge variant="outline" className="text-xs">#{rank}</Badge>
                           </div>
                           <p className="text-xs md:text-sm text-muted-foreground truncate">{team.school_name}</p>
@@ -339,7 +339,7 @@ export default function LeaderboardPage() {
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-lg md:text-xl font-bold">{team.total_score || 0}</div>
+                        <div className="text-lg md:text-xl font-bold dark:text-white">{team.total_score || 0}</div>
                         <div className="text-xs text-muted-foreground">Score</div>
                       </div>
                     </div>

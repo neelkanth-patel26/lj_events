@@ -12,6 +12,10 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
+    // Force light mode on landing page
+    document.documentElement.classList.remove('dark')
+    localStorage.removeItem('theme')
+    
     getCurrentUser().then((u) => {
       setUser(u)
       setLoading(false)

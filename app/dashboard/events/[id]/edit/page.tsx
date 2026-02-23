@@ -76,12 +76,12 @@ export default function EditEventPage({ params }: { params: Promise<{ id: string
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-3xl font-bold">Edit Event</h1>
+        <h1 className="text-3xl font-bold dark:text-white">Edit Event</h1>
       </div>
       
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardHeader>
-          <CardTitle>Event Details</CardTitle>
+          <CardTitle className="dark:text-white">Event Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

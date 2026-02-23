@@ -120,6 +120,66 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground relative overflow-x-hidden;
+    background: hsl(var(--background));
   }
+  body::before,
+  body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    z-index: -1;
+    animation: float 20s ease-in-out infinite;
+  }
+  body::before {
+    width: 700px;
+    height: 700px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0.6;
+    top: -20%;
+    left: -20%;
+  }
+  body::after {
+    width: 600px;
+    height: 600px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    opacity: 0.6;
+    bottom: -20%;
+    right: -20%;
+    animation-delay: -10s;
+  }
+  .dark body::before {
+    background: linear-gradient(135deg, #4158D0 0%, #C850C0 100%);
+    opacity: 0.4;
+  }
+  .dark body::after {
+    background: linear-gradient(135deg, #0093E9 0%, #80D0C7 100%);
+    opacity: 0.4;
+  }
+  body > div:first-child::before {
+    content: '';
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FBAB7E 0%, #F7CE68 100%);
+    filter: blur(60px);
+    opacity: 0.5;
+    top: 40%;
+    right: 10%;
+    z-index: -1;
+    animation: float 25s ease-in-out infinite;
+    animation-delay: -5s;
+  }
+  .dark body > div:first-child::before {
+    background: linear-gradient(135deg, #FA8BFF 0%, #2BD2FF 90%);
+    opacity: 0.3;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -50px) scale(1.15); }
+  66% { transform: translate(-30px, 30px) scale(0.85); }
 }

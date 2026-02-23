@@ -127,7 +127,7 @@ const handleCreateTeam = async (e: React.FormEvent) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Manage Teams</h1>
+          <h1 className="text-2xl md:text-3xl font-bold dark:text-white">Manage Teams</h1>
           <p className="text-sm text-muted-foreground mt-1">{teams?.length || 0} Teams Registered</p>
         </div>
         <div className="flex gap-2">
@@ -149,9 +149,9 @@ const handleCreateTeam = async (e: React.FormEvent) => {
 
       {/* Add Team Form - Admin Only */}
       {showForm && userRole === 'admin' && (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+            <CardTitle className="text-lg md:text-xl flex items-center gap-2 dark:text-white">
               <Plus className="h-4 w-4 md:h-5 md:w-5" />
               Add New Team
             </CardTitle>
@@ -200,11 +200,11 @@ const handleCreateTeam = async (e: React.FormEvent) => {
       {teams && teams.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {teams.map((team: any) => (
-            <Card key={team.id} className="hover:shadow-md transition-shadow">
+            <Card key={team.id} className="hover:shadow-md transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
               <CardHeader className="pb-3 p-3 md:p-4">
                 <div className="flex items-start justify-between gap-2">
                   <div className="space-y-1 min-w-0 flex-1">
-                    <CardTitle className="text-base md:text-lg truncate">{team.team_name}</CardTitle>
+                    <CardTitle className="text-base md:text-lg truncate dark:text-white">{team.team_name}</CardTitle>
                     {team.school_name && (
                       <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
                         <School className="h-3 w-3 md:h-4 md:w-4" />
@@ -280,11 +280,11 @@ const handleCreateTeam = async (e: React.FormEvent) => {
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-6 md:py-12">
             <div className="text-center">
               <Users className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-base md:text-lg font-medium mb-2">No teams registered yet</h3>
+              <h3 className="text-base md:text-lg font-medium dark:text-white mb-2">No teams registered yet</h3>
               <p className="text-sm text-muted-foreground mb-4">Get started by adding the first team to this event.</p>
               {userRole === 'admin' && (
                 <Button onClick={() => setShowForm(true)} size="sm">

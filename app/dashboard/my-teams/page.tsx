@@ -101,10 +101,10 @@ export default function MyTeamsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">My Teams</h1>
+          <h1 className="text-3xl font-bold dark:text-white">My Teams</h1>
           <p className="text-sm text-muted-foreground mt-1">View your team information and members</p>
         </div>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-8 text-center">
             <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground">You are not part of any team yet</p>
@@ -136,7 +136,7 @@ export default function MyTeamsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">My Teams</h1>
+          <h1 className="text-3xl font-bold dark:text-white">My Teams</h1>
           <p className="text-sm text-muted-foreground mt-1">View your team information and members</p>
         </div>
         <Select value={selectedEvent} onValueChange={setSelectedEvent}>
@@ -155,24 +155,24 @@ export default function MyTeamsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 text-center">
             <Calendar className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold">{Object.keys(teamsByEvent).length}</p>
+            <p className="text-2xl font-bold dark:text-white">{Object.keys(teamsByEvent).length}</p>
             <p className="text-xs text-muted-foreground">Events</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 text-center">
             <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold">{userTeams.length}</p>
+            <p className="text-2xl font-bold dark:text-white">{userTeams.length}</p>
             <p className="text-xs text-muted-foreground">Teams</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 text-center">
             <Trophy className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <p className="text-2xl font-bold">{userTeams.reduce((sum, t) => sum + (t.total_score || 0), 0)}</p>
+            <p className="text-2xl font-bold dark:text-white">{userTeams.reduce((sum, t) => sum + (t.total_score || 0), 0)}</p>
             <p className="text-xs text-muted-foreground">Total Score</p>
           </CardContent>
         </Card>
@@ -181,16 +181,16 @@ export default function MyTeamsPage() {
       {Object.entries(filteredTeamsByEvent).map(([eventId, eventData]: [string, any]) => (
         <div key={eventId} className="space-y-4">
           <div 
-            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-colors"
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800 p-3 rounded-lg transition-colors"
             onClick={() => toggleEventCollapse(eventId)}
           >
             {collapsedEvents.has(eventId) ? 
-              <ChevronDown className="h-5 w-5 text-gray-600" /> : 
-              <ChevronUp className="h-5 w-5 text-gray-600" />
+              <ChevronDown className="h-5 w-5 text-gray-600 dark:text-neutral-400" /> : 
+              <ChevronUp className="h-5 w-5 text-gray-600 dark:text-neutral-400" />
             }
-            <Calendar className="h-5 w-5 text-gray-600" />
+            <Calendar className="h-5 w-5 text-gray-600 dark:text-neutral-400" />
             <div>
-              <h2 className="text-xl font-semibold">{eventData.event?.name || 'Unknown Event'}</h2>
+              <h2 className="text-xl font-semibold dark:text-white">{eventData.event?.name || 'Unknown Event'}</h2>
               <p className="text-sm text-muted-foreground">
                 {eventData.event?.event_date && new Date(eventData.event.event_date).toLocaleDateString()}
                 {eventData.event?.venue && ` • ${eventData.event.venue}`}
@@ -202,11 +202,11 @@ export default function MyTeamsPage() {
           </div>
 
           {!collapsedEvents.has(eventId) && eventData.teams.map((team: any) => (
-            <Card key={team.id}>
+            <Card key={team.id} className="dark:bg-neutral-900 dark:border-neutral-800">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-xl">{team.team_name}</CardTitle>
+                    <CardTitle className="text-xl dark:text-white">{team.team_name}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">{team.school_name}</p>
                   </div>
                   <Badge variant="outline" className="text-lg font-bold">
@@ -254,7 +254,7 @@ export default function MyTeamsPage() {
                           <User className="h-5 w-5 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium truncate">{member.users?.full_name || 'Unknown'}</p>
+                          <p className="font-medium truncate dark:text-white">{member.users?.full_name || 'Unknown'}</p>
                           <p className="text-xs text-muted-foreground truncate">{member.users?.email}</p>
                           {member.users?.enrollment_number && (
                             <p className="text-xs text-muted-foreground">{member.users.enrollment_number}</p>

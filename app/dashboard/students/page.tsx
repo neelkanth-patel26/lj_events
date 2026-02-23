@@ -214,7 +214,7 @@ export default function StudentsPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Student Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Student Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Import and manage student accounts</p>
         </div>
         <div className="flex gap-2">
@@ -231,40 +231,40 @@ export default function StudentsPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{studentStats.total}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{studentStats.total}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Total Users</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <UserCircle className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{studentStats.students}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{studentStats.students}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Students</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{studentStats.admins}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{studentStats.admins}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Admins</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="students" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="students" className="text-xs md:text-sm">All Students ({students?.length || 0})</TabsTrigger>
-          <TabsTrigger value="import" className="text-xs md:text-sm">Import Students</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 dark:bg-neutral-900 dark:border-neutral-800">
+          <TabsTrigger value="students" className="text-xs md:text-sm dark:data-[state=active]:bg-neutral-800">All Students ({students?.length || 0})</TabsTrigger>
+          <TabsTrigger value="import" className="text-xs md:text-sm dark:data-[state=active]:bg-neutral-800">Import Students</TabsTrigger>
         </TabsList>
         
         <TabsContent value="import">
           <div className="grid md:grid-cols-2 gap-4">
-            <Card>
+            <Card className="dark:bg-neutral-900 dark:border-neutral-800">
               <CardHeader className="p-3 md:p-4">
-                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg dark:text-white">
                   <Upload className="h-4 w-4 md:h-5 md:w-5" />
                   Import Students
                 </CardTitle>
@@ -321,9 +321,9 @@ export default function StudentsPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-muted/30">
+            <Card className="bg-muted/30 dark:bg-neutral-900 dark:border-neutral-800">
               <CardHeader className="p-3 md:p-4">
-                <CardTitle className="text-base md:text-lg">Instructions</CardTitle>
+                <CardTitle className="text-base md:text-lg dark:text-white">Instructions</CardTitle>
               </CardHeader>
               <CardContent className="p-3 md:p-4 pt-0">
                 <div className="space-y-3 text-sm text-muted-foreground">
@@ -354,21 +354,21 @@ export default function StudentsPage() {
         
         <TabsContent value="students" className="space-y-4">
           {/* Controls */}
-          <Card>
+          <Card className="dark:bg-neutral-900 dark:border-neutral-800">
             <CardContent className="p-3 md:p-4">
-              <div className="flex flex-col sm:flex-row gap-3 md:items-center justify-between">
-                <div className="relative flex-1 max-w-md">
+              <div className="flex flex-col md:flex-row gap-3">
+                <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by name, email, or enrollment..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
+                    className="pl-9 h-10"
                   />
                 </div>
                 <div className="flex gap-2">
                   <Select value={filterRole} onValueChange={setFilterRole}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-full md:w-40 h-10">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -377,12 +377,12 @@ export default function StudentsPage() {
                       <SelectItem value="admin">Admins</SelectItem>
                     </SelectContent>
                   </Select>
-                  <div className="hidden md:flex border rounded-md">
+                  <div className="hidden md:flex border rounded-md dark:border-neutral-700">
                     <Button
                       variant={viewMode === 'grid' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setViewMode('grid')}
-                      className="rounded-r-none"
+                      className="rounded-r-none h-10"
                     >
                       <Grid className="h-4 w-4" />
                     </Button>
@@ -390,7 +390,7 @@ export default function StudentsPage() {
                       variant={viewMode === 'list' ? 'default' : 'ghost'}
                       size="sm"
                       onClick={() => setViewMode('list')}
-                      className="rounded-l-none"
+                      className="rounded-l-none h-10"
                     >
                       <List className="h-4 w-4" />
                     </Button>
@@ -414,17 +414,17 @@ export default function StudentsPage() {
                   {filteredStudents.map((student: any) => {
                     const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
                     return (
-                    <Card key={student.id} className={`hover:shadow-lg transition-all ${isSpecial ? 'ring-2 ring-primary bg-gradient-to-br from-primary/5 to-primary/10' : ''}`}>
+                    <Card key={student.id} className={`hover:shadow-lg transition-all ${isSpecial ? 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700' : 'dark:bg-neutral-900 dark:border-neutral-800'}`}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <div className={`w-12 h-12 ${isSpecial ? 'bg-gradient-to-br from-primary to-primary/70' : 'bg-gradient-to-br from-primary/20 to-primary/5'} rounded-full flex items-center justify-center ${isSpecial ? 'text-white' : 'text-primary'} font-bold text-lg flex-shrink-0`}>
+                          <div className="w-12 h-12 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-gray-900 font-bold text-lg flex-shrink-0">
                             {student.full_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-2">
                               <div>
-                                <h3 className="font-semibold text-base truncate">{student.full_name}</h3>
-                                {isSpecial && <span className="text-xs text-primary font-semibold">⭐ Platform Developer</span>}
+                                <h3 className="font-semibold text-base truncate dark:text-white">{student.full_name}</h3>
+                                {isSpecial && <span className="text-xs text-primary font-semibold">⭐ Developer</span>}
                               </div>
                               <div className="flex gap-1">
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openEditDialog(student)}>
@@ -471,18 +471,18 @@ export default function StudentsPage() {
                   {filteredStudents.map((student: any) => {
                     const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
                     return (
-                    <Card key={student.id} className={`border-l-4 ${isSpecial ? 'border-l-primary bg-gradient-to-r from-primary/5 to-transparent' : 'border-l-transparent'}`}>
+                    <Card key={student.id} className={`${isSpecial ? 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-l-4 border-l-gray-900 dark:border-l-gray-400 border-gray-300 dark:border-gray-700' : 'border-l-4 border-l-transparent dark:bg-neutral-900 dark:border-neutral-800'}`}>
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 ${isSpecial ? 'bg-gradient-to-br from-primary to-primary/70' : 'bg-gradient-to-br from-primary/20 to-primary/5'} rounded-lg flex items-center justify-center ${isSpecial ? 'text-white' : 'text-primary'} font-bold text-lg flex-shrink-0`}>
+                          <div className="w-12 h-12 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-gray-900 font-bold text-lg flex-shrink-0">
                             {student.full_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
                           
                           <div className="flex-1 min-w-0 grid md:grid-cols-5 gap-3 items-center">
                             <div className="min-w-0">
-                              <div className="font-semibold text-sm mb-1">
+                              <div className="font-semibold text-sm mb-1 dark:text-white">
                                 {student.full_name}
-                                {isSpecial && <span className="ml-2 text-xs text-primary font-semibold">⭐ Platform Developer</span>}
+                                {isSpecial && <span className="ml-2 text-xs text-primary font-semibold">⭐ Developer</span>}
                               </div>
                               <Badge variant={student.role === 'admin' ? 'default' : student.role === 'mentor' ? 'secondary' : 'outline'} className="text-xs">
                                 {student.role}
@@ -499,7 +499,7 @@ export default function StudentsPage() {
                             <div>
                               {student.enrollment_number ? (
                                 <div className="flex items-center gap-2">
-                                  <div className={`px-2 py-1 rounded text-xs font-mono ${isSpecial ? 'bg-primary text-white' : 'bg-muted'}`}>
+                                  <div className={`px-2 py-1 rounded text-xs font-mono ${isSpecial ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-muted dark:bg-neutral-800'}`}>
                                     {student.enrollment_number}
                                   </div>
                                 </div>
@@ -535,13 +535,13 @@ export default function StudentsPage() {
               )}
             </>
           ) : (
-            <Card>
+            <Card className="dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="py-12">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-muted dark:bg-neutral-800 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Users className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">
+                  <h3 className="text-lg font-semibold mb-2 dark:text-white">
                     {searchTerm || filterRole !== 'all' ? 'No students found' : 'No students yet'}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">

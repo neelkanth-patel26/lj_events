@@ -151,7 +151,7 @@ export default function AdminsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Admin Management</h1>
+          <h1 className="text-3xl font-bold dark:text-white">Admin Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage administrator accounts</p>
         </div>
         <Button onClick={() => setShowAddDialog(true)} size="sm">
@@ -160,15 +160,15 @@ export default function AdminsPage() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-4 text-center">
-          <Shield className="h-8 w-8 mx-auto mb-2 text-gray-700" />
-          <p className="text-2xl font-bold">{admins.length}</p>
+          <Shield className="h-8 w-8 mx-auto mb-2 text-gray-700 dark:text-neutral-400" />
+          <p className="text-2xl font-bold dark:text-white">{admins.length}</p>
           <p className="text-sm text-muted-foreground">Total Admins</p>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -185,15 +185,15 @@ export default function AdminsPage() {
       {filteredAdmins.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAdmins.map((admin: any) => (
-            <Card key={admin.id} className="hover:shadow-lg transition-shadow">
+            <Card key={admin.id} className="hover:shadow-lg transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
+                  <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-800 dark:from-neutral-700 dark:to-neutral-800 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
                     {admin.full_name?.charAt(0)?.toUpperCase() || 'A'}
                   </div>
                   
                   <div className="space-y-2 w-full">
-                    <div className="font-semibold text-lg">{admin.full_name}</div>
+                    <div className="font-semibold text-lg dark:text-white">{admin.full_name}</div>
                     <Badge variant="default" className="text-xs bg-gray-700">Admin</Badge>
                     
                     <div className="space-y-1.5 pt-2">
@@ -229,10 +229,10 @@ export default function AdminsPage() {
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="py-12 text-center">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No admins found</h3>
+            <h3 className="text-lg font-semibold mb-2 dark:text-white">No admins found</h3>
             <p className="text-sm text-muted-foreground">
               {searchTerm ? 'Try adjusting your search' : 'Add your first admin'}
             </p>

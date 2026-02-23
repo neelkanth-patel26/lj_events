@@ -26,15 +26,15 @@ export default function EventLeaderboardPage() {
           Back
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">{event.name} - Leaderboard</h1>
+          <h1 className="text-3xl font-bold dark:text-white">{event.name} - Leaderboard</h1>
           <p className="text-muted-foreground">{new Date(event.event_date).toLocaleDateString()}</p>
         </div>
       </div>
 
       {rankings && rankings.length > 0 ? (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 dark:text-white">
               <Trophy className="h-5 w-5" />
               Rankings
             </CardTitle>
@@ -42,18 +42,18 @@ export default function EventLeaderboardPage() {
           <CardContent>
             <div className="space-y-2">
               {rankings.map((team: any, index: number) => (
-                <div key={team.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={team.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-neutral-800 dark:bg-neutral-800">
                   <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-8 h-8 bg-gray-600 dark:bg-neutral-700 rounded-full flex items-center justify-center text-white font-bold">
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-semibold">{team.team_name}</p>
+                      <p className="font-semibold dark:text-white">{team.team_name}</p>
                       <p className="text-sm text-muted-foreground">{team.school_name}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold">{team.total_score || 0}</p>
+                    <p className="text-xl font-bold dark:text-white">{team.total_score || 0}</p>
                     <Badge variant={index < 3 ? 'default' : 'outline'}>#{index + 1}</Badge>
                   </div>
                 </div>
@@ -62,7 +62,7 @@ export default function EventLeaderboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <Trophy className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

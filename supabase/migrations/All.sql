@@ -114,9 +114,11 @@ CREATE TABLE public.team_judges (
   status USER-DEFINED DEFAULT 'pending'::judge_status,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
+  event_id uuid NOT NULL,
   CONSTRAINT team_judges_pkey PRIMARY KEY (id),
   CONSTRAINT team_judges_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.teams(id),
-  CONSTRAINT team_judges_judge_id_fkey FOREIGN KEY (judge_id) REFERENCES public.users(id)
+  CONSTRAINT team_judges_judge_id_fkey FOREIGN KEY (judge_id) REFERENCES public.users(id),
+  CONSTRAINT team_judges_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.events(id)
 );
 CREATE TABLE public.team_members (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -155,5 +157,6 @@ CREATE TABLE public.users (
   password_hash text NOT NULL,
   enrollment_number character varying,
   department character varying,
+  theme character varying DEFAULT 'light'::character varying,
   CONSTRAINT users_pkey PRIMARY KEY (id)
 );

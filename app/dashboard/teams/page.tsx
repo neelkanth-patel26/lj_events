@@ -80,18 +80,18 @@ export default function TeamsPage() {
   }, {})
 
   const renderTeamCard = (team: any) => {
-    const isLeaderboardLocked = userRole === 'student' && !eventLeaderboardStatus[team.event_id]
+    const isLeaderboardLocked = (userRole === 'student' || userRole === 'mentor') && !eventLeaderboardStatus[team.event_id]
     return (
     <Card 
       key={team.id} 
-      className="border-2 hover:border-gray-400 hover:shadow-lg transition-all cursor-pointer"
+      className="border-2 hover:border-gray-400 dark:hover:border-gray-600 hover:shadow-lg transition-all cursor-pointer dark:bg-neutral-900 dark:border-neutral-800"
       onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}
     >
       <CardContent className="p-4">
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-base mb-1 line-clamp-2">{team.team_name}</h3>
+              <h3 className="font-semibold text-base mb-1 line-clamp-2 dark:text-white">{team.team_name}</h3>
               <div className="flex flex-wrap gap-1.5">
                 {team.stall_no && (
                   <Badge variant="outline" className="text-xs">
@@ -106,7 +106,7 @@ export default function TeamsPage() {
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <div className="text-xl font-bold">{isLeaderboardLocked ? '***' : (team.total_score || 0)}</div>
+              <div className="text-xl font-bold dark:text-white">{isLeaderboardLocked ? '***' : (team.total_score || 0)}</div>
               <div className="text-xs text-muted-foreground">Score</div>
             </div>
           </div>
@@ -115,13 +115,13 @@ export default function TeamsPage() {
             <span>{teamMembers[team.id]?.length || 0} Members</span>
           </div>
           {teamMembers[team.id] && teamMembers[team.id].length > 0 && (
-            <div className="pt-2 border-t space-y-1.5">
+            <div className="pt-2 border-t dark:border-neutral-800 space-y-1.5">
               {teamMembers[team.id].map((member: any, idx: number) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-semibold text-gray-700">{member.users?.full_name?.charAt(0) || 'M'}</span>
+                  <div className="h-6 w-6 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{member.users?.full_name?.charAt(0) || 'M'}</span>
                   </div>
-                  <p className="text-xs font-medium truncate">{member.users?.full_name || 'Member'}</p>
+                  <p className="text-xs font-medium truncate dark:text-gray-300">{member.users?.full_name || 'Member'}</p>
                 </div>
               ))}
             </div>
@@ -135,7 +135,7 @@ export default function TeamsPage() {
     <div className="space-y-6 pb-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Teams</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Teams</h1>
           <p className="text-sm text-muted-foreground">View and manage teams</p>
         </div>
         {userRole === 'admin' && (
@@ -147,35 +147,35 @@ export default function TeamsPage() {
       </div>
 
       <div className="grid grid-cols-3 gap-3 md:gap-4">
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 text-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Users className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
+            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+              <Users className="h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-gray-300" />
             </div>
-            <p className="text-xl md:text-2xl font-bold">{filteredTeams.length}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{filteredTeams.length}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Teams</p>
           </CardContent>
         </Card>
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 text-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
-              <Trophy className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
+            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+              <Trophy className="h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-gray-300" />
             </div>
-            <p className="text-xl md:text-2xl font-bold">
-              {userRole === 'student' 
+            <p className="text-xl md:text-2xl font-bold dark:text-white">
+              {(userRole === 'student' || userRole === 'mentor') && (filterEvent === 'all' || !eventLeaderboardStatus[filterEvent])
                 ? '***' 
                 : filteredTeams.length ? Math.max(...filteredTeams.map((t: any) => t.total_score || 0)) : 0}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
         </Card>
-        <Card className="border shadow-sm">
+        <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 text-center">
-            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
-              <MapPin className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
+            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 dark:bg-neutral-800 flex items-center justify-center">
+              <MapPin className="h-5 w-5 md:h-6 md:w-6 text-gray-700 dark:text-gray-300" />
             </div>
-            <p className="text-xl md:text-2xl font-bold">
-              {userRole === 'student'
+            <p className="text-xl md:text-2xl font-bold dark:text-white">
+              {(userRole === 'student' || userRole === 'mentor') && (filterEvent === 'all' || !eventLeaderboardStatus[filterEvent])
                 ? '***'
                 : filteredTeams.length ? Math.round(filteredTeams.reduce((sum: number, t: any) => sum + (t.total_score || 0), 0) / filteredTeams.length) : 0}
             </p>
@@ -184,7 +184,7 @@ export default function TeamsPage() {
         </Card>
       </div>
 
-      <Card className="border shadow-sm">
+      <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="relative">
@@ -216,31 +216,31 @@ export default function TeamsPage() {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="border-2">
+            <Card key={i} className="border-2 dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-4">
-                <div className="space-y-3 animate-pulse">
+                <div className="space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 space-y-2">
-                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-5 bg-gray-200 dark:bg-neutral-800 rounded w-3/4 animate-pulse"></div>
                       <div className="flex gap-2">
-                        <div className="h-5 bg-gray-200 rounded w-16"></div>
-                        <div className="h-5 bg-gray-200 rounded w-20"></div>
+                        <div className="h-5 bg-gray-200 dark:bg-neutral-800 rounded w-16 animate-pulse" style={{animationDelay: '0.1s'}}></div>
+                        <div className="h-5 bg-gray-200 dark:bg-neutral-800 rounded w-20 animate-pulse" style={{animationDelay: '0.2s'}}></div>
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <div className="h-6 bg-gray-200 rounded w-12"></div>
-                      <div className="h-3 bg-gray-200 rounded w-12"></div>
+                      <div className="h-6 bg-gray-200 dark:bg-neutral-800 rounded w-12 animate-pulse" style={{animationDelay: '0.15s'}}></div>
+                      <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-12 animate-pulse" style={{animationDelay: '0.25s'}}></div>
                     </div>
                   </div>
-                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                  <div className="pt-2 border-t space-y-2">
+                  <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded w-24 animate-pulse" style={{animationDelay: '0.3s'}}></div>
+                  <div className="pt-2 border-t dark:border-neutral-800 space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
-                      <div className="h-3 bg-gray-200 rounded w-32"></div>
+                      <div className="h-6 w-6 bg-gray-200 dark:bg-neutral-800 rounded-full animate-pulse" style={{animationDelay: '0.35s'}}></div>
+                      <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-32 animate-pulse" style={{animationDelay: '0.4s'}}></div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
-                      <div className="h-3 bg-gray-200 rounded w-28"></div>
+                      <div className="h-6 w-6 bg-gray-200 dark:bg-neutral-800 rounded-full animate-pulse" style={{animationDelay: '0.45s'}}></div>
+                      <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-28 animate-pulse" style={{animationDelay: '0.5s'}}></div>
                     </div>
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export default function TeamsPage() {
                     }}
                   >
                     <ChevronDown className={`h-5 w-5 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
-                    <h2 className="text-lg font-semibold">{event?.name || 'No Event'}</h2>
+                    <h2 className="text-lg font-semibold dark:text-white">{event?.name || 'No Event'}</h2>
                     <Badge variant="outline">{eventTeams.length}</Badge>
                   </div>
                   {!isCollapsed && (
@@ -286,7 +286,7 @@ export default function TeamsPage() {
           </div>
         )
       ) : (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-12 text-center">
             <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
             <p className="text-muted-foreground">No teams found</p>

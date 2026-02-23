@@ -239,7 +239,7 @@ export default function MentorsPage() {
     <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Mentor Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Mentor Management</h1>
           <p className="text-xs md:text-sm text-muted-foreground mt-1">Manage mentor accounts</p>
         </div>
         <div className="flex gap-2">
@@ -254,29 +254,29 @@ export default function MentorsPage() {
         </div>
       </div>
 
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-3 md:p-4 text-center">
           <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-          <p className="text-xl md:text-2xl font-bold">{mentors.length}</p>
+          <p className="text-xl md:text-2xl font-bold dark:text-white">{mentors.length}</p>
           <p className="text-xs md:text-sm text-muted-foreground">Total Mentors</p>
         </CardContent>
       </Card>
 
       <Tabs defaultValue="mentors" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="mentors" className="text-xs md:text-sm">All Mentors ({mentors.length})</TabsTrigger>
-          <TabsTrigger value="import" className="text-xs md:text-sm">Import Mentors</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 dark:bg-neutral-900 dark:border-neutral-800">
+          <TabsTrigger value="mentors" className="text-xs md:text-sm dark:data-[state=active]:bg-neutral-800">All Mentors ({mentors.length})</TabsTrigger>
+          <TabsTrigger value="import" className="text-xs md:text-sm dark:data-[state=active]:bg-neutral-800">Import Mentors</TabsTrigger>
         </TabsList>
         
         <TabsContent value="import">
           <div className="grid md:grid-cols-2 gap-4">
-            <Card>
+            <Card className="dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-3 md:p-4">
-                <h3 className="font-semibold mb-4 text-sm md:text-base">Import Mentors</h3>
+                <h3 className="font-semibold mb-4 text-sm md:text-base dark:text-white">Import Mentors</h3>
                 <form onSubmit={handleFileUpload} className="space-y-4">
                   <div className="space-y-2">
                     <Label className="text-xs md:text-sm">Upload File *</Label>
-                    <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                    <div className="border-2 border-dashed dark:border-neutral-700 rounded-lg p-6 text-center hover:border-primary/50 dark:hover:border-primary/50 transition-colors">
                       <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
                       <Input
                         ref={fileInputRef}
@@ -287,7 +287,7 @@ export default function MentorsPage() {
                       />
                       <p className="text-xs text-muted-foreground mt-2">CSV or Excel</p>
                       {selectedFile && (
-                        <p className="text-sm font-medium text-green-600 mt-2">✓ {selectedFile.name}</p>
+                        <p className="text-sm font-medium text-green-600 dark:text-green-400 mt-2">✓ {selectedFile.name}</p>
                       )}
                     </div>
                   </div>
@@ -297,20 +297,20 @@ export default function MentorsPage() {
                 </form>
               </CardContent>
             </Card>
-            <Card className="bg-muted/30">
+            <Card className="bg-muted/30 dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-3 md:p-4">
-                <h3 className="font-semibold mb-4 text-sm md:text-base">Instructions</h3>
+                <h3 className="font-semibold mb-4 text-sm md:text-base dark:text-white">Instructions</h3>
                 <div className="space-y-3 text-xs md:text-sm text-muted-foreground">
                   <div>
-                    <p className="font-medium text-foreground mb-1">1. Download Template</p>
+                    <p className="font-medium text-foreground dark:text-gray-300 mb-1">1. Download Template</p>
                     <p>Click Template button to get CSV format</p>
                   </div>
                   <div>
-                    <p className="font-medium text-foreground mb-1">2. Fill Mentor Data</p>
+                    <p className="font-medium text-foreground dark:text-gray-300 mb-1">2. Fill Mentor Data</p>
                     <p>Add: email, name, password, department, company, designation, domain, experience, bank details</p>
                   </div>
                   <div>
-                    <p className="font-medium text-foreground mb-1">3. Upload File</p>
+                    <p className="font-medium text-foreground dark:text-gray-300 mb-1">3. Upload File</p>
                     <p>Upload CSV/Excel to import mentors</p>
                   </div>
                 </div>
@@ -320,7 +320,7 @@ export default function MentorsPage() {
         </TabsContent>
         
         <TabsContent value="mentors" className="space-y-4">
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
@@ -348,16 +348,16 @@ export default function MentorsPage() {
         viewMode === 'list' ? (
         <div className="space-y-2 md:space-y-3">
           {filteredMentors.map((mentor: any) => (
-            <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
+            <Card key={mentor.id} className="hover:shadow-lg transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-3 md:p-4">
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold text-lg md:text-xl shadow-md flex-shrink-0">
+                  <div className="w-12 h-12 md:w-14 md:h-14 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-gray-900 font-bold text-lg md:text-xl shadow-md flex-shrink-0">
                     {mentor.full_name?.charAt(0)?.toUpperCase() || 'M'}
                   </div>
                   
                   <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3">
                     <div>
-                      <div className="font-semibold text-sm md:text-base mb-1">{mentor.full_name}</div>
+                      <div className="font-semibold text-sm md:text-base mb-1 dark:text-white">{mentor.full_name}</div>
                       <Badge variant="secondary" className="text-xs">Mentor</Badge>
                     </div>
                     
@@ -396,15 +396,15 @@ export default function MentorsPage() {
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {filteredMentors.map((mentor: any) => (
-            <Card key={mentor.id} className="hover:shadow-lg transition-shadow">
+            <Card key={mentor.id} className="hover:shadow-lg transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-4 md:p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center text-white font-bold text-2xl md:text-3xl shadow-lg">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-gray-900 font-bold text-2xl md:text-3xl shadow-lg">
                     {mentor.full_name?.charAt(0)?.toUpperCase() || 'M'}
                   </div>
                   
                   <div className="space-y-2 w-full">
-                    <div className="font-semibold text-base md:text-lg">{mentor.full_name}</div>
+                    <div className="font-semibold text-base md:text-lg dark:text-white">{mentor.full_name}</div>
                     <Badge variant="secondary" className="text-xs">Mentor</Badge>
                     
                     <div className="space-y-1.5 pt-2">
@@ -439,10 +439,10 @@ export default function MentorsPage() {
         </div>
         )
       ) : (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="py-8 md:py-12 text-center">
             <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-base md:text-lg font-semibold mb-2">No mentors found</h3>
+            <h3 className="text-base md:text-lg font-semibold mb-2 dark:text-white">No mentors found</h3>
           </CardContent>
         </Card>
       )}
@@ -450,7 +450,7 @@ export default function MentorsPage() {
       </Tabs>
 
       <Dialog open={!!editMentor} onOpenChange={(open) => !open && setEditMentor(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle>Edit Mentor</DialogTitle>
           </DialogHeader>
@@ -590,7 +590,7 @@ export default function MentorsPage() {
       </Dialog>
 
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent className="dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle>Add Mentor</DialogTitle>
           </DialogHeader>
@@ -642,7 +642,7 @@ export default function MentorsPage() {
       </Dialog>
 
       <Dialog open={!!viewProfile} onOpenChange={(open) => !open && setViewProfile(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle>{viewProfile?.full_name} - Profile Details</DialogTitle>
           </DialogHeader>

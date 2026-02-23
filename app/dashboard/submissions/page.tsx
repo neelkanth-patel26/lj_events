@@ -59,16 +59,16 @@ export default function SubmissionsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Team Submissions</h1>
+        <h1 className="text-3xl font-bold dark:text-white">Team Submissions</h1>
         <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Cancel' : 'Submit Work'}
         </Button>
       </div>
 
       {showForm && (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardHeader>
-            <CardTitle>Submit Team Work</CardTitle>
+            <CardTitle className="dark:text-white">Submit Team Work</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleCreateSubmission} className="space-y-4">
@@ -114,9 +114,9 @@ export default function SubmissionsPage() {
       <div className="grid gap-4">
         {submissions && submissions.length > 0 ? (
           submissions.map((submission: Submission) => (
-            <Card key={submission.id}>
+            <Card key={submission.id} className="dark:bg-neutral-900 dark:border-neutral-800">
               <CardHeader>
-                <CardTitle>{submission.submission_title}</CardTitle>
+                <CardTitle className="dark:text-white">{submission.submission_title}</CardTitle>
                 <CardDescription>
                   Status: <span className="capitalize font-semibold">{submission.status}</span>
                   {' • '}
@@ -143,7 +143,7 @@ export default function SubmissionsPage() {
             </Card>
           ))
         ) : (
-          <Card>
+          <Card className="dark:bg-neutral-900 dark:border-neutral-800">
             <CardContent className="pt-6">
               <p className="text-center text-muted-foreground">No submissions yet</p>
             </CardContent>

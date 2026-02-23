@@ -115,7 +115,7 @@ export default function EventsPage() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Events Management</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Events Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Create and manage competition events</p>
         </div>
         {userRole === 'admin' && (
@@ -127,31 +127,31 @@ export default function EventsPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{stats.total}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{stats.total}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Total Events</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{stats.active}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{stats.active}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Active Events</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{stats.totalTeams}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{stats.totalTeams}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Total Teams</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-3 md:p-4 text-center">
             <Clock className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{stats.completed}</p>
+            <p className="text-xl md:text-2xl font-bold dark:text-white">{stats.completed}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Completed</p>
           </CardContent>
         </Card>
@@ -159,9 +159,9 @@ export default function EventsPage() {
 
       {/* Create Event Form */}
       {showForm && userRole === 'admin' && (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardHeader className="p-3 md:p-4">
-            <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+            <CardTitle className="text-lg md:text-xl flex items-center gap-2 dark:text-white">
               <Plus className="h-4 w-4 md:h-5 md:w-5" />
               Create New Event
             </CardTitle>
@@ -280,7 +280,7 @@ export default function EventsPage() {
       )}
 
       {/* Controls */}
-      <Card>
+      <Card className="dark:bg-neutral-900 dark:border-neutral-800">
         <CardContent className="p-3 md:p-4">
           <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
             <div className="relative flex-1">
@@ -333,10 +333,10 @@ export default function EventsPage() {
         viewMode === 'grid' ? (
           <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredEvents.map((event: any) => (
-              <Card key={event.id} className="hover:shadow-md transition-shadow">
+              <Card key={event.id} className="hover:shadow-md transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
                 <CardHeader className="pb-3 p-3 md:p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base md:text-lg truncate">{event.name}</CardTitle>
+                    <CardTitle className="text-base md:text-lg truncate dark:text-white">{event.name}</CardTitle>
                     <Badge className={`${getStatusColor(event.status)} text-xs flex-shrink-0`}>
                       {event.status || 'draft'}
                     </Badge>
@@ -362,24 +362,24 @@ export default function EventsPage() {
                       </p>
                     )}
                     
-                    <div className="grid grid-cols-4 gap-2 p-2 md:p-3 bg-muted rounded-lg">
+                    <div className="grid grid-cols-4 gap-2 p-2 md:p-3 bg-muted dark:bg-neutral-800 rounded-lg">
                       <div className="text-center">
-                        <Users className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <Users className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600 dark:text-white" />
                         <div className="text-sm md:text-base font-bold">{event.total_teams || 0}</div>
                         <div className="text-xs text-muted-foreground">Teams</div>
                       </div>
                       <div className="text-center">
-                        <Trophy className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <Trophy className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600 dark:text-white" />
                         <div className="text-sm md:text-base font-bold">{event.total_judges || 0}</div>
                         <div className="text-xs text-muted-foreground">Judges</div>
                       </div>
                       <div className="text-center">
-                        <FileText className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <FileText className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600 dark:text-white" />
                         <div className="text-sm md:text-base font-bold">{event.total_submissions || 0}</div>
                         <div className="text-xs text-muted-foreground">Subs</div>
                       </div>
                       <div className="text-center">
-                        <Clock className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600" />
+                        <Clock className="h-3 w-3 md:h-4 md:w-4 mx-auto mb-1 text-gray-600 dark:text-white" />
                         <div className="text-sm md:text-base font-bold">{event.completion_rate || 0}%</div>
                         <div className="text-xs text-muted-foreground">Done</div>
                       </div>
@@ -424,7 +424,7 @@ export default function EventsPage() {
         ) : (
           <div className="space-y-2">
             {filteredEvents.map((event: any) => (
-              <Card key={event.id} className="hover:shadow-md transition-shadow">
+              <Card key={event.id} className="hover:shadow-md transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
                 <CardContent className="p-3 md:p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
@@ -433,7 +433,7 @@ export default function EventsPage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-sm md:text-base truncate">{event.name}</h3>
+                          <h3 className="font-semibold text-sm md:text-base truncate dark:text-white">{event.name}</h3>
                           <Badge className={`${getStatusColor(event.status)} text-xs`}>
                             {event.status || 'draft'}
                           </Badge>
@@ -487,7 +487,7 @@ export default function EventsPage() {
           </div>
         )
       ) : (
-        <Card>
+        <Card className="dark:bg-neutral-900 dark:border-neutral-800">
           <CardContent className="p-4 md:pt-6">
             <div className="text-center py-6 md:py-8">
               <Calendar className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />

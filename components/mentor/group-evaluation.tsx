@@ -318,7 +318,7 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
 
     return (
         <div className="space-y-4">
-            <Card className="border shadow-sm">
+            <Card className="border shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
                 <CardContent className="p-4 space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -356,25 +356,25 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
             </Card>
 
             {selectedEvent && loadingTeams && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
-                        <Card key={i} className="animate-pulse">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <Card key={i} className="animate-pulse" style={{ animationDelay: `${i * 100}ms` }}>
                             <CardHeader className="pb-3 space-y-3">
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 space-y-2">
-                                        <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="h-5 bg-gray-200 dark:bg-neutral-800 rounded w-3/4"></div>
                                         <div className="flex gap-1.5">
-                                            <div className="h-4 bg-gray-200 rounded w-16"></div>
-                                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                            <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded w-16"></div>
+                                            <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded w-20"></div>
                                         </div>
                                     </div>
-                                    <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
+                                    <div className="h-10 w-10 bg-gray-200 dark:bg-neutral-800 rounded-lg"></div>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                                <div className="h-3 bg-gray-200 rounded w-full"></div>
-                                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                                <div className="h-8 bg-gray-200 rounded w-full mt-4"></div>
+                                <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-full"></div>
+                                <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-2/3"></div>
+                                <div className="h-8 bg-gray-200 dark:bg-neutral-800 rounded w-full mt-4"></div>
                             </CardContent>
                         </Card>
                     ))}
@@ -386,7 +386,7 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                     {filteredTeams.map((team) => (
                         <Card 
                             key={team.id} 
-                            className="cursor-pointer transition-all hover:shadow-lg hover:border-gray-400 border-2"
+                            className="cursor-pointer transition-all hover:shadow-lg hover:border-gray-400 dark:hover:border-gray-600 border-2 dark:bg-neutral-900 dark:border-neutral-800"
                             onClick={() => {
                                 setSelectedTeam(team)
                                 setScores({})
@@ -395,7 +395,7 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
-                                        <CardTitle className="text-base mb-2 line-clamp-2">{team.team_name}</CardTitle>
+                                        <CardTitle className="text-base mb-2 line-clamp-2 dark:text-white">{team.team_name}</CardTitle>
                                         <div className="flex flex-wrap gap-1.5">
                                             {team.stall_no && (
                                                 <Badge variant="outline" className="text-xs">
@@ -418,8 +418,23 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-2">
+                                {team.members && team.members.length > 0 && (
+                                    <div className="space-y-1.5 pb-2 border-b dark:border-neutral-800">
+                                        {team.members.slice(0, 3).map((member: any, idx: number) => (
+                                            <div key={idx} className="flex items-center gap-2">
+                                                <div className="h-5 w-5 rounded-full bg-gray-900 dark:bg-white flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-xs font-semibold text-white dark:text-gray-900">{member.users?.full_name?.charAt(0) || 'M'}</span>
+                                                </div>
+                                                <p className="text-xs font-medium truncate dark:text-gray-300">{member.users?.full_name || 'Member'}</p>
+                                            </div>
+                                        ))}
+                                        {team.members.length > 3 && (
+                                            <p className="text-xs text-muted-foreground pl-7">+{team.members.length - 3} more</p>
+                                        )}
+                                    </div>
+                                )}
                                 {(team.team_size || team.member_count) && (
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
                                         <Users className="h-3 w-3" />
                                         <span>{team.team_size || team.member_count} Members</span>
                                     </div>
@@ -457,7 +472,7 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
 
             {selectedTeam && (
                 <Dialog open={!!selectedTeam} onOpenChange={(open) => !open && setSelectedTeam(null)}>
-                    <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto dark:bg-neutral-900 dark:border-neutral-800">
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold">Evaluate: {selectedTeam.team_name}</DialogTitle>
                             <DialogDescription>
@@ -487,7 +502,7 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                 ))}
                             </div>
 
-                            <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-lg border-2">
+                            <div className="flex flex-col gap-3 p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg border-2 dark:border-neutral-700">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-semibold text-muted-foreground">Total Score</span>
                                     <span className="text-2xl font-bold">

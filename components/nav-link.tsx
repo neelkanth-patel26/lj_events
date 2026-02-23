@@ -16,7 +16,7 @@ export function NavLink({ href, children, className = '', ...props }: NavLinkPro
   return (
     <Link
       href={href}
-      className={`${className} ${isActive ? 'bg-primary text-primary-foreground [&>svg]:text-primary-foreground' : ''}`}
+      className={`${className} ${isActive ? 'bg-gray-900 text-white [&>svg]:text-white' : ''}`}
       {...props}
     >
       {children}

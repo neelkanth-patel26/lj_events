@@ -15,6 +15,29 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Get current user role from session
+    const { data: { user } } = await supabase.auth.getUser()
+    const { data: userData } = user ? await supabase
+      .from('users')
+      .select('role')
+      .eq('email', user.email)
+      .single() : { data: null }
+
+    // Check if leaderboard is visible
+    const { data: event } = await supabase
+      .from('events')
+      .select('leaderboard_visible')
+      .eq('id', eventId)
+      .single()
+
+    // Only restrict students when leaderboard is not visible
+    if (!event?.leaderboard_visible && userData?.role === 'student') {
+      return NextResponse.json(
+        { error: 'Leaderboard is not visible for this event' },
+        { status: 403 }
+      )
+    }
+
     const { data: teams, error: teamError } = await supabase
       .from('teams')
       .select('id, team_name, school_name, domain, stall_no, total_score, team_size')

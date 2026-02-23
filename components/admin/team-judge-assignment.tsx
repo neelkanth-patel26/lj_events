@@ -40,6 +40,7 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
 
   useEffect(() => {
     fetchData()
@@ -134,9 +135,14 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
     }
   }
 
-  const filteredTeams = teams.filter(team => 
-    team.team_name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredTeams = teams.filter(team => {
+    const matchesSearch = team.team_name.toLowerCase().includes(searchTerm.toLowerCase())
+    const hasAssignments = assignments[team.id]?.length > 0
+    const matchesFilter = filterStatus === 'all' || 
+      (filterStatus === 'assigned' && hasAssignments) ||
+      (filterStatus === 'unassigned' && !hasAssignments)
+    return matchesSearch && matchesFilter
+  })
 
   const getTeamStats = () => {
     const totalTeams = teams.length
@@ -302,14 +308,26 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
               </div>
               <span className="font-semibold">Teams & Assignments</span>
             </CardTitle>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search teams..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 border-2"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search teams..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-11 border-2"
+                />
+              </div>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="h-11 border-2">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Teams</SelectItem>
+                  <SelectItem value="assigned">Assigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>

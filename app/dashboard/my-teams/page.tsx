@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Users, Calendar, Trophy, MapPin, Mail, Phone, User, ChevronDown, ChevronUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -9,6 +10,7 @@ export default function MyTeamsPage() {
   const [userTeams, setUserTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set())
+  const [selectedEvent, setSelectedEvent] = useState('all')
 
   useEffect(() => {
     const fetchMyTeams = async () => {
@@ -17,38 +19,48 @@ export default function MyTeamsPage() {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         
+        console.log('Auth user:', user?.email)
+        
         if (user) {
-          const { data: userData } = await supabase
+          const { data: userData, error: userError } = await supabase
             .from('users')
             .select('id')
             .eq('email', user.email)
             .single()
           
+          console.log('User data:', userData, 'Error:', userError)
+          
           if (userData) {
-            const { data: teamMembers } = await supabase
+            const { data: teamMembers, error: tmError } = await supabase
               .from('team_members')
               .select('team_id')
               .eq('user_id', userData.id)
             
+            console.log('Team members:', teamMembers, 'Error:', tmError)
+            
             if (teamMembers && teamMembers.length > 0) {
               const teamIds = teamMembers.map(tm => tm.team_id)
+              console.log('Team IDs:', teamIds)
               
-              const { data: teams } = await supabase
+              const { data: teams, error: teamsError } = await supabase
                 .from('teams')
                 .select('*')
                 .in('id', teamIds)
               
+              console.log('Teams:', teams, 'Error:', teamsError)
+              
               if (teams) {
+                const eventIds = [...new Set(teams.map(t => t.event_id))]
                 const { data: events } = await supabase
                   .from('events')
                   .select('*')
-                  .in('id', teams.map(t => t.event_id))
+                  .in('id', eventIds)
                 
                 const teamsWithData = await Promise.all(
                   teams.map(async (team) => {
                     const { data: members } = await supabase
                       .from('team_members')
-                      .select('*, users(*)')
+                      .select('id, role, user_id, users(id, full_name, email, enrollment_number)')
                       .eq('team_id', team.id)
                     
                     const event = events?.find(e => e.id === team.event_id)
@@ -57,6 +69,7 @@ export default function MyTeamsPage() {
                   })
                 )
                 
+                console.log('Final teams with data:', teamsWithData)
                 setUserTeams(teamsWithData)
               }
             }
@@ -124,11 +137,32 @@ export default function MyTeamsPage() {
     return acc
   }, {})
 
+  const filteredTeamsByEvent = selectedEvent === 'all' 
+    ? teamsByEvent 
+    : { [selectedEvent]: teamsByEvent[selectedEvent] }
+
+  const allEvents = Object.values(teamsByEvent).map((data: any) => data.event).filter(Boolean)
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">My Teams</h1>
-        <p className="text-sm text-muted-foreground mt-1">View your team information and members</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">My Teams</h1>
+          <p className="text-sm text-muted-foreground mt-1">View your team information and members</p>
+        </div>
+        <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Filter by event" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Events</SelectItem>
+            {allEvents.map((event: any) => (
+              <SelectItem key={event.id} value={event.id}>
+                {event.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -155,7 +189,7 @@ export default function MyTeamsPage() {
         </Card>
       </div>
 
-      {Object.entries(teamsByEvent).map(([eventId, eventData]: [string, any]) => (
+      {Object.entries(filteredTeamsByEvent).map(([eventId, eventData]: [string, any]) => (
         <div key={eventId} className="space-y-4">
           <div 
             className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-colors"

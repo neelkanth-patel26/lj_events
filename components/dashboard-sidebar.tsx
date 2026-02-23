@@ -145,11 +145,11 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
               key={item.href}
               href={item.href}
               className={`flex flex-col items-center justify-center flex-1 gap-1 py-2 px-1 rounded-lg transition-colors group ${
-                isActive ? 'bg-gray-100 dark:bg-gray-800' : ''
+                isActive ? 'bg-white dark:bg-gray-800' : ''
               }`}
             >
-              <item.icon className="h-5 w-5 text-gray-600" />
-              <span className="text-[10px] font-medium text-gray-600 uppercase tracking-wider truncate max-w-full">
+              <item.icon className={`h-5 w-5 ${isActive ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'}`} />
+              <span className={`text-[10px] font-medium uppercase tracking-wider truncate max-w-full ${isActive ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                 {item.label}
               </span>
             </Link>
@@ -160,8 +160,8 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             onClick={() => setMoreDialogOpen(true)}
             className="flex flex-col items-center justify-center flex-1 gap-1 py-2 px-1 rounded-lg transition-colors"
           >
-            <MoreHorizontal className="h-5 w-5 text-gray-600" />
-            <span className="text-[10px] font-medium text-gray-600 uppercase tracking-wider">
+            <MoreHorizontal className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               More
             </span>
           </button>

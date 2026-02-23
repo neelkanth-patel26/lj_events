@@ -37,6 +37,11 @@ export default function StudentsPage() {
   const [editForm, setEditForm] = useState({ full_name: '', email: '', enrollment_number: '', role: '', department: '' })
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [addForm, setAddForm] = useState({ full_name: '', email: '', password: '', enrollment_number: '', role: 'student', department: '' })
+  const [showResultDialog, setShowResultDialog] = useState(false)
+  const [importResult, setImportResult] = useState({ users: 0, updated: 0, teams: 0, message: '' })
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string, name: string } | null>(null)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileUpload = async (e: React.FormEvent) => {
@@ -63,7 +68,8 @@ export default function StudentsPage() {
       setSelectedFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
       refreshData()
-      alert(result.message || `Success! Created ${result.users} students and ${result.teams} teams`)
+      setImportResult(result)
+      setShowResultDialog(true)
     } catch (error: any) {
       console.error('Error importing students:', error)
       alert('Failed to import students: ' + error.message)
@@ -130,11 +136,16 @@ export default function StudentsPage() {
   }
 
   const handleDeleteStudent = async (studentId: string, studentName: string) => {
-    if (!confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) return
+    setDeleteTarget({ id: studentId, name: studentName })
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/students/delete?id=${studentId}`, {
+      const response = await fetch(`/api/students/delete?id=${deleteTarget.id}`, {
         method: 'DELETE'
       })
 
@@ -143,8 +154,10 @@ export default function StudentsPage() {
         throw new Error(error.error || 'Failed to delete student')
       }
 
+      setShowDeleteDialog(false)
+      setDeleteTarget(null)
       refreshData()
-      alert('Student deleted successfully')
+      setShowSuccessDialog(true)
     } catch (error: any) {
       alert('Failed to delete student: ' + error.message)
     } finally {
@@ -691,6 +704,107 @@ export default function StudentsPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Result Dialog */}
+      <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <Upload className="h-5 w-5 text-gray-700" />
+              </div>
+              Import Complete
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                <p className="text-3xl font-bold text-gray-900">{importResult.users}</p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">New Users</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                <p className="text-3xl font-bold text-gray-900">{importResult.updated}</p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Updated</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                <p className="text-3xl font-bold text-gray-900">{importResult.teams}</p>
+                <p className="text-xs text-gray-600 mt-1 font-medium">Teams</p>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-100 rounded-lg border-2 border-gray-200">
+              <p className="text-sm text-gray-700">{importResult.message}</p>
+            </div>
+            <Button onClick={() => setShowResultDialog(false)} className="w-full bg-gray-900 hover:bg-gray-800">
+              Done
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              Delete Student
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <p className="text-sm text-red-900">
+                Are you sure you want to delete <span className="font-bold">{deleteTarget?.name}</span>?
+              </p>
+              <p className="text-xs text-red-700 mt-2">
+                This action cannot be undone. All associated data will be permanently removed.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowDeleteDialog(false)} 
+                className="flex-1"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={confirmDelete} 
+                className="flex-1"
+                disabled={loading}
+              >
+                {loading ? 'Deleting...' : 'Delete'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="sr-only">Success</DialogTitle>
+          </DialogHeader>
+          <div className="text-center space-y-4 py-4">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Success!</h3>
+              <p className="text-sm text-gray-600">Student deleted successfully</p>
+            </div>
+            <Button onClick={() => setShowSuccessDialog(false)} className="w-full">
+              Done
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

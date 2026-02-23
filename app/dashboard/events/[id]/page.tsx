@@ -382,6 +382,15 @@ export default function EventDetailsPage() {
                         <><Lock className="h-4 w-4 mr-2" />Leaderboard Locked</>
                       )}
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start text-sm"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/events/${eventId}/assign-judges`)}
+                    >
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Assign Mentors
+                    </Button>
                   </>
                 )}
               </div>

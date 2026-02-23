@@ -104,9 +104,10 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
         
         setLoadingTeams(true)
         try {
-            const res = await fetch(`/api/events/${eventId}/teams`)
+            // Fetch only teams assigned to this mentor
+            const res = await fetch(`/api/judging/assigned-teams?judgeId=${currentUserId}&eventId=${eventId}`)
             const data = await res.json()
-            console.log('Fetched teams:', data)
+            console.log('Fetched assigned teams:', data)
             
             // Fetch member count and mentor's score for each team
             const teamsWithMembers = await Promise.all(
@@ -316,39 +317,41 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
     const selectedEventData = events.find(e => e.id === selectedEvent)
 
     return (
-        <div className="space-y-6">
-            <Card>
+        <div className="space-y-4">
+            <Card className="border shadow-sm">
                 <CardContent className="p-4 space-y-4">
-                    <div>
-                        <Label>Select Event</Label>
-                        <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                            <SelectTrigger className="mt-2">
-                                <SelectValue placeholder="Choose an event" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {events.map(event => (
-                                    <SelectItem key={event.id} value={event.id}>
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="h-4 w-4" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold">Select Event</Label>
+                            <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+                                <SelectTrigger className="h-11">
+                                    <SelectValue placeholder="Choose an event" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {events.map(event => (
+                                        <SelectItem key={event.id} value={event.id}>
                                             {event.name}
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    {selectedEvent && (
-                        <div className="relative">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search teams by name or number..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-8"
-                            />
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                    )}
+
+                        {selectedEvent && (
+                            <div className="space-y-2">
+                                <Label className="text-sm font-semibold">Search Teams</Label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search by name..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-9 h-11"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
 
@@ -379,152 +382,75 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
             )}
 
             {selectedEvent && filteredTeams.length > 0 && !loadingTeams && (
-                <div>
-                    <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                        <Users className="h-5 w-5 text-primary" />
-                        Teams in {selectedEventData?.name}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {filteredTeams.map((team) => (
-                            <Card 
-                                key={team.id} 
-                                className={`cursor-pointer transition-all hover:shadow-xl hover:scale-[1.02] border-l-4 ${
-                                    selectedTeam?.id === team.id 
-                                        ? 'ring-2 ring-primary shadow-xl border-l-primary bg-primary/5' 
-                                        : 'border-l-gray-300 hover:border-l-primary'
-                                }`}
-                                onClick={() => {
-                                    setSelectedTeam(team)
-                                    setScores({})
-                                }}
-                            >
-                                <CardHeader className="pb-3 space-y-3">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex-1 min-w-0">
-                                            <CardTitle className="text-base mb-2 truncate">{team.team_name}</CardTitle>
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {team.stall_no && (
-                                                    <Badge variant="outline" className="text-[10px] font-semibold px-2 py-0.5">
-                                                        Stall {team.stall_no}
-                                                    </Badge>
-                                                )}
-                                                {team.domain && (
-                                                    <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                                                        {team.domain}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
-                                            <Users className="h-5 w-5 text-primary" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredTeams.map((team) => (
+                        <Card 
+                            key={team.id} 
+                            className="cursor-pointer transition-all hover:shadow-lg hover:border-gray-400 border-2"
+                            onClick={() => {
+                                setSelectedTeam(team)
+                                setScores({})
+                            }}
+                        >
+                            <CardHeader className="pb-3">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                        <CardTitle className="text-base mb-2 line-clamp-2">{team.team_name}</CardTitle>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {team.stall_no && (
+                                                <Badge variant="outline" className="text-xs">
+                                                    Stall {team.stall_no}
+                                                </Badge>
+                                            )}
+                                            {team.domain && (
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {team.domain}
+                                                </Badge>
+                                            )}
                                         </div>
                                     </div>
                                     {team.my_score !== undefined && team.my_score > 0 && (
-                                        <div className="flex items-center justify-between p-2 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
-                                            <span className="text-xs font-semibold text-muted-foreground">My Score</span>
-                                            <span className="text-lg font-black text-primary">{team.my_score}</span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-xs text-muted-foreground">Score</span>
+                                            <span className="text-xl font-bold">{team.my_score}</span>
                                         </div>
                                     )}
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    {team.school_name && (
-                                        <div className="flex items-center gap-2 text-xs">
-                                            <div className="h-4 w-4 rounded bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                                            </div>
-                                            <span className="font-medium text-muted-foreground truncate">{team.school_name}</span>
-                                        </div>
-                                    )}
-                                    {(team.team_size || team.member_count) && (
-                                        <div className="flex items-center gap-2 text-xs">
-                                            <div className="h-4 w-4 rounded bg-orange-100 flex items-center justify-center flex-shrink-0">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-orange-600" />
-                                            </div>
-                                            <span className="font-medium text-muted-foreground">{team.team_size || team.member_count} Members</span>
-                                        </div>
-                                    )}
-                                    {team.contact_email && (
-                                        <div className="flex items-center gap-2 text-xs">
-                                            <div className="h-4 w-4 rounded bg-green-100 flex items-center justify-center flex-shrink-0">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-green-600" />
-                                            </div>
-                                            <span className="font-medium text-muted-foreground truncate">{team.contact_email}</span>
-                                        </div>
-                                    )}
-                                    {team.contact_phone && (
-                                        <div className="flex items-center gap-2 text-xs">
-                                            <div className="h-4 w-4 rounded bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-purple-600" />
-                                            </div>
-                                            <span className="font-medium text-muted-foreground">{team.contact_phone}</span>
-                                        </div>
-                                    )}
-                                    {team.members && team.members.length > 0 && (
-                                        <div className="pt-2 mt-2 border-t space-y-1.5">
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Team Members</p>
-                                            {team.members.slice(0, 2).map((member: any, idx: number) => (
-                                                <div key={idx} className="flex items-center gap-2">
-                                                    <div className="h-5 w-5 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
-                                                        <span className="text-[9px] font-bold text-primary">{member.users?.full_name?.charAt(0) || 'M'}</span>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-[11px] font-semibold truncate">{member.users?.full_name || 'Member'}</p>
-                                                        {member.users?.enrollment_number && (
-                                                            <p className="text-[9px] text-muted-foreground truncate">{member.users.enrollment_number}</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {team.members.length > 2 && (
-                                                <p className="text-[10px] text-muted-foreground pl-7">+{team.members.length - 2} more members</p>
-                                            )}
-                                        </div>
-                                    )}
-                                    <div className="pt-2">
-                                        {team.my_score !== undefined && team.my_score > 0 ? (
-                                            <Button 
-                                                variant="ghost" 
-                                                size="sm" 
-                                                className="w-full text-[10px] h-7"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setSelectedTeam(team)
-                                                    setScores({})
-                                                }}
-                                            >
-                                                Edit Score
-                                            </Button>
-                                        ) : (
-                                            <Button 
-                                                variant={selectedTeam?.id === team.id ? "default" : "outline"} 
-                                                size="sm" 
-                                                className="w-full font-semibold text-xs h-8"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    setSelectedTeam(team)
-                                                    setScores({})
-                                                }}
-                                            >
-                                                {selectedTeam?.id === team.id ? (
-                                                    <><CheckCircle2 className="h-3 w-3 mr-1.5" />Selected</>
-                                                ) : (
-                                                    <><Award className="h-3 w-3 mr-1.5" />Evaluate</>
-                                                )}
-                                            </Button>
-                                        )}
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                {(team.team_size || team.member_count) && (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Users className="h-3 w-3" />
+                                        <span>{team.team_size || team.member_count} Members</span>
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                )}
+                                <Button 
+                                    variant={team.my_score > 0 ? "outline" : "default"} 
+                                    size="sm" 
+                                    className="w-full"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setSelectedTeam(team)
+                                        setScores({})
+                                    }}
+                                >
+                                    {team.my_score > 0 ? (
+                                        <>Edit Score</>
+                                    ) : (
+                                        <><Award className="h-3 w-3 mr-1.5" />Evaluate</>
+                                    )}
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
             )}
 
             {selectedEvent && filteredTeams.length === 0 && !loadingTeams && (
                 <Card>
-                    <CardContent className="p-8 text-center text-muted-foreground">
-                        <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>No teams found for this event</p>
+                    <CardContent className="p-12 text-center">
+                        <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+                        <p className="text-muted-foreground">No teams assigned</p>
                     </CardContent>
                 </Card>
             )}
@@ -533,21 +459,18 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                 <Dialog open={!!selectedTeam} onOpenChange={(open) => !open && setSelectedTeam(null)}>
                     <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <Award className="h-5 w-5 text-primary" />
-                                Evaluating: {selectedTeam.team_name}
-                            </DialogTitle>
+                            <DialogTitle className="text-xl font-bold">Evaluate: {selectedTeam.team_name}</DialogTitle>
                             <DialogDescription>
-                                Enter scores for each criterion below
+                                Enter scores for each criterion
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-6">
-                            <div className="space-y-4">
+                        <div className="space-y-4">
+                            <div className="space-y-3">
                                 {criteria.map((criterion) => (
                                     <div key={criterion.id} className="space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <Label className="text-sm font-medium">{criterion.name}</Label>
-                                            <span className="text-sm font-bold text-primary">
+                                            <Label className="text-sm font-semibold">{criterion.name}</Label>
+                                            <span className="text-sm font-bold">
                                                 {scores[criterion.id] || 0} / {criterion.maxPoints}
                                             </span>
                                         </div>
@@ -558,21 +481,21 @@ export function GroupEvaluation({ initialGroups = [] }: { initialGroups?: any[] 
                                             value={scores[criterion.id] ?? ''}
                                             onChange={(e) => updateScore(criterion.id, e.target.value)}
                                             placeholder="Enter score"
-                                            className="w-full"
+                                            className="h-11"
                                         />
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="flex flex-col gap-3 p-4 bg-primary/5 rounded-lg border border-primary/10">
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Total Score</p>
-                                    <div className="text-3xl font-black text-primary tabular-nums">
+                            <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-lg border-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-semibold text-muted-foreground">Total Score</span>
+                                    <span className="text-2xl font-bold">
                                         {calculateTotal()} / {criteria.reduce((sum, c) => sum + c.maxPoints, 0)}
-                                    </div>
+                                    </span>
                                 </div>
-                                <Button onClick={submitScores} disabled={loading} className="w-full gap-2">
-                                    <CheckCircle2 className="h-4 w-4" />
+                                <Button onClick={submitScores} disabled={loading} className="w-full h-11">
+                                    <CheckCircle2 className="h-4 w-4 mr-2" />
                                     {loading ? 'Submitting...' : 'Submit Evaluation'}
                                 </Button>
                             </div>

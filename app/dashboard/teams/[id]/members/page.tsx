@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Users, Mail, ArrowLeft, MapPin, School, Trophy, Calendar, Edit, Hash, FileText, UserPlus, X, Search } from 'lucide-react'
+import { Users, Mail, ArrowLeft, MapPin, School, Trophy, Edit, Hash, FileText, UserPlus, X, Search, Award, Target } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState, use, useCallback, useEffect } from 'react'
 import useSWR from 'swr'
@@ -144,9 +144,7 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
   const events = Array.isArray(eventsData) ? eventsData : []
   const users = Array.isArray(usersData) ? usersData : []
   const event = events.find((e: any) => e.id === team.event_id)
-  const groupNumber = team.team_name?.replace('Team ', '') || 'N/A'
   const memberCount = team.team_members?.length || 0
-  const createdDate = team.created_at ? new Date(team.created_at).toLocaleDateString() : 'Unknown'
   
   const existingMemberIds = team.team_members?.map((m: any) => m.user_id) || []
   const availableUsers = users.filter((u: any) => 
@@ -159,173 +157,202 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
   const isAdmin = userRole === 'admin'
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-xl md:text-3xl font-bold truncate">{team.team_name || `Team ${groupNumber}`}</h1>
-          <p className="text-xs md:text-sm text-muted-foreground mt-1 truncate">
-            {team.school_name || 'LJ University'} • {event?.name || 'No Event'} • Group {groupNumber}
-          </p>
+    <div className="space-y-6 pb-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold">{team.team_name}</h1>
+            {team.domain && (
+              <Badge variant="outline" className="hidden md:inline-flex">{team.domain}</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span>{event?.name || 'No Event'}</span>
+            {team.stall_no && (
+              <>
+                <span>•</span>
+                <span>Stall {team.stall_no}</span>
+              </>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => router.back()} size="sm">
-            <ArrowLeft className="h-4 w-4 md:mr-2" />
-            <span className="hidden md:inline">Back</span>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
           {isAdmin && (
             <Button onClick={handleEdit} size="sm">
-              <Edit className="h-4 w-4 md:mr-2" />
-              <span className="hidden md:inline">Edit Team</span>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
             </Button>
           )}
         </div>
       </div>
 
-      {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-xl md:text-3xl font-bold">{memberCount}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Members</p>
+        <Card className="border-2 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4 md:p-6 text-center">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <Users className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+            </div>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">{memberCount}</p>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">Members</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-xl md:text-3xl font-bold">{team.total_score || 0}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Score</p>
+        <Card className="border-2 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4 md:p-6 text-center">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <Trophy className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+            </div>
+            <p className="text-2xl md:text-3xl font-bold text-gray-900">{team.total_score || 0}</p>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">Score</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <MapPin className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-lg md:text-2xl font-bold truncate">{team.stall_no || 'N/A'}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Stall</p>
+        <Card className="border-2 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4 md:p-6 text-center">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <MapPin className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+            </div>
+            <p className="text-xl md:text-2xl font-bold text-gray-900">{team.stall_no || 'N/A'}</p>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">Stall</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-3 md:p-6 text-center">
-            <FileText className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-gray-600" />
-            <p className="text-base md:text-xl font-bold truncate">{team.domain || 'N/A'}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Domain</p>
+        <Card className="border-2 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4 md:p-6 text-center">
+            <div className="w-12 h-12 md:w-14 md:h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+              <Award className="h-6 w-6 md:h-7 md:w-7 text-gray-700" />
+            </div>
+            <p className="text-xl md:text-2xl font-bold text-gray-900">{memberCount > 0 ? Math.round((team.total_score || 0) / memberCount) : 0}</p>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">Avg/Member</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Team Members */}
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
-        {/* Team Details */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="p-3 md:p-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base md:text-lg">Team Details</CardTitle>
-              {isAdmin && (
-                <Button onClick={handleEdit} variant="ghost" size="sm">
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="border-2 shadow-sm lg:col-span-1">
+          <CardHeader className="p-4 md:p-5 border-b bg-gradient-to-r from-gray-50 to-white">
+            <CardTitle className="text-base md:text-lg flex items-center gap-2">
+              <Target className="h-5 w-5 text-gray-700" />
+              Team Details
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0 space-y-3">
+          <CardContent className="p-4 md:p-5 space-y-3">
             {event && (
-              <div>
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">Event</p>
-                <p className="text-sm md:text-base font-medium truncate">{event.name}</p>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border-2 border-blue-200">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Event</p>
+                <p className="text-sm md:text-base font-bold text-blue-900">{event.name}</p>
               </div>
             )}
-            <div>
-              <p className="text-xs md:text-sm font-medium text-muted-foreground">Team Name</p>
-              <p className="text-base md:text-lg font-semibold truncate">{team.team_name}</p>
-            </div>
-            <div>
-              <p className="text-xs md:text-sm font-medium text-muted-foreground">School</p>
-              <p className="text-sm md:text-base font-medium truncate">{team.school_name || 'LJ University'}</p>
-            </div>
+            {team.school_name && (
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border-2 hover:border-gray-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-white border flex items-center justify-center flex-shrink-0">
+                  <School className="h-4 w-4 text-gray-700" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-gray-500 mb-0.5">School</p>
+                  <p className="text-sm font-semibold text-gray-900">{team.school_name}</p>
+                </div>
+              </div>
+            )}
             {team.domain && (
-              <div>
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">Domain</p>
-                <Badge variant="secondary" className="text-xs">{team.domain}</Badge>
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border-2 hover:border-gray-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-white border flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-4 w-4 text-gray-700" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-gray-500 mb-0.5">Domain</p>
+                  <p className="text-sm font-semibold text-gray-900">{team.domain}</p>
+                </div>
               </div>
             )}
             {team.stall_no && (
-              <div>
-                <p className="text-xs md:text-sm font-medium text-muted-foreground">Stall Location</p>
-                <p className="text-sm md:text-base font-medium">{team.stall_no}</p>
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border-2 hover:border-gray-300 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-white border flex items-center justify-center flex-shrink-0">
+                  <MapPin className="h-4 w-4 text-gray-700" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-medium text-gray-500 mb-0.5">Stall Location</p>
+                  <p className="text-sm font-semibold text-gray-900">{team.stall_no}</p>
+                </div>
               </div>
             )}
-            <div>
-              <p className="text-xs md:text-sm font-medium text-muted-foreground">Team ID</p>
-              <p className="text-[10px] md:text-xs font-mono bg-muted p-2 rounded break-all">{team.id}</p>
-            </div>
           </CardContent>
         </Card>
 
-        {/* Team Members */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="p-3 md:p-4">
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle className="text-base md:text-lg">Team Members ({memberCount})</CardTitle>
+        <Card className="border-2 shadow-sm lg:col-span-2">
+          <CardHeader className="p-4 md:p-5 border-b bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                <Users className="h-5 w-5 text-gray-700" />
+                Team Members
+                <Badge variant="secondary" className="ml-1">{memberCount}</Badge>
+              </CardTitle>
               {isAdmin && (
                 <Button onClick={() => setShowAddMember(true)} size="sm">
-                  <UserPlus className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Add Member</span>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add
                 </Button>
               )}
             </div>
           </CardHeader>
-          <CardContent className="p-3 md:p-4 pt-0">
+          <CardContent className="p-4 md:p-5">
             {memberCount > 0 ? (
-              <div className="space-y-2 md:space-y-3">
+              <div className="space-y-3">
                 {team.team_members.map((member: any, index: number) => (
-                  <div key={member.id} className="flex items-center gap-2 md:gap-4 p-3 md:p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-full flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0">
-                      {member.users?.full_name?.charAt(0) || (index + 1)}
+                  <div 
+                    key={member.id} 
+                    className="group flex items-center gap-4 p-4 border-2 rounded-xl hover:border-gray-400 hover:shadow-md transition-all bg-gradient-to-r from-white to-gray-50"
+                  >
+                    <div className="relative flex-shrink-0">
+                      <div className="w-14 h-14 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center font-bold text-lg text-gray-700 shadow-sm">
+                        {member.users?.full_name?.charAt(0) || 'M'}
+                      </div>
+                      <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-md border-2 border-white">
+                        {index + 1}
+                      </div>
                     </div>
+                    
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm md:text-base truncate">{member.users?.full_name || 'Unknown Member'}</p>
-                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 text-xs md:text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1 min-w-0">
-                          <Mail className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
+                      <p className="font-bold text-gray-900 truncate mb-1">{member.users?.full_name || 'Unknown'}</p>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Mail className="h-3.5 w-3.5" />
                           <span className="truncate">{member.users?.email || 'No email'}</span>
                         </div>
                         {member.users?.enrollment_number && (
-                          <div className="flex items-center gap-1">
-                            <Hash className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
-                            <span className="truncate">{member.users.enrollment_number}</span>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Hash className="h-3.5 w-3.5" />
+                            <span className="font-mono text-xs">{member.users.enrollment_number}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col md:flex-row items-end md:items-center gap-1 md:gap-2 flex-shrink-0">
-                      <Badge variant={member.role === 'leader' ? 'default' : 'secondary'} className="text-xs">
-                        {member.role || 'Member'}
-                      </Badge>
-                      {isAdmin && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleRemoveMember(member.id)}
-                          disabled={loading}
-                          className="h-8 w-8 p-0"
-                        >
-                          <X className="h-4 w-4 text-red-600" />
-                        </Button>
-                      )}
-                    </div>
+                    
+                    {isAdmin && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleRemoveMember(member.id)}
+                        disabled={loading}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-9 w-9 p-0 hover:bg-red-50 hover:text-red-600 flex-shrink-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 md:py-12">
-                <Users className="h-12 w-12 md:h-16 md:w-16 mx-auto text-muted-foreground mb-3 md:mb-4" />
-                <p className="text-base md:text-lg font-medium text-muted-foreground mb-2">No members found</p>
-                <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4 px-4">This team doesn't have any members assigned yet.</p>
+              <div className="text-center py-16">
+                <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  <Users className="h-10 w-10 text-gray-400" />
+                </div>
+                <p className="text-xl font-bold text-gray-900 mb-2">No Members Yet</p>
+                <p className="text-sm text-gray-500 mb-6">Start building your team by adding members</p>
                 {isAdmin && (
                   <Button onClick={() => setShowAddMember(true)} size="sm">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Add First Member
+                    Add Member
                   </Button>
                 )}
               </div>
@@ -334,7 +361,6 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
         </Card>
       </div>
 
-      {/* Edit Dialog */}
       <Dialog open={showEdit} onOpenChange={setShowEdit}>
         <DialogContent>
           <DialogHeader>
@@ -377,8 +403,8 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" disabled={loading} className="flex-1 bg-gray-900 hover:bg-gray-800">
-                {loading ? 'Saving...' : 'Save Changes'}
+              <Button type="submit" disabled={loading}>
+                {loading ? 'Saving...' : 'Save'}
               </Button>
               <Button type="button" variant="outline" onClick={() => setShowEdit(false)}>
                 Cancel
@@ -388,35 +414,34 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
         </DialogContent>
       </Dialog>
 
-      {/* Add Member Dialog */}
       <Dialog open={showAddMember} onOpenChange={setShowAddMember}>
-        <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add Team Member</DialogTitle>
+            <DialogTitle>Add Member</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search students by name or email..."
+                placeholder="Search students..."
                 value={searchUser}
                 onChange={(e) => setSearchUser(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <div className="max-h-[50vh] md:max-h-96 overflow-y-auto space-y-2">
+            <div className="max-h-96 overflow-y-auto space-y-2">
               {availableUsers.length > 0 ? (
                 availableUsers.map((user: any) => (
-                  <div key={user.id} className="flex items-center justify-between gap-2 p-2 md:p-3 border rounded-lg hover:bg-muted/50">
-                    <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm md:text-base flex-shrink-0">
+                  <div key={user.id} className="flex items-center justify-between gap-3 p-3 border rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center font-bold flex-shrink-0">
                         {user.full_name?.charAt(0) || 'U'}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm md:text-base font-semibold truncate">{user.full_name}</p>
-                        <p className="text-xs md:text-sm text-muted-foreground truncate">{user.email}</p>
+                        <p className="font-semibold truncate">{user.full_name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                         {user.enrollment_number && (
-                          <p className="text-[10px] md:text-xs text-muted-foreground">{user.enrollment_number}</p>
+                          <p className="text-xs text-muted-foreground">{user.enrollment_number}</p>
                         )}
                       </div>
                     </div>
@@ -424,15 +449,14 @@ export default function TeamMembersPage({ params }: { params: Promise<{ id: stri
                       size="sm" 
                       onClick={() => handleAddMember(user.id)}
                       disabled={loading}
-                      className="flex-shrink-0"
                     >
                       Add
                     </Button>
                   </div>
                 ))
               ) : (
-                <div className="text-center py-6 md:py-8 text-xs md:text-sm text-muted-foreground px-4">
-                  {searchUser ? 'No students found matching your search' : 'No available students to add'}
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  {searchUser ? 'No students found' : 'No available students'}
                 </div>
               )}
             </div>

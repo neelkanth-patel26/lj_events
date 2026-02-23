@@ -86,36 +86,65 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create teams
+    // Create or update teams
     for (const [groupNum, teamData] of teamMap) {
-      const { data: team } = await supabase.from('teams').insert({
-        event_id: eventId,
-        team_name: `Team ${groupNum}`,
-        school_name: teamData.school,
-        domain: teamData.domain,
-        stall_no: teamData.stall,
-        team_size: teamData.members.length
-      }).select().single()
+      const { data: existingTeam } = await supabase
+        .from('teams')
+        .select('id, team_size')
+        .eq('event_id', eventId)
+        .eq('team_name', `Team ${groupNum}`)
+        .maybeSingle()
 
-      if (team) {
-        results.teams++
+      let teamId = existingTeam?.id
+      let newMembersAdded = 0
+
+      if (existingTeam) {
+        teamId = existingTeam.id
+      } else {
+        const { data: team } = await supabase.from('teams').insert({
+          event_id: eventId,
+          team_name: `Team ${groupNum}`,
+          school_name: teamData.school,
+          domain: teamData.domain,
+          stall_no: teamData.stall,
+          team_size: 0
+        }).select('id').single()
+
+        if (team) {
+          results.teams++
+          teamId = team.id
+        }
+      }
+
+      if (teamId) {
         for (const memberId of teamData.members) {
-          // Check if already enrolled
           const { data: existing } = await supabase
             .from('team_members')
             .select('id')
-            .eq('team_id', team.id)
+            .eq('team_id', teamId)
             .eq('user_id', memberId)
-            .single()
+            .maybeSingle()
 
           if (!existing) {
             await supabase.from('team_members').insert({
-              team_id: team.id,
+              team_id: teamId,
               user_id: memberId,
               role: 'member'
             })
+            newMembersAdded++
           }
         }
+
+        // Update team size based on actual member count
+        const { count } = await supabase
+          .from('team_members')
+          .select('*', { count: 'exact', head: true })
+          .eq('team_id', teamId)
+
+        await supabase
+          .from('teams')
+          .update({ team_size: count || 0 })
+          .eq('id', teamId)
       }
     }
 

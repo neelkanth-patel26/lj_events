@@ -5,7 +5,6 @@ export async function POST(request: NextRequest) {
   const { students, eventId } = await request.json()
   const supabase = await createClient()
 
-  // Group students by group number
   const groupedStudents = students.reduce((acc: any, student: any) => {
     const groupNum = student.groupNumber || 'ungrouped'
     if (!acc[groupNum]) acc[groupNum] = []
@@ -15,9 +14,8 @@ export async function POST(request: NextRequest) {
 
   const createdUsers: any[] = []
 
-  // Create users first
   for (const student of students) {
-    const { data: user } = await supabase
+    const { data: user, error } = await supabase
       .from('users')
       .insert({
         email: student.email,
@@ -25,7 +23,7 @@ export async function POST(request: NextRequest) {
         password_hash: Buffer.from(student.password).toString('base64'),
         role: 'student',
       })
-      .select()
+      .select('id')
       .single()
 
     if (user) {
@@ -33,35 +31,57 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Create teams and assign members
   for (const [groupNum, members] of Object.entries(groupedStudents)) {
-    if (groupNum === 'ungrouped') continue
+    if (groupNum === 'ungrouped' || !groupNum) continue
 
     const schoolName = (members as any[])[0]?.schoolName || 'Unknown School'
+    const newMembersForGroup = createdUsers.filter(u => u.groupNumber === groupNum)
     
-    // Create team
-    const { data: team } = await supabase
-      .from('teams')
-      .insert({
-        event_id: eventId,
-        team_name: `Team ${groupNum}`,
-        school_name: schoolName,
-        team_size: (members as any[]).length,
-      })
-      .select()
-      .single()
+    if (newMembersForGroup.length === 0) continue
 
-    if (team) {
-      // Add team members
-      const teamMembers = createdUsers
-        .filter(u => u.groupNumber === groupNum)
-        .map((u, index) => ({
-          team_id: team.id,
-          user_id: u.id,
-          role: index === 0 ? 'lead' : 'member',
-        }))
+    const { data: existingTeam } = await supabase
+      .from('teams')
+      .select('id, team_size')
+      .eq('event_id', eventId)
+      .eq('team_name', `Team ${groupNum}`)
+      .maybeSingle()
+
+    let teamId = existingTeam?.id
+
+    if (!existingTeam) {
+      const { data: team } = await supabase
+        .from('teams')
+        .insert({
+          event_id: eventId,
+          team_name: `Team ${groupNum}`,
+          school_name: schoolName,
+          team_size: 0,
+        })
+        .select('id')
+        .single()
+      
+      if (team) teamId = team.id
+    }
+
+    if (teamId) {
+      const teamMembers = newMembersForGroup.map(u => ({
+        team_id: teamId,
+        user_id: u.id,
+        role: 'member',
+      }))
 
       await supabase.from('team_members').insert(teamMembers)
+
+      // Update team size based on actual member count
+      const { count } = await supabase
+        .from('team_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('team_id', teamId)
+
+      await supabase
+        .from('teams')
+        .update({ team_size: count || 0 })
+        .eq('id', teamId)
     }
   }
 

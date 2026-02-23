@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MoreHorizontal, LayoutDashboard, Calendar, Users, Gavel, Trophy, User, Settings2, Shield } from 'lucide-react'
+import { MoreHorizontal, LayoutDashboard, Calendar, Users, Gavel, Trophy, User, Settings2, Shield, UserCog } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { NavLink } from '@/components/nav-link'
 
@@ -20,7 +20,8 @@ const iconMap: Record<string, any> = {
   Trophy,
   User,
   Settings2,
-  Shield
+  Shield,
+  UserCog
 }
 
 export function MobileMoreMenu({ items }: { items: NavItem[] }) {

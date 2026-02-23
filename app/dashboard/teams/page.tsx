@@ -1,27 +1,22 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { Users, Search, Grid, List, MapPin, Trophy, Calendar, Plus, ChevronDown, ChevronUp, Mail, Phone } from 'lucide-react'
+import { Users, Search, MapPin, Trophy, Plus, ChevronDown } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useRealtime } from '@/components/realtime-provider'
 
 export default function TeamsPage() {
   const { teams, events } = useRealtime()
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterDomain, setFilterDomain] = useState('all')
   const [filterEvent, setFilterEvent] = useState('all')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [userRole, setUserRole] = useState<string | null>(null)
-  const [showAddTeam, setShowAddTeam] = useState(false)
-  const [selectedEventId, setSelectedEventId] = useState('')
+  const [teamMembers, setTeamMembers] = useState<Record<string, any[]>>({})
   const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set())
-  const [unlockedEvents, setUnlockedEvents] = useState<Set<string>>(new Set())
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -30,7 +25,6 @@ export default function TeamsPage() {
         const data = await res.json()
         setUserRole(data?.role || 'admin')
       } catch (error) {
-        console.error('Error fetching role:', error)
         setUserRole('admin')
       }
     }
@@ -38,31 +32,35 @@ export default function TeamsPage() {
   }, [])
 
   useEffect(() => {
-    if (events && events.length > 0) {
-      const unlocked = new Set(
-        events
-          .filter((e: any) => e.leaderboard_visible === true)
-          .map((e: any) => e.id)
-      )
-      setUnlockedEvents(unlocked)
+    const fetchMembers = async () => {
+      if (!teams || teams.length === 0) return
+      setLoading(true)
+      const membersMap: Record<string, any[]> = {}
+      for (const team of teams) {
+        try {
+          const res = await fetch(`/api/teams/${team.id}/members`)
+          const data = await res.json()
+          membersMap[team.id] = data || []
+        } catch {
+          membersMap[team.id] = []
+        }
+      }
+      setTeamMembers(membersMap)
+      setLoading(false)
     }
-  }, [events])
+    fetchMembers()
+  }, [teams])
 
   const filteredTeams = Array.isArray(teams) ? teams.filter((team: any) => {
-    const matchesSearch = team.team_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         team.school_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesDomain = filterDomain === 'all' || team.domain === filterDomain
+    const matchesSearch = team.team_name?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesEvent = filterEvent === 'all' || team.event_id === filterEvent
-    return matchesSearch && matchesDomain && matchesEvent
+    return matchesSearch && matchesEvent
   }).sort((a: any, b: any) => {
-    const eventA = events?.find((e: any) => e.id === a.event_id)?.name || ''
-    const eventB = events?.find((e: any) => e.id === b.event_id)?.name || ''
-    if (eventA !== eventB) return eventA.localeCompare(eventB)
-    return (a.team_name || '').localeCompare(b.team_name || '')
+    const numA = parseInt(a.team_name.match(/\d+/)?.[0] || '0')
+    const numB = parseInt(b.team_name.match(/\d+/)?.[0] || '0')
+    return numA - numB
   }) : []
 
-  const domains = Array.isArray(teams) ? [...new Set(teams.map((team: any) => team.domain).filter(Boolean))] : []
-  
   const teamsByEvent = filteredTeams.reduce((acc: any, team: any) => {
     const eventId = team.event_id || 'no-event'
     if (!acc[eventId]) acc[eventId] = []
@@ -70,322 +68,214 @@ export default function TeamsPage() {
     return acc
   }, {})
 
-  // Initialize all events as collapsed when filter is 'all'
-  useEffect(() => {
-    if (filterEvent === 'all' && Object.keys(teamsByEvent).length > 0) {
-      setCollapsedEvents(new Set(Object.keys(teamsByEvent)))
-    } else {
-      setCollapsedEvents(new Set())
-    }
-  }, [filterEvent])
-
-  const toggleEventCollapse = (eventId: string) => {
-    setCollapsedEvents(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(eventId)) {
-        newSet.delete(eventId)
-      } else {
-        newSet.add(eventId)
-      }
-      return newSet
-    })
-  }
+  const renderTeamCard = (team: any) => (
+    <Card 
+      key={team.id} 
+      className="border-2 hover:border-gray-400 hover:shadow-lg transition-all cursor-pointer"
+      onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}
+    >
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base mb-1 line-clamp-2">{team.team_name}</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {team.stall_no && (
+                  <Badge variant="outline" className="text-xs">
+                    Stall {team.stall_no}
+                  </Badge>
+                )}
+                {team.domain && (
+                  <Badge variant="secondary" className="text-xs">
+                    {team.domain}
+                  </Badge>
+                )}
+              </div>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <div className="text-xl font-bold">{team.total_score || 0}</div>
+              <div className="text-xs text-muted-foreground">Score</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Users className="h-3 w-3" />
+            <span>{teamMembers[team.id]?.length || 0} Members</span>
+          </div>
+          {teamMembers[team.id] && teamMembers[team.id].length > 0 && (
+            <div className="pt-2 border-t space-y-1.5">
+              {teamMembers[team.id].map((member: any, idx: number) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-semibold text-gray-700">{member.users?.full_name?.charAt(0) || 'M'}</span>
+                  </div>
+                  <p className="text-xs font-medium truncate">{member.users?.full_name || 'Member'}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div className="space-y-6 pb-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Teams Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">View and manage team information</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Teams</h1>
+          <p className="text-sm text-muted-foreground">View and manage teams</p>
         </div>
         {userRole === 'admin' && (
-          <Button onClick={() => setShowAddTeam(true)} size="sm">
+          <Button size="sm">
             <Plus className="h-4 w-4 mr-2" />
-            Add Team
+            Add
           </Button>
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <Card>
-          <CardContent className="p-3 md:p-4 text-center">
-            <Users className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{Array.isArray(teams) ? teams.length : 0}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Total Teams</p>
+      <div className="grid grid-cols-3 gap-3 md:gap-4">
+        <Card className="border shadow-sm">
+          <CardContent className="p-4 text-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+              <Users className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
+            </div>
+            <p className="text-xl md:text-2xl font-bold">{filteredTeams.length}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Teams</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-3 md:p-4 text-center">
-            <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id)) ? (Array.isArray(teams) && teams.length ? Math.max(...teams.map((team: any) => team.total_score || 0)) : 0) : '***'}</p>
+        <Card className="border shadow-sm">
+          <CardContent className="p-4 text-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+              <Trophy className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
+            </div>
+            <p className="text-xl md:text-2xl font-bold">
+              {filteredTeams.length ? Math.max(...filteredTeams.map((t: any) => t.total_score || 0)) : 0}
+            </p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-3 md:p-4 text-center">
-            <MapPin className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{domains.length}</p>
-            <p className="text-xs md:text-sm text-muted-foreground">Domains</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-3 md:p-4 text-center">
-            <Calendar className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id)) ? (Array.isArray(teams) && teams.length ? (teams.reduce((sum: number, team: any) => sum + (team.total_score || 0), 0) / teams.length).toFixed(0) : 0) : '***'}</p>
+        <Card className="border shadow-sm">
+          <CardContent className="p-4 text-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 rounded-lg bg-gray-100 flex items-center justify-center">
+              <MapPin className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
+            </div>
+            <p className="text-xl md:text-2xl font-bold">
+              {filteredTeams.length ? Math.round(filteredTeams.reduce((sum: number, t: any) => sum + (t.total_score || 0), 0) / filteredTeams.length) : 0}
+            </p>
             <p className="text-xs md:text-sm text-muted-foreground">Avg Score</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardContent className="p-3 md:p-4">
-          <div className="flex flex-col md:flex-row gap-2 md:gap-4 md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Card className="border shadow-sm">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search teams..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
+                className="pl-9 h-11"
               />
             </div>
-            <div className="flex gap-2">
-              <Select value={filterEvent} onValueChange={setFilterEvent}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Filter by event" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Events</SelectItem>
-                  {Array.isArray(events) && events.map((event: any) => (
-                    <SelectItem key={event.id} value={event.id}>
-                      {event.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterDomain} onValueChange={setFilterDomain}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="Filter by domain" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Domains</SelectItem>
-                  {domains.map((domain: string) => (
-                    <SelectItem key={domain} value={domain}>
-                      {domain}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="hidden md:flex border rounded-md">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-l-none"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Select value={filterEvent} onValueChange={setFilterEvent}>
+              <SelectTrigger className="h-11">
+                <SelectValue placeholder="Filter by event" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Events</SelectItem>
+                {Array.isArray(events) && events.map((event: any) => (
+                  <SelectItem key={event.id} value={event.id}>
+                    {event.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {filteredTeams && filteredTeams.length > 0 ? (
-        <div className="space-y-6">
-          {Object.entries(teamsByEvent).map(([eventId, eventTeams]: [string, any]) => {
-            const event = events?.find((e: any) => e.id === eventId)
-            const eventName = event?.name || 'No Event Assigned'
-            
-            return (
-              <div key={eventId} className="space-y-4">
-                <div 
-                  className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                  onClick={() => filterEvent === 'all' && toggleEventCollapse(eventId)}
-                >
-                  {filterEvent === 'all' && (
-                    collapsedEvents.has(eventId) ? 
-                      <ChevronDown className="h-5 w-5 text-gray-600" /> : 
-                      <ChevronUp className="h-5 w-5 text-gray-600" />
-                  )}
-                  <Calendar className="h-5 w-5 text-gray-600" />
-                  <h2 className="text-xl font-semibold text-gray-900">{eventName}</h2>
-                  <Badge variant="outline" className="text-gray-600">
-                    {eventTeams.length} {eventTeams.length === 1 ? 'team' : 'teams'}
-                  </Badge>
-                </div>
-                
-                {(!collapsedEvents.has(eventId) || filterEvent !== 'all') && (
-                  viewMode === 'grid' ? (
-                    <div className="grid gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {eventTeams.map((team: any) => (
-              <Card key={team.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}>
-                <CardHeader className="p-3 md:p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-base md:text-lg truncate">{team.team_name}</CardTitle>
-                      <CardDescription className="text-xs md:text-sm truncate">{team.school_name}</CardDescription>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="border-2">
+              <CardContent className="p-4">
+                <div className="space-y-3 animate-pulse">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                      <div className="flex gap-2">
+                        <div className="h-5 bg-gray-200 rounded w-16"></div>
+                        <div className="h-5 bg-gray-200 rounded w-20"></div>
+                      </div>
                     </div>
-                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">{userRole === 'admin' || unlockedEvents.has(team.event_id) ? (team.total_score || 0) : '***'}</Badge>
+                    <div className="space-y-1">
+                      <div className="h-6 bg-gray-200 rounded w-12"></div>
+                      <div className="h-3 bg-gray-200 rounded w-12"></div>
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-3 md:p-4 pt-0">
-                  <div className="space-y-2">
-                    {team.domain && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Domain:</span>
-                        <Badge variant="secondary" className="text-xs">{team.domain}</Badge>
-                      </div>
-                    )}
-                    {team.stall_no && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                        <span className="text-xs md:text-sm">{team.stall_no}</span>
-                      </div>
-                    )}
+                  <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  <div className="pt-2 border-t space-y-2">
                     <div className="flex items-center gap-2">
-                      <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                      <span className="text-xs md:text-sm">{team.team_size || 0} members</span>
+                      <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+                      <div className="h-3 bg-gray-200 rounded w-32"></div>
                     </div>
-                    {team.contact_email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                        <span className="text-xs md:text-sm truncate" title={team.contact_email}>{team.contact_email}</span>
-                      </div>
-                    )}
-                    {team.contact_phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                        <span className="text-xs md:text-sm">{team.contact_phone}</span>
-                      </div>
-                    )}
-                    <div className="pt-2 border-t mt-2">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>ID: {team.id.slice(0, 8)}</span>
-                        <span>{new Date(team.created_at).toLocaleDateString()}</span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+                      <div className="h-3 bg-gray-200 rounded w-28"></div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-            {eventTeams.map((team: any) => (
-              <Card key={team.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => window.location.href = `/dashboard/teams/${team.id}/members`}>
-                <CardContent className="p-3 md:p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
-                      <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm md:text-base flex-shrink-0">
-                        {team.team_name?.replace('Team ', '') || '?'}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-semibold text-sm md:text-base truncate">{team.team_name}</h3>
-                        <p className="text-xs md:text-sm text-muted-foreground truncate">{team.school_name}</p>
-                        <div className="flex items-center gap-2 md:gap-4 mt-1 flex-wrap">
-                          {team.domain && <Badge variant="secondary" className="text-xs">{team.domain}</Badge>}
-                          {team.stall_no && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <MapPin className="h-3 w-3" />
-                              {team.stall_no}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            {team.team_size || 0}
-                          </span>
-                          {team.contact_email && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Mail className="h-3 w-3" />
-                              {team.contact_email}
-                            </span>
-                          )}
-                          {team.contact_phone && (
-                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Phone className="h-3 w-3" />
-                              {team.contact_phone}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-lg md:text-xl font-bold">{userRole === 'admin' || unlockedEvents.has(team.event_id) ? (team.total_score || 0) : '***'}</div>
-                      <div className="text-xs text-muted-foreground">Score</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-                      ))}
-                    </div>
-                  )
-                )}
-              </div>
-            )
-          })}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+      ) : filteredTeams.length > 0 ? (
+        filterEvent === 'all' ? (
+          <div className="space-y-6">
+            {Object.entries(teamsByEvent).map(([eventId, eventTeams]: [string, any]) => {
+              const event = events?.find((e: any) => e.id === eventId)
+              const isCollapsed = collapsedEvents.has(eventId)
+              return (
+                <div key={eventId} className="space-y-4">
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
+                    onClick={() => {
+                      setCollapsedEvents(prev => {
+                        const next = new Set(prev)
+                        if (next.has(eventId)) next.delete(eventId)
+                        else next.add(eventId)
+                        return next
+                      })
+                    }}
+                  >
+                    <ChevronDown className={`h-5 w-5 transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                    <h2 className="text-lg font-semibold">{event?.name || 'No Event'}</h2>
+                    <Badge variant="outline">{eventTeams.length}</Badge>
+                  </div>
+                  {!isCollapsed && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {eventTeams.map(renderTeamCard)}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredTeams.map(renderTeamCard)}
+          </div>
+        )
       ) : (
         <Card>
-          <CardContent className="p-4 md:pt-6">
-            <div className="text-center py-6 md:py-8">
-              <Users className="h-10 w-10 md:h-12 md:w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-sm md:text-base text-muted-foreground">
-                {searchTerm || filterDomain !== 'all' ? 'No teams match your filters' : 'No teams found'}
-              </p>
-            </div>
+          <CardContent className="p-12 text-center">
+            <Users className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
+            <p className="text-muted-foreground">No teams found</p>
           </CardContent>
         </Card>
       )}
-
-      <Dialog open={showAddTeam} onOpenChange={setShowAddTeam}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Event to Add Team</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Event</Label>
-              <Select value={selectedEventId} onValueChange={setSelectedEventId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose an event" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.isArray(events) && events.map((event: any) => (
-                    <SelectItem key={event.id} value={event.id}>
-                      {event.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => {
-                  if (selectedEventId) {
-                    window.location.href = `/dashboard/events/${selectedEventId}/teams`
-                  }
-                }} 
-                disabled={!selectedEventId}
-                className="flex-1"
-              >
-                Continue
-              </Button>
-              <Button variant="outline" onClick={() => setShowAddTeam(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

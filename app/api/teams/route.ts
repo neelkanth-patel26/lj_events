@@ -1,14 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const eventId = searchParams.get('event')
     
-    const { data: teams, error } = await supabase
-      .from('teams')
-      .select('*')
-      .order('created_at', { ascending: false })
+    let query = supabase.from('teams').select('*').order('created_at', { ascending: false })
+    
+    if (eventId) {
+      query = query.eq('event_id', eventId)
+    }
+
+    const { data: teams, error } = await query
 
     if (error) throw error
 

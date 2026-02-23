@@ -132,6 +132,15 @@ export async function getAssignedGroups() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
 
+    // Get user from users table to get the actual user ID
+    const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+    if (!userData) return []
+
     const { data, error } = await supabase
         .from('team_judges')
         .select(`
@@ -149,9 +158,10 @@ export async function getAssignedGroups() {
         )
       )
     `)
-        .eq('judge_id', user.id)
+        .eq('judge_id', userData.id)
 
     if (error || !data) {
+        console.error('Error fetching assigned groups:', error)
         return []
     }
 

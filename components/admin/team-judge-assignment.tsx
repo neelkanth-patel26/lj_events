@@ -86,6 +86,21 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
       return
     }
 
+    // Check for duplicates
+    const existingJudgeIds = assignments[selectedTeam]?.map(a => a.judge_id) || []
+    const duplicates = selectedMentors.filter(id => existingJudgeIds.includes(id))
+    
+    if (duplicates.length > 0) {
+      const duplicateNames = duplicates.map(id => mentors.find(m => m.id === id)?.full_name).join(', ')
+      toast({ 
+        title: 'Duplicate Assignment', 
+        description: `${duplicateNames} already assigned to this team`, 
+        variant: 'destructive', 
+        className: 'bg-white' 
+      })
+      return
+    }
+
     setLoading(true)
     try {
       const results = await Promise.all(
@@ -100,7 +115,7 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
 
       const newAssignments = selectedMentors.map((mentorId, idx) => {
         const mentor = mentors.find(m => m.id === mentorId)
-        return mentor ? { id: results[idx]?.id || `temp-${Date.now()}-${idx}`, ...results[idx], judge: { full_name: mentor.full_name } } : null
+        return mentor ? { id: results[idx]?.id || `temp-${Date.now()}-${idx}`, judge_id: mentorId, team_id: selectedTeam, ...results[idx], judge: { full_name: mentor.full_name } } : null
       }).filter(Boolean)
 
       setAssignments(prev => ({

@@ -240,6 +240,14 @@ const handleCreateTeam = async (e: React.FormEvent) => {
                   </div>
                   
                   <div className="pt-2 border-t flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-xs md:text-sm"
+                      onClick={() => router.push(`/dashboard/teams/${team.id}/members`)}
+                    >
+                      View
+                    </Button>
                     {userRole === 'admin' && (
                       <>
                         <Button 
@@ -257,7 +265,7 @@ const handleCreateTeam = async (e: React.FormEvent) => {
                         <Button 
                           variant="destructive" 
                           size="sm" 
-                          className="text-xs md:text-sm"
+                          className="text-xs md:text-sm px-2"
                           onClick={() => setDeletingTeam(team)}
                           disabled={loading}
                         >
@@ -265,14 +273,6 @@ const handleCreateTeam = async (e: React.FormEvent) => {
                         </Button>
                       </>
                     )}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs md:text-sm"
-                      onClick={() => router.push(`/dashboard/teams/${team.id}/members`)}
-                    >
-                      View
-                    </Button>
                   </div>
                 </div>
               </CardContent>

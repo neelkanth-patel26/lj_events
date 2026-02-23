@@ -100,3 +100,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id: teamId } = await params
+    const supabase = await createClient()
+
+    // Delete team members first
+    await supabase.from('team_members').delete().eq('team_id', teamId)
+
+    // Delete team
+    const { error } = await supabase.from('teams').delete().eq('id', teamId)
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error('Delete Team Error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}

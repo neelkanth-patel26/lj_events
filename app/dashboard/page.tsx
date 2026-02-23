@@ -45,7 +45,7 @@ export default function DashboardPage() {
     const hasVisibleLeaderboard = events?.some((e: any) => e.leaderboard_visible) || false
     const canViewScores = userRole === 'admin' || hasVisibleLeaderboard
 
-    const topTeams = canViewScores ? (teams?.filter((t: any) => t.total_score > 0)
+    const topTeams = userRole === 'admin' ? (teams?.filter((t: any) => t.total_score > 0)
       .sort((a: any, b: any) => (b.total_score || 0) - (a.total_score || 0))
       .slice(0, 5) || []) : []
 

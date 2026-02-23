@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { useState, use, useEffect } from 'react'
-import { ArrowLeft, Plus, Users, Trophy, School, X, Pencil } from 'lucide-react'
+import { ArrowLeft, Plus, Users, Trophy, School, X, Pencil, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 
@@ -21,6 +21,7 @@ export default function ManageTeamsPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(false)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [editingTeam, setEditingTeam] = useState<any>(null)
+  const [deletingTeam, setDeletingTeam] = useState<any>(null)
   const [formData, setFormData] = useState({
     teamName: '',
     schoolName: '',
@@ -85,6 +86,26 @@ const handleCreateTeam = async (e: React.FormEvent) => {
       mutate()
     } catch (error) {
       console.error('Error updating team:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteTeam = async () => {
+    if (!deletingTeam) return
+    
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/teams/${deletingTeam.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete team')
+      setDeletingTeam(null)
+      mutate()
+    } catch (error) {
+      console.error('Error deleting team:', error)
+      alert('Failed to delete team')
     } finally {
       setLoading(false)
     }
@@ -220,18 +241,29 @@ const handleCreateTeam = async (e: React.FormEvent) => {
                   
                   <div className="pt-2 border-t flex gap-2">
                     {userRole === 'admin' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1 text-xs md:text-sm"
-                        onClick={() => {
-                          setEditingTeam(team)
-                          setFormData({ teamName: team.team_name, schoolName: team.school_name || '' })
-                        }}
-                      >
-                        <Pencil className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
+                      <>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1 text-xs md:text-sm"
+                          onClick={() => {
+                            setEditingTeam(team)
+                            setFormData({ teamName: team.team_name, schoolName: team.school_name || '' })
+                          }}
+                        >
+                          <Pencil className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="text-xs md:text-sm"
+                          onClick={() => setDeletingTeam(team)}
+                          disabled={loading}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </>
                     )}
                     <Button 
                       variant="outline" 
@@ -298,6 +330,26 @@ const handleCreateTeam = async (e: React.FormEvent) => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Team Confirmation Dialog */}
+      <Dialog open={!!deletingTeam} onOpenChange={(open) => !open && setDeletingTeam(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Team</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deletingTeam?.team_name}</strong>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingTeam(null)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteTeam} disabled={loading}>
+              {loading ? 'Deleting...' : 'Delete Team'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

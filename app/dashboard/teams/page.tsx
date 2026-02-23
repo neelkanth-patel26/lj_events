@@ -18,6 +18,8 @@ export default function TeamsPage() {
   const [filterEvent, setFilterEvent] = useState('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userTeamIds, setUserTeamIds] = useState<Set<string>>(new Set())
   const [showAddTeam, setShowAddTeam] = useState(false)
   const [selectedEventId, setSelectedEventId] = useState('')
   const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set())
@@ -26,9 +28,26 @@ export default function TeamsPage() {
   useEffect(() => {
     const fetchRole = async () => {
       try {
-        const res = await fetch('/api/auth/me')
-        const data = await res.json()
-        setUserRole(data?.role || 'admin')
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          setUserId(user.id)
+          const { data: userData } = await supabase.from('users').select('role').eq('id', user.id).single()
+          setUserRole(userData?.role || 'admin')
+          
+          if (userData?.role === 'student') {
+            const { data: teamMembers } = await supabase
+              .from('team_members')
+              .select('team_id')
+              .eq('user_id', user.id)
+            if (teamMembers) {
+              setUserTeamIds(new Set(teamMembers.map(tm => tm.team_id)))
+            }
+          }
+        } else {
+          setUserRole('admin')
+        }
       } catch (error) {
         console.error('Error fetching role:', error)
         setUserRole('admin')
@@ -117,7 +136,7 @@ export default function TeamsPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Trophy className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id)) ? (Array.isArray(teams) && teams.length ? Math.max(...teams.map((team: any) => team.total_score || 0)) : 0) : '***'}</p>
+            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id) || (userRole === 'student' && userTeamIds.has(t.id))) ? (Array.isArray(teams) && teams.length ? Math.max(...teams.map((team: any) => team.total_score || 0)) : 0) : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
         </Card>
@@ -131,7 +150,7 @@ export default function TeamsPage() {
         <Card>
           <CardContent className="p-3 md:p-4 text-center">
             <Calendar className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-primary" />
-            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id)) ? (Array.isArray(teams) && teams.length ? (teams.reduce((sum: number, team: any) => sum + (team.total_score || 0), 0) / teams.length).toFixed(0) : 0) : '***'}</p>
+            <p className="text-xl md:text-2xl font-bold">{userRole === 'admin' || teams.some((t: any) => unlockedEvents.has(t.event_id) || (userRole === 'student' && userTeamIds.has(t.id))) ? (Array.isArray(teams) && teams.length ? (teams.reduce((sum: number, team: any) => sum + (team.total_score || 0), 0) / teams.length).toFixed(0) : 0) : '***'}</p>
             <p className="text-xs md:text-sm text-muted-foreground">Avg Score</p>
           </CardContent>
         </Card>
@@ -234,7 +253,13 @@ export default function TeamsPage() {
                       <CardTitle className="text-base md:text-lg truncate">{team.team_name}</CardTitle>
                       <CardDescription className="text-xs md:text-sm truncate">{team.school_name}</CardDescription>
                     </div>
-                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">{userRole === 'admin' || unlockedEvents.has(team.event_id) ? (team.total_score || 0) : '***'}</Badge>
+                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
+                      {userRole === 'admin' || unlockedEvents.has(team.event_id) 
+                        ? (team.total_score || 0) 
+                        : (userRole === 'student' && userTeamIds.has(team.id) 
+                          ? (team.total_score || 0) 
+                          : '***')}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-3 md:p-4 pt-0">
@@ -319,7 +344,13 @@ export default function TeamsPage() {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-lg md:text-xl font-bold">{userRole === 'admin' || unlockedEvents.has(team.event_id) ? (team.total_score || 0) : '***'}</div>
+                      <div className="text-lg md:text-xl font-bold">
+                        {userRole === 'admin' || unlockedEvents.has(team.event_id) 
+                          ? (team.total_score || 0) 
+                          : (userRole === 'student' && userTeamIds.has(team.id) 
+                            ? (team.total_score || 0) 
+                            : '***')}
+                      </div>
                       <div className="text-xs text-muted-foreground">Score</div>
                     </div>
                   </div>

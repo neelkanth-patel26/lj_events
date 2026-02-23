@@ -50,7 +50,7 @@ export function MobileMoreMenu({ items }: { items: NavItem[] }) {
                   key={item.href}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all hover:bg-sidebar-accent"
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all hover:bg-sidebar-accent text-foreground"
                 >
                   <Icon className="h-5 w-5 text-muted-foreground" />
                   {item.label}

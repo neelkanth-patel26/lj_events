@@ -11,27 +11,32 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const passwordHash = Buffer.from(password).toString('base64')
-
-    const { data, error } = await supabase
+    
+    // First, get user by email
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('email', email)
-      .eq('password_hash', passwordHash)
       .single()
 
-    if (error || !data) {
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    // Check password
+    const passwordHash = Buffer.from(password).toString('base64')
+    if (user.password_hash !== passwordHash) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
     const cookieStore = await cookies()
-    cookieStore.set('user_session', JSON.stringify({ id: data.id, email: data.email, role: data.role }), {
+    cookieStore.set('user_session', JSON.stringify({ id: user.id, email: user.email, role: user.role }), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 7,
     })
 
-    return NextResponse.json({ user: data })
+    return NextResponse.json({ user })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

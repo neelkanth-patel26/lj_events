@@ -38,6 +38,8 @@ export async function getCurrentUser() {
       email: userData.email,
       role: userData.role,
       fullName: userData.full_name,
+      enrollment_number: userData.enrollment_number,
+      theme: userData.theme || 'light',
       mentorDetails: mentorProfile ? {
         company: mentorProfile.company,
         domain: mentorProfile.domain,

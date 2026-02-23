@@ -41,7 +41,7 @@ export default async function DashboardLayout({
     { href: '/dashboard/criteria', label: 'Criteria', icon: Settings2, iconName: 'Settings2', roles: ['admin'] },
     { href: '/dashboard/judging', label: 'Judging', icon: Gavel, iconName: 'Gavel', roles: ['mentor'] },
     { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy, iconName: 'Trophy', roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/profile', label: 'Profile', icon: User, iconName: 'User', roles: ['mentor'] },
+    { href: '/dashboard/profile', label: 'Profile', icon: User, iconName: 'User', roles: ['admin', 'student', 'mentor'] },
   ]
 
   const filteredNav = navItems.filter(item => item.roles.includes(user.role))

@@ -17,6 +17,7 @@ export default function TeamsPage() {
   const [teamMembers, setTeamMembers] = useState<Record<string, any[]>>({})
   const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
+  const [eventLeaderboardStatus, setEventLeaderboardStatus] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -51,6 +52,16 @@ export default function TeamsPage() {
     fetchMembers()
   }, [teams])
 
+  useEffect(() => {
+    if (events && events.length > 0) {
+      const statusMap: Record<string, boolean> = {}
+      events.forEach((event: any) => {
+        statusMap[event.id] = event.leaderboard_visible || false
+      })
+      setEventLeaderboardStatus(statusMap)
+    }
+  }, [events])
+
   const filteredTeams = Array.isArray(teams) ? teams.filter((team: any) => {
     const matchesSearch = team.team_name?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesEvent = filterEvent === 'all' || team.event_id === filterEvent
@@ -68,7 +79,9 @@ export default function TeamsPage() {
     return acc
   }, {})
 
-  const renderTeamCard = (team: any) => (
+  const renderTeamCard = (team: any) => {
+    const isLeaderboardLocked = userRole === 'student' && !eventLeaderboardStatus[team.event_id]
+    return (
     <Card 
       key={team.id} 
       className="border-2 hover:border-gray-400 hover:shadow-lg transition-all cursor-pointer"
@@ -93,7 +106,7 @@ export default function TeamsPage() {
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <div className="text-xl font-bold">{team.total_score || 0}</div>
+              <div className="text-xl font-bold">{isLeaderboardLocked ? '***' : (team.total_score || 0)}</div>
               <div className="text-xs text-muted-foreground">Score</div>
             </div>
           </div>
@@ -116,7 +129,7 @@ export default function TeamsPage() {
         </div>
       </CardContent>
     </Card>
-  )
+  )}
 
   return (
     <div className="space-y-6 pb-6">
@@ -149,7 +162,9 @@ export default function TeamsPage() {
               <Trophy className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
             </div>
             <p className="text-xl md:text-2xl font-bold">
-              {filteredTeams.length ? Math.max(...filteredTeams.map((t: any) => t.total_score || 0)) : 0}
+              {userRole === 'student' 
+                ? '***' 
+                : filteredTeams.length ? Math.max(...filteredTeams.map((t: any) => t.total_score || 0)) : 0}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground">Top Score</p>
           </CardContent>
@@ -160,7 +175,9 @@ export default function TeamsPage() {
               <MapPin className="h-5 w-5 md:h-6 md:w-6 text-gray-700" />
             </div>
             <p className="text-xl md:text-2xl font-bold">
-              {filteredTeams.length ? Math.round(filteredTeams.reduce((sum: number, t: any) => sum + (t.total_score || 0), 0) / filteredTeams.length) : 0}
+              {userRole === 'student'
+                ? '***'
+                : filteredTeams.length ? Math.round(filteredTeams.reduce((sum: number, t: any) => sum + (t.total_score || 0), 0) / filteredTeams.length) : 0}
             </p>
             <p className="text-xs md:text-sm text-muted-foreground">Avg Score</p>
           </CardContent>

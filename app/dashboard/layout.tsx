@@ -37,7 +37,6 @@ export default async function DashboardLayout({
     { href: '/dashboard/students', label: 'Students', icon: Users, iconName: 'Users', roles: ['admin'] },
     { href: '/dashboard/mentors', label: 'Mentors', icon: User, iconName: 'User', roles: ['admin'] },
     { href: '/dashboard/teams', label: 'Teams', icon: Users, iconName: 'Users', roles: ['admin', 'mentor', 'student'] },
-    { href: '/dashboard/my-teams', label: 'My Teams', icon: Users, iconName: 'Users', roles: ['student'] },
     { href: '/dashboard/assign-judges', label: 'Assign Judges', icon: UserCog, iconName: 'UserCog', roles: ['admin'] },
     { href: '/dashboard/criteria', label: 'Criteria', icon: Settings2, iconName: 'Settings2', roles: ['admin'] },
     { href: '/dashboard/judging', label: 'Judging', icon: Gavel, iconName: 'Gavel', roles: ['mentor'] },

@@ -153,7 +153,12 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {stats.topTeams.length > 0 && stats.canViewScores ? (
+            {!stats.canViewScores ? (
+              <div className="text-center py-8">
+                <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">Leaderboard locked</p>
+              </div>
+            ) : stats.topTeams.length > 0 ? (
               <div className="space-y-2">
                 {stats.topTeams.map((team: any, index: number) => (
                   <Link key={team.id} href={`/dashboard/teams/${team.id}/members`}>
@@ -181,7 +186,97 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-8">
                 <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">{stats.canViewScores ? 'No scored teams yet' : 'Leaderboard locked'}</p>
+                <p className="text-sm text-muted-foreground">No scored teams yet</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Student Dashboard
+  if (userRole === 'student') {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Student Dashboard</h2>
+          <p className="text-sm text-muted-foreground mt-1">View your team and competition progress</p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Calendar className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.activeEvents}</p>
+              <p className="text-xs text-muted-foreground">Active Events</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.totalTeams}</p>
+              <p className="text-xs text-muted-foreground">Total Teams</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Award className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.canViewScores ? stats.scoredTeams : '***'}</p>
+              <p className="text-xs text-muted-foreground">Evaluated</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <Gavel className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-2xl font-bold">{stats.canViewScores ? stats.pendingTeams : '***'}</p>
+              <p className="text-xs text-muted-foreground">Pending</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4" />
+                Top Performing Teams
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!stats.canViewScores ? (
+              <div className="text-center py-8">
+                <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">Leaderboard locked</p>
+              </div>
+            ) : stats.topTeams.length > 0 ? (
+              <div className="space-y-2">
+                {stats.topTeams.map((team: any, index: number) => (
+                  <div key={team.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold ${
+                      index === 0 ? 'bg-gray-900 text-white' :
+                      index === 1 ? 'bg-gray-700 text-white' :
+                      index === 2 ? 'bg-gray-500 text-white' :
+                      'bg-muted text-muted-foreground'
+                    }`}>
+                      #{index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{team.team_name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{team.school_name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-lg">{team.total_score}</p>
+                      <p className="text-xs text-muted-foreground">pts</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Trophy className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">No scored teams yet</p>
               </div>
             )}
           </CardContent>

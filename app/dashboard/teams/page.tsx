@@ -253,7 +253,13 @@ export default function TeamsPage() {
                       <CardTitle className="text-base md:text-lg truncate">{team.team_name}</CardTitle>
                       <CardDescription className="text-xs md:text-sm truncate">{team.school_name}</CardDescription>
                     </div>
-                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">{userRole === 'admin' || unlockedEvents.has(team.event_id) || (userRole === 'student' && userTeamIds.has(team.id)) ? (team.total_score || 0) : '***'}</Badge>
+                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
+                      {userRole === 'admin' || unlockedEvents.has(team.event_id) 
+                        ? (team.total_score || 0) 
+                        : (userRole === 'student' && userTeamIds.has(team.id) 
+                          ? (team.total_score || 0) 
+                          : '***')}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-3 md:p-4 pt-0">
@@ -338,7 +344,13 @@ export default function TeamsPage() {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-lg md:text-xl font-bold">{userRole === 'admin' || unlockedEvents.has(team.event_id) || (userRole === 'student' && userTeamIds.has(team.id)) ? (team.total_score || 0) : '***'}</div>
+                      <div className="text-lg md:text-xl font-bold">
+                        {userRole === 'admin' || unlockedEvents.has(team.event_id) 
+                          ? (team.total_score || 0) 
+                          : (userRole === 'student' && userTeamIds.has(team.id) 
+                            ? (team.total_score || 0) 
+                            : '***')}
+                      </div>
                       <div className="text-xs text-muted-foreground">Score</div>
                     </div>
                   </div>

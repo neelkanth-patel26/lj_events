@@ -55,20 +55,6 @@ export default function LeaderboardPage() {
 
   if (!userRole) return null
 
-  if (userRole === 'mentor') {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="max-w-md">
-          <CardContent className="p-8 text-center">
-            <Trophy className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-            <p className="text-muted-foreground">You don't have permission to view the leaderboard.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   const toggleLeaderboardVisibility = async () => {
     if (!selectedEvent || userRole !== 'admin') return
     

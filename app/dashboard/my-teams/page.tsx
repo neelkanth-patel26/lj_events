@@ -2,12 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Users, Calendar, Trophy, MapPin, Mail, Phone, User } from 'lucide-react'
+import { Users, Calendar, Trophy, MapPin, Mail, Phone, User, ChevronDown, ChevronUp } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export default function MyTeamsPage() {
   const [userTeams, setUserTeams] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const fetchMyTeams = async () => {
@@ -17,32 +18,47 @@ export default function MyTeamsPage() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (user) {
-          const { data: teamMembers } = await supabase
-            .from('team_members')
-            .select('team_id')
-            .eq('user_id', user.id)
+          const { data: userData } = await supabase
+            .from('users')
+            .select('id')
+            .eq('email', user.email)
+            .single()
           
-          if (teamMembers && teamMembers.length > 0) {
-            const teamIds = teamMembers.map(tm => tm.team_id)
+          if (userData) {
+            const { data: teamMembers } = await supabase
+              .from('team_members')
+              .select('team_id')
+              .eq('user_id', userData.id)
             
-            const { data: teams } = await supabase
-              .from('teams')
-              .select('*, events(*)')
-              .in('id', teamIds)
-            
-            if (teams) {
-              const teamsWithMembers = await Promise.all(
-                teams.map(async (team) => {
-                  const { data: members } = await supabase
-                    .from('team_members')
-                    .select('*, users(*)')
-                    .eq('team_id', team.id)
-                  
-                  return { ...team, members: members || [] }
-                })
-              )
+            if (teamMembers && teamMembers.length > 0) {
+              const teamIds = teamMembers.map(tm => tm.team_id)
               
-              setUserTeams(teamsWithMembers)
+              const { data: teams } = await supabase
+                .from('teams')
+                .select('*')
+                .in('id', teamIds)
+              
+              if (teams) {
+                const { data: events } = await supabase
+                  .from('events')
+                  .select('*')
+                  .in('id', teams.map(t => t.event_id))
+                
+                const teamsWithData = await Promise.all(
+                  teams.map(async (team) => {
+                    const { data: members } = await supabase
+                      .from('team_members')
+                      .select('*, users(*)')
+                      .eq('team_id', team.id)
+                    
+                    const event = events?.find(e => e.id === team.event_id)
+                    
+                    return { ...team, members: members || [], event }
+                  })
+                )
+                
+                setUserTeams(teamsWithData)
+              }
             }
           }
         }
@@ -55,6 +71,18 @@ export default function MyTeamsPage() {
     
     fetchMyTeams()
   }, [])
+
+  const toggleEventCollapse = (eventId: string) => {
+    setCollapsedEvents(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(eventId)) {
+        newSet.delete(eventId)
+      } else {
+        newSet.add(eventId)
+      }
+      return newSet
+    })
+  }
 
   if (loading) {
     return (
@@ -88,7 +116,7 @@ export default function MyTeamsPage() {
     const eventId = team.event_id
     if (!acc[eventId]) {
       acc[eventId] = {
-        event: team.events,
+        event: team.event,
         teams: []
       }
     }
@@ -129,7 +157,14 @@ export default function MyTeamsPage() {
 
       {Object.entries(teamsByEvent).map(([eventId, eventData]: [string, any]) => (
         <div key={eventId} className="space-y-4">
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-3 rounded-lg transition-colors"
+            onClick={() => toggleEventCollapse(eventId)}
+          >
+            {collapsedEvents.has(eventId) ? 
+              <ChevronDown className="h-5 w-5 text-gray-600" /> : 
+              <ChevronUp className="h-5 w-5 text-gray-600" />
+            }
             <Calendar className="h-5 w-5 text-gray-600" />
             <div>
               <h2 className="text-xl font-semibold">{eventData.event?.name || 'Unknown Event'}</h2>
@@ -143,7 +178,7 @@ export default function MyTeamsPage() {
             </Badge>
           </div>
 
-          {eventData.teams.map((team: any) => (
+          {!collapsedEvents.has(eventId) && eventData.teams.map((team: any) => (
             <Card key={team.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">

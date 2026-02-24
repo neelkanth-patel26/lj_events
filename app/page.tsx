@@ -30,7 +30,7 @@ export default function Home() {
   if (loading) return null
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 text-center">
         <div className="max-w-4xl space-y-10">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary dark:bg-white shadow-lg shadow-primary/20 mb-6">

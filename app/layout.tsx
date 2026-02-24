@@ -54,14 +54,25 @@ export default function RootLayout({
           __html: `
             (function() {
               const theme = localStorage.getItem('theme');
-              const isDark = theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-              if (isDark) {
-                document.documentElement.classList.add('dark');
+              if (theme) {
+                const isDark = theme === 'dark';
+                if (isDark) {
+                  document.documentElement.classList.add('dark');
+                }
+                const color = isDark ? '#000000' : '#ffffff';
+                document.documentElement.style.backgroundColor = color;
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', color);
+              } else {
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (systemDark) {
+                  document.documentElement.classList.add('dark');
+                }
+                const color = systemDark ? '#000000' : '#ffffff';
+                document.documentElement.style.backgroundColor = color;
+                const meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', color);
               }
-              const color = isDark ? '#000000' : '#ffffff';
-              document.documentElement.style.backgroundColor = color;
-              const meta = document.querySelector('meta[name="theme-color"]');
-              if (meta) meta.setAttribute('content', color);
             })()
           `
         }} />

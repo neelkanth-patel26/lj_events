@@ -22,9 +22,13 @@ export default function Page() {
   const router = useRouter()
 
   useEffect(() => {
-    // Force light mode on login page
-    document.documentElement.classList.remove('dark')
-    localStorage.removeItem('theme')
+    // Match system theme
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
   }, [])
 
   const handleLogin = async (e: React.FormEvent) => {

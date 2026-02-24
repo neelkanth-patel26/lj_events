@@ -2,8 +2,6 @@ import { getCurrentUser, signOut } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { RealtimeProvider } from '@/components/realtime-provider'
 import { ThemeProvider } from '@/components/theme-provider'
-import { ProfileCompletionBanner } from '@/components/profile-completion-banner'
-import { ProfileNotificationService } from '@/components/profile-notification-service'
 import { redirect } from 'next/navigation'
 import PWAInitializer from '@/components/pwa-initializer'
 import { NavLink } from '@/components/nav-link'
@@ -54,8 +52,6 @@ export default async function DashboardLayout({
       <PWAInitializer />
       <OrientationLock />
       <ThemeProvider theme={user.theme} />
-      <ProfileCompletionBanner />
-      <ProfileNotificationService />
       <RealtimeProvider>
         <div className="min-h-screen bg-white dark:bg-black flex flex-col md:flex-row">
         {/* Desktop Sidebar */}

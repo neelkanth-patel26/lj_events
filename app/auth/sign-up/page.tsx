@@ -22,6 +22,7 @@ export default function Page() {
   const [role, setRole] = useState<'student' | 'mentor' | 'admin'>('student')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isPWA, setIsPWA] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -32,6 +33,12 @@ export default function Page() {
     } else {
       document.documentElement.classList.remove('dark')
     }
+    
+    // Check if running as PWA
+    const isPWAMode = window.matchMedia('(display-mode: standalone)').matches || 
+                      (window.navigator as any).standalone || 
+                      document.referrer.includes('android-app://')
+    setIsPWA(isPWAMode)
   }, [])
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -163,6 +170,16 @@ export default function Page() {
                     Sign in
                   </Link>
                 </div>
+                {!isPWA && (
+                  <div className="mt-4 text-center">
+                    <Link
+                      href="/download-pwa"
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      Download App (QR Code)
+                    </Link>
+                  </div>
+                )}
               </form>
             </CardContent>
           </Card>

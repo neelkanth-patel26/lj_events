@@ -46,20 +46,14 @@ export default function Preloader() {
               cx="80"
               cy="80"
               r="70"
-              stroke="url(#gradient)"
+              stroke="currentColor"
               strokeWidth="8"
               fill="none"
               strokeDasharray={`${2 * Math.PI * 70}`}
               strokeDashoffset={`${2 * Math.PI * 70 * (1 - progress / 100)}`}
-              className="transition-all duration-300"
+              className={`transition-all duration-300 ${isDark ? 'text-white' : 'text-black'}`}
               strokeLinecap="round"
             />
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#667eea" />
-                <stop offset="100%" stopColor="#f093fb" />
-              </linearGradient>
-            </defs>
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <span className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{progress}%</span>
@@ -70,7 +64,7 @@ export default function Preloader() {
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Copyright © Gaming Network Studio Media Group</p>
           <div className={`w-full ${isDark ? 'bg-gray-800' : 'bg-gray-200'} rounded-full h-2 overflow-hidden`}>
             <div 
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-300 rounded-full"
+              className={`h-full transition-all duration-300 rounded-full ${isDark ? 'bg-white' : 'bg-black'}`}
               style={{ width: `${progress}%` }}
             />
           </div>

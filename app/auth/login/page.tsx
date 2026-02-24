@@ -51,13 +51,8 @@ export default function Page() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-30 blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-br from-pink-400 to-orange-400 rounded-full opacity-30 blur-3xl animate-float-delayed"></div>
-      </div>
-      
-      <div className="w-full max-w-md relative z-10">
+    <div className="flex min-h-screen w-full items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md">
         <div className="flex flex-col gap-6">
           <div className="text-center space-y-2">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-black shadow-lg mb-2">
@@ -124,23 +119,6 @@ export default function Page() {
           </Card>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(40px, -40px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translate(0, 0); }
-          50% { transform: translate(-40px, 40px); }
-        }
-        .animate-float {
-          animation: float 10s ease-in-out infinite;
-        }
-        .animate-float-delayed {
-          animation: float-delayed 10s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   )
 }

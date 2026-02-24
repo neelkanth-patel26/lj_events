@@ -26,7 +26,7 @@ export default function Home() {
   if (loading) return null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 text-center">
         <div className="max-w-4xl space-y-10">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary shadow-lg shadow-primary/20 mb-6">
@@ -35,7 +35,7 @@ export default function Home() {
             </svg>
           </div>
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-7xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-primary to-gray-900 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-gray-900">
               LJ University Event Management
             </h1>
             <p className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -61,13 +61,13 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <div className="px-6 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
-                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Event Management</span>
+                <span className="text-primary">Event Management</span>
               </div>
               <div className="px-6 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
-                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Team Evaluation</span>
+                <span className="text-primary">Team Evaluation</span>
               </div>
               <div className="px-6 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
-                <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Live Leaderboards</span>
+                <span className="text-primary">Live Leaderboards</span>
               </div>
             </div>
           </div>

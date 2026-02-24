@@ -67,9 +67,9 @@ export default async function DashboardLayout({
               <NavLink
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-all group [&.bg-gray-900]:bg-gray-900 dark:[&.bg-gray-900]:bg-white [&.bg-gray-900]:text-white dark:[&.bg-gray-900]:text-gray-900 [&.bg-gray-900]:hover:bg-gray-800 dark:[&.bg-gray-900]:hover:bg-gray-100"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-800 transition-all"
               >
-                <item.icon className="h-5 w-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors [.bg-gray-900_&]:text-white dark:[.bg-gray-900_&]:text-gray-900" />
+                <item.icon className="h-5 w-5" />
                 <span>{item.label}</span>
               </NavLink>
             ))}

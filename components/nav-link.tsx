@@ -18,7 +18,7 @@ export function NavLink({ href, children, className = '', onClick, ...props }: N
     <Link
       href={href}
       onClick={onClick}
-      className={`${className} ${isActive ? 'bg-black dark:bg-white [&>svg]:text-white dark:[&>svg]:text-black [&>span]:text-white dark:[&>span]:text-black shadow-md' : ''}`}
+      className={`${className} ${isActive ? 'bg-black dark:bg-white text-white dark:text-black [&>svg]:text-white dark:[&>svg]:text-black [&>span]:text-white dark:[&>span]:text-black shadow-md hover:bg-black hover:dark:bg-white hover:[&>svg]:text-white hover:dark:[&>svg]:text-black hover:[&>span]:text-white hover:dark:[&>span]:text-black' : ''}`}
       {...props}
     >
       {children}

@@ -16,7 +16,9 @@ const fetcher = (url: string) => fetch(url, { cache: 'no-store' }).then(r => r.j
 export default function ManageTeamsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: eventId } = use(params)
   const router = useRouter()
-  const { data: teams, mutate, isLoading } = useSWR(`/api/events/${eventId}/teams`, fetcher)
+  const { data, mutate, isLoading } = useSWR(`/api/events/${eventId}/teams`, fetcher)
+  const teams = data?.teams
+  const isLeaderboardVisible = data?.leaderboard_visible
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -225,7 +227,7 @@ const handleCreateTeam = async (e: React.FormEvent) => {
                       <span className="text-xs md:text-sm font-medium">Score</span>
                     </div>
                     <span className="text-base md:text-lg font-bold">
-                      {userRole === 'mentor' || userRole === 'student' ? '***' : (team.total_score || 0)}
+                      {(userRole === 'admin' || isLeaderboardVisible) ? (team.total_score || 0) : '***'}
                     </span>
                   </div>
                   

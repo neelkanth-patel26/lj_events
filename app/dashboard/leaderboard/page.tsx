@@ -20,7 +20,7 @@ export default function LeaderboardPage() {
   const [isLeaderboardVisible, setIsLeaderboardVisible] = useState(false)
   const [togglingVisibility, setTogglingVisibility] = useState(false)
   const [loadingVisibility, setLoadingVisibility] = useState(false)
-  const { data: rankings, mutate } = useSWR(
+  const { data: rankings, mutate, isLoading } = useSWR(
     selectedEvent ? `/api/leaderboard?eventId=${selectedEvent}` : null,
     (url) => fetch(url, { cache: 'no-store' }).then(r => r.json())
   )
@@ -78,14 +78,14 @@ export default function LeaderboardPage() {
     }
   }
 
-  const exportLeaderboard = async () => {
+  const exportLeaderboard = async (type: 'full' | 'top5' = 'full') => {
     if (!rankings || !selectedEvent) return
     
     try {
       const response = await fetch('/api/leaderboard/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ eventId: selectedEvent })
+        body: JSON.stringify({ eventId: selectedEvent, type })
       })
 
       if (!response.ok) {
@@ -96,7 +96,7 @@ export default function LeaderboardPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `leaderboard-${selectedEvent}.pdf`
+      a.download = `leaderboard-${type === 'top5' ? 'top5' : 'full'}-${selectedEvent}.pdf`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -141,10 +141,16 @@ export default function LeaderboardPage() {
             </Button>
           )}
           {rankings && rankings.length > 0 && (isLeaderboardVisible || userRole === 'admin') && (
-            <Button onClick={exportLeaderboard} variant="outline" size="sm" className="w-fit">
-              <Download className="h-4 w-4 mr-2" />
-              Export PDF
-            </Button>
+            <>
+              <Button onClick={() => exportLeaderboard('top5')} variant="outline" size="sm" className="w-fit">
+                <Download className="h-4 w-4 mr-2" />
+                Top 5
+              </Button>
+              <Button onClick={() => exportLeaderboard('full')} variant="outline" size="sm" className="w-fit">
+                <Download className="h-4 w-4 mr-2" />
+                Full PDF
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -222,7 +228,24 @@ export default function LeaderboardPage() {
       </Card>
 
       {/* Rankings Display */}
-      {loadingVisibility ? (
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i} className="dark:bg-neutral-900 dark:border-neutral-800">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-200 dark:bg-neutral-800 rounded-full animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded animate-pulse w-1/3" />
+                    <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded animate-pulse w-1/2" />
+                  </div>
+                  <div className="h-6 bg-gray-200 dark:bg-neutral-800 rounded animate-pulse w-16" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : loadingVisibility ? (
         <Card>
           <CardContent className="p-4 md:pt-6">
             <div className="text-center py-6 md:py-8">

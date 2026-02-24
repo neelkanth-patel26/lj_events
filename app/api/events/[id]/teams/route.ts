@@ -6,6 +6,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const supabase = await createClient()
 
+    // Get event leaderboard visibility
+    const { data: event } = await supabase
+      .from('events')
+      .select('leaderboard_visible')
+      .eq('id', id)
+      .single()
+
     // Get teams with member counts via team_members
     const { data: teams, error } = await supabase
       .from('teams')
@@ -23,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       member_count: team.team_members?.[0]?.count || 0
     }))
 
-    return NextResponse.json(processedTeams, {
+    return NextResponse.json({ teams: processedTeams, leaderboard_visible: event?.leaderboard_visible || false }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate',
         'Pragma': 'no-cache',

@@ -12,9 +12,13 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    // Force light mode on landing page
-    document.documentElement.classList.remove('dark')
-    localStorage.removeItem('theme')
+    // Match system theme
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    if (isDark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
     
     getCurrentUser().then((u) => {
       setUser(u)
@@ -26,7 +30,7 @@ export default function Home() {
   if (loading) return null
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-black relative overflow-hidden">
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 text-center">
         <div className="max-w-4xl space-y-10">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary shadow-lg shadow-primary/20 mb-6">
@@ -35,7 +39,7 @@ export default function Home() {
             </svg>
           </div>
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-gray-900 dark:text-white">
               LJ University Event Management
             </h1>
             <p className="text-lg md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -60,20 +64,20 @@ export default function Home() {
               Features for Admins, Mentors/Judges, and Students
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <div className="px-6 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
+              <div className="px-6 py-3 bg-white dark:bg-neutral-900 shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
                 <span className="text-primary">Event Management</span>
               </div>
-              <div className="px-6 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
+              <div className="px-6 py-3 bg-white dark:bg-neutral-900 shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
                 <span className="text-primary">Team Evaluation</span>
               </div>
-              <div className="px-6 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
+              <div className="px-6 py-3 bg-white dark:bg-neutral-900 shadow-md hover:shadow-lg rounded-full text-sm font-semibold transition-all hover:scale-105 cursor-default">
                 <span className="text-primary">Live Leaderboards</span>
               </div>
             </div>
           </div>
         </div>
         <div className="absolute bottom-8 left-0 right-0 text-center space-y-1">
-          <p className="text-sm font-semibold text-gray-900">Made By Group 1</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">Made By Group 1</p>
           <p className="text-xs text-muted-foreground">Copyright © Gaming Network Studio Media Group</p>
         </div>
       </div>

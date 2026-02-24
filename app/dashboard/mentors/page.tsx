@@ -468,6 +468,7 @@ export default function MentorsPage() {
                       value={editForm.full_name}
                       onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
                       required
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -477,6 +478,7 @@ export default function MentorsPage() {
                       value={editForm.email}
                       onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                       required
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2 col-span-2">
@@ -485,6 +487,7 @@ export default function MentorsPage() {
                       value={editForm.department}
                       onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                       placeholder="e.g. Computer Engineering"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                 </div>
@@ -504,6 +507,7 @@ export default function MentorsPage() {
                       value={editForm.company}
                       onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
                       placeholder="Enter company"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -512,6 +516,7 @@ export default function MentorsPage() {
                       value={editForm.designation}
                       onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
                       placeholder="Enter designation"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -520,6 +525,7 @@ export default function MentorsPage() {
                       value={editForm.domain}
                       onChange={(e) => setEditForm({ ...editForm, domain: e.target.value })}
                       placeholder="e.g. AI/ML, Web Dev"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -528,6 +534,7 @@ export default function MentorsPage() {
                       value={editForm.experience}
                       onChange={(e) => setEditForm({ ...editForm, experience: e.target.value })}
                       placeholder="e.g. 5 years"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                 </div>
@@ -547,6 +554,7 @@ export default function MentorsPage() {
                       value={editForm.bank_name}
                       onChange={(e) => setEditForm({ ...editForm, bank_name: e.target.value })}
                       placeholder="Enter bank name"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -555,6 +563,7 @@ export default function MentorsPage() {
                       value={editForm.acc_no}
                       onChange={(e) => setEditForm({ ...editForm, acc_no: e.target.value })}
                       placeholder="Enter account number"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -563,6 +572,7 @@ export default function MentorsPage() {
                       value={editForm.ifsc}
                       onChange={(e) => setEditForm({ ...editForm, ifsc: e.target.value.toUpperCase() })}
                       placeholder="Enter IFSC code"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                   <div className="space-y-2">
@@ -571,6 +581,7 @@ export default function MentorsPage() {
                       value={editForm.branch}
                       onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })}
                       placeholder="Enter branch"
+                      className="dark:bg-neutral-800 dark:border-neutral-700"
                     />
                   </div>
                 </div>
@@ -601,6 +612,7 @@ export default function MentorsPage() {
                 value={addForm.full_name}
                 onChange={(e) => setAddForm({ ...addForm, full_name: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -610,6 +622,7 @@ export default function MentorsPage() {
                 value={addForm.email}
                 onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -619,6 +632,7 @@ export default function MentorsPage() {
                 value={addForm.password}
                 onChange={(e) => setAddForm({ ...addForm, password: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -627,6 +641,7 @@ export default function MentorsPage() {
                 value={addForm.department}
                 onChange={(e) => setAddForm({ ...addForm, department: e.target.value })}
                 placeholder="e.g. Computer Engineering"
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="flex gap-2">

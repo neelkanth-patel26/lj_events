@@ -274,12 +274,12 @@ export default function StudentsPage() {
                   <div className="space-y-2">
                     <Label className="text-xs md:text-sm">Select Event *</Label>
                     <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700">
                         <SelectValue placeholder="Choose event" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dark:bg-neutral-800 dark:border-neutral-700">
                         {Array.isArray(events) && events.map((event: any) => (
-                          <SelectItem key={event.id} value={event.id}>
+                          <SelectItem key={event.id} value={event.id} className="dark:text-white dark:focus:bg-neutral-700">
                             {event.name}
                           </SelectItem>
                         ))}
@@ -368,13 +368,13 @@ export default function StudentsPage() {
                 </div>
                 <div className="flex gap-2">
                   <Select value={filterRole} onValueChange={setFilterRole}>
-                    <SelectTrigger className="w-full md:w-40 h-10">
+                    <SelectTrigger className="w-full md:w-40 h-10 dark:bg-neutral-800 dark:border-neutral-700">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="student">Students</SelectItem>
-                      <SelectItem value="admin">Admins</SelectItem>
+                    <SelectContent className="dark:bg-neutral-800 dark:border-neutral-700">
+                      <SelectItem value="all" className="dark:text-white dark:focus:bg-neutral-700">All Roles</SelectItem>
+                      <SelectItem value="student" className="dark:text-white dark:focus:bg-neutral-700">Students</SelectItem>
+                      <SelectItem value="admin" className="dark:text-white dark:focus:bg-neutral-700">Admins</SelectItem>
                     </SelectContent>
                   </Select>
                   <div className="hidden md:flex border rounded-md dark:border-neutral-700">
@@ -563,7 +563,7 @@ export default function StudentsPage() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editStudent} onOpenChange={(open) => !open && setEditStudent(null)}>
-        <DialogContent>
+        <DialogContent className="dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle>Edit Student</DialogTitle>
           </DialogHeader>
@@ -575,6 +575,7 @@ export default function StudentsPage() {
                 value={editForm.full_name}
                 onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -585,6 +586,7 @@ export default function StudentsPage() {
                 value={editForm.email}
                 onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -593,6 +595,7 @@ export default function StudentsPage() {
                 id="edit-enrollment"
                 value={editForm.enrollment_number}
                 onChange={(e) => setEditForm({ ...editForm, enrollment_number: e.target.value })}
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -602,18 +605,19 @@ export default function StudentsPage() {
                 value={editForm.department}
                 onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                 placeholder="e.g. Computer Engineering"
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-role">Role</Label>
               <Select value={editForm.role} onValueChange={(value) => setEditForm({ ...editForm, role: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="mentor">Mentor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                <SelectContent className="dark:bg-neutral-800 dark:border-neutral-700">
+                  <SelectItem value="student" className="dark:text-white dark:focus:bg-neutral-700">Student</SelectItem>
+                  <SelectItem value="mentor" className="dark:text-white dark:focus:bg-neutral-700">Mentor</SelectItem>
+                  <SelectItem value="admin" className="dark:text-white dark:focus:bg-neutral-700">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -631,7 +635,7 @@ export default function StudentsPage() {
 
       {/* Add Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
+        <DialogContent className="dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle>Add Student</DialogTitle>
           </DialogHeader>
@@ -643,6 +647,7 @@ export default function StudentsPage() {
                 value={addForm.full_name}
                 onChange={(e) => setAddForm({ ...addForm, full_name: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -653,6 +658,7 @@ export default function StudentsPage() {
                 value={addForm.email}
                 onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -663,6 +669,7 @@ export default function StudentsPage() {
                 value={addForm.password}
                 onChange={(e) => setAddForm({ ...addForm, password: e.target.value })}
                 required
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -671,6 +678,7 @@ export default function StudentsPage() {
                 id="add-enrollment"
                 value={addForm.enrollment_number}
                 onChange={(e) => setAddForm({ ...addForm, enrollment_number: e.target.value })}
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
@@ -680,18 +688,19 @@ export default function StudentsPage() {
                 value={addForm.department}
                 onChange={(e) => setAddForm({ ...addForm, department: e.target.value })}
                 placeholder="e.g. Computer Engineering"
+                className="dark:bg-neutral-800 dark:border-neutral-700"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="add-role">Role</Label>
               <Select value={addForm.role} onValueChange={(value) => setAddForm({ ...addForm, role: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="mentor">Mentor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                <SelectContent className="dark:bg-neutral-800 dark:border-neutral-700">
+                  <SelectItem value="student" className="dark:text-white dark:focus:bg-neutral-700">Student</SelectItem>
+                  <SelectItem value="mentor" className="dark:text-white dark:focus:bg-neutral-700">Mentor</SelectItem>
+                  <SelectItem value="admin" className="dark:text-white dark:focus:bg-neutral-700">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -709,7 +718,7 @@ export default function StudentsPage() {
 
       {/* Import Result Dialog */}
       <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
@@ -745,7 +754,7 @@ export default function StudentsPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
@@ -787,7 +796,7 @@ export default function StudentsPage() {
 
       {/* Success Dialog */}
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm dark:bg-neutral-900 dark:border-neutral-800">
           <DialogHeader>
             <DialogTitle className="sr-only">Success</DialogTitle>
           </DialogHeader>

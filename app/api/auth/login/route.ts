@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     
     // First, get user by email
     const { data: user, error: userError } = await supabase
@@ -19,7 +19,10 @@ export async function POST(request: NextRequest) {
       .eq('email', email)
       .single()
 
+    console.log('User lookup:', { email, found: !!user, error: userError?.message, details: userError })
+
     if (userError || !user) {
+      console.error('Database error:', userError)
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 

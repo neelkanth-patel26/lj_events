@@ -397,7 +397,8 @@ export default function TeamJudgeAssignment({ eventId }: { eventId: string }) {
                                 <span className="text-xs md:text-sm font-medium truncate flex-1 dark:text-white">{assignment.judge.full_name}</span>
                                 <button
                                   onClick={() => removeJudge(assignment.id, team.id)}
-                                  className="opacity-0 group-hover:opacity-100 hover:bg-red-100 text-red-600 rounded-full p-1 transition-all"
+                                  className="hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full p-1 transition-all"
+                                  title="Remove mentor"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>

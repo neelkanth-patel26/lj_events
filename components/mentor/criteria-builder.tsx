@@ -103,7 +103,13 @@ export function CriteriaBuilder() {
     }
 
     const removeCriterion = (id: string) => {
-        setCriteria(criteria.filter(c => c.id !== id))
+        if (criteria.length === 1) {
+            if (confirm('Remove the last criterion? This will clear all criteria for this event.')) {
+                setCriteria([])
+            }
+        } else {
+            setCriteria(criteria.filter(c => c.id !== id))
+        }
     }
 
     const updateCriterion = (id: string, field: 'name' | 'maxPoints', value: string | number) => {
@@ -153,48 +159,54 @@ export function CriteriaBuilder() {
                 
                 {selectedEvent && (
                     <>
-                        <div className="space-y-2">
-                            {criteria.map((c, index) => (
-                                <div 
-                                    key={c.id} 
-                                    className="flex items-center gap-2 p-3 rounded-lg border-2 dark:border-neutral-700 bg-muted/30 dark:bg-neutral-800/50 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
-                                    style={{ animationDelay: `${index * 50}ms` }}
-                                >
-                                    {isAdmin && <GripVertical className="h-4 w-4 text-muted-foreground dark:text-neutral-500 shrink-0 cursor-grab" />}
-                                    <div className="flex-1 min-w-0">
-                                        <Input
-                                            placeholder="Criterion name (e.g., Innovation & Creativity)"
-                                            value={c.name}
-                                            onChange={(e) => updateCriterion(c.id, 'name', e.target.value)}
-                                            className="h-10 border-0 bg-transparent focus-visible:ring-1 dark:text-white placeholder:text-muted-foreground/60"
-                                            disabled={!isAdmin}
-                                        />
+                        {criteria.length > 0 ? (
+                            <div className="space-y-2">
+                                {criteria.map((c, index) => (
+                                    <div 
+                                        key={c.id} 
+                                        className="flex items-center gap-2 p-3 rounded-lg border-2 dark:border-neutral-700 bg-muted/30 dark:bg-neutral-800/50 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+                                        style={{ animationDelay: `${index * 50}ms` }}
+                                    >
+                                        {isAdmin && <GripVertical className="h-4 w-4 text-muted-foreground dark:text-neutral-500 shrink-0 cursor-grab" />}
+                                        <div className="flex-1 min-w-0">
+                                            <Input
+                                                placeholder="Criterion name (e.g., Innovation & Creativity)"
+                                                value={c.name}
+                                                onChange={(e) => updateCriterion(c.id, 'name', e.target.value)}
+                                                className="h-10 border-0 bg-transparent focus-visible:ring-1 dark:text-white placeholder:text-muted-foreground/60"
+                                                disabled={!isAdmin}
+                                            />
+                                        </div>
+                                        <div className="w-24 relative shrink-0">
+                                            <Input
+                                                type="number"
+                                                placeholder="100"
+                                                value={c.maxPoints || ''}
+                                                onChange={(e) => updateCriterion(c.id, 'maxPoints', parseInt(e.target.value) || 100)}
+                                                className="h-10 pr-9 text-center font-semibold dark:bg-neutral-900 dark:border-neutral-600 dark:text-white"
+                                                max={100}
+                                                disabled={!isAdmin}
+                                            />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground dark:text-neutral-400">pts</span>
+                                        </div>
+                                        {isAdmin && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-10 w-10 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
+                                                onClick={() => removeCriterion(c.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                     </div>
-                                    <div className="w-24 relative shrink-0">
-                                        <Input
-                                            type="number"
-                                            placeholder="100"
-                                            value={c.maxPoints || ''}
-                                            onChange={(e) => updateCriterion(c.id, 'maxPoints', parseInt(e.target.value) || 100)}
-                                            className="h-10 pr-9 text-center font-semibold dark:bg-neutral-900 dark:border-neutral-600 dark:text-white"
-                                            max={100}
-                                            disabled={!isAdmin}
-                                        />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground dark:text-neutral-400">pts</span>
-                                    </div>
-                                    {isAdmin && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-10 w-10 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
-                                            onClick={() => removeCriterion(c.id)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground dark:text-neutral-400">
+                                <p>No criteria defined. Click "Add Criterion" to create one.</p>
+                            </div>
+                        )}
 
                         {isAdmin && (
                             <div className="flex flex-col sm:flex-row gap-2 pt-2">

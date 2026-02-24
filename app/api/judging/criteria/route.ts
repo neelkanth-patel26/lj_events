@@ -34,25 +34,40 @@ export async function POST(request: Request) {
 
     const adminClient = createAdminClient()
 
-    // Insert new criteria
-    const insertData = criteria.map((c: any, index: number) => ({
-      event_id: eventId,
-      criteria_name: c.criteria_name || c.name,
-      max_score: c.max_score || c.maxPoints,
-      display_order: index
-    }))
-    
-    const { data, error } = await adminClient
+    // Delete existing criteria for this event first
+    const { error: deleteError } = await adminClient
       .from('evaluation_criteria')
-      .insert(insertData)
-      .select()
+      .delete()
+      .eq('event_id', eventId)
 
-    if (error) {
-      console.error('Insert error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (deleteError) {
+      console.error('Delete error:', deleteError)
+      return NextResponse.json({ error: deleteError.message }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    // Insert new criteria only if there are any
+    if (criteria && criteria.length > 0) {
+      const insertData = criteria.map((c: any, index: number) => ({
+        event_id: eventId,
+        criteria_name: c.criteria_name || c.name,
+        max_score: c.max_score || c.maxPoints,
+        display_order: index
+      }))
+      
+      const { data, error } = await adminClient
+        .from('evaluation_criteria')
+        .insert(insertData)
+        .select()
+
+      if (error) {
+        console.error('Insert error:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json(data)
+    }
+
+    return NextResponse.json([])
   } catch (error: any) {
     console.error('Criteria save error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })

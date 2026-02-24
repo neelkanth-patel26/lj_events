@@ -21,6 +21,7 @@ export function CriteriaBuilder() {
     ])
     const [loading, setLoading] = useState(false)
     const [userRole, setUserRole] = useState<string>('admin')
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
 
     useEffect(() => {
         checkRole()
@@ -116,6 +117,27 @@ export function CriteriaBuilder() {
         setCriteria(criteria.map(c => c.id === id ? { ...c, [field]: value } : c))
     }
 
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index)
+    }
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault()
+        if (draggedIndex === null || draggedIndex === index) return
+        
+        const newCriteria = [...criteria]
+        const draggedItem = newCriteria[draggedIndex]
+        newCriteria.splice(draggedIndex, 1)
+        newCriteria.splice(index, 0, draggedItem)
+        
+        setCriteria(newCriteria)
+        setDraggedIndex(index)
+    }
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null)
+    }
+
     const isAdmin = userRole === 'admin'
 
     const totalPoints = criteria.reduce((sum, c) => sum + (c.maxPoints || 0), 0)
@@ -164,10 +186,16 @@ export function CriteriaBuilder() {
                                 {criteria.map((c, index) => (
                                     <div 
                                         key={c.id} 
-                                        className="flex items-center gap-2 p-3 rounded-lg border-2 dark:border-neutral-700 bg-muted/30 dark:bg-neutral-800/50 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+                                        draggable={isAdmin}
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                        className={`flex items-center gap-2 p-3 rounded-lg border-2 dark:border-neutral-700 bg-muted/30 dark:bg-neutral-800/50 hover:border-gray-400 dark:hover:border-gray-600 transition-all ${
+                                            draggedIndex === index ? 'opacity-50' : ''
+                                        }`}
                                         style={{ animationDelay: `${index * 50}ms` }}
                                     >
-                                        {isAdmin && <GripVertical className="h-4 w-4 text-muted-foreground dark:text-neutral-500 shrink-0 cursor-grab" />}
+                                        {isAdmin && <GripVertical className="h-4 w-4 text-muted-foreground dark:text-neutral-500 shrink-0 cursor-grab active:cursor-grabbing" />}
                                         <div className="flex-1 min-w-0">
                                             <Input
                                                 placeholder="Criterion name (e.g., Innovation & Creativity)"

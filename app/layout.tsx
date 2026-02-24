@@ -53,9 +53,8 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
               const theme = localStorage.getItem('theme');
-              const isDark = theme ? theme === 'dark' : systemDark;
+              const isDark = theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
               if (isDark) {
                 document.documentElement.classList.add('dark');
               }

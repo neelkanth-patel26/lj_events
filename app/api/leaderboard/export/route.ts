@@ -46,9 +46,35 @@ export async function POST(request: NextRequest) {
           `)
           .eq('team_id', team.id)
 
+        // Get criterion-wise scores
+        const { data: scores } = await supabase
+          .from('scores')
+          .select(`
+            score,
+            evaluation_criteria:criteria_id(
+              id,
+              criteria_name
+            )
+          `)
+          .eq('team_id', team.id)
+        
+        // Group scores by criterion
+        const criterionScores: Record<string, { name: string; total: number }> = {}
+        scores?.forEach((s: any) => {
+          const criterionId = s.evaluation_criteria?.id
+          const criterionName = s.evaluation_criteria?.criteria_name
+          if (criterionId && criterionName) {
+            if (!criterionScores[criterionId]) {
+              criterionScores[criterionId] = { name: criterionName, total: 0 }
+            }
+            criterionScores[criterionId].total += s.score || 0
+          }
+        })
+
         return {
           ...team,
-          members: members?.map(m => m.users) || []
+          members: members?.map(m => m.users) || [],
+          criterionScores: Object.values(criterionScores)
         }
       })
     )
@@ -114,6 +140,27 @@ export async function POST(request: NextRequest) {
       doc.text(infoText, 12, yPosition + 3)
       
       yPosition += 8
+
+      // Criterion scores section
+      if (team.criterionScores && team.criterionScores.length > 0) {
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(0)
+        doc.text('Criterion Scores:', 12, yPosition + 3)
+        
+        yPosition += 5
+        
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(60)
+        
+        team.criterionScores.forEach((criterion: any) => {
+          doc.text(`• ${criterion.name}: ${criterion.total} pts`, 14, yPosition + 3)
+          yPosition += 4
+        })
+        
+        yPosition += 3
+      }
 
       // Members section
       if (team.members && team.members.length > 0) {

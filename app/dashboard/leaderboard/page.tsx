@@ -293,9 +293,20 @@ export default function LeaderboardPage() {
                         </div>
                       )}
                       <div className="flex items-center justify-between pt-2 border-t dark:border-neutral-800">
-                        <span className="text-xs text-muted-foreground">Score</span>
+                        <span className="text-xs text-muted-foreground">Total Score</span>
                         <span className="text-lg md:text-xl font-bold dark:text-white">{team.total_score || 0}</span>
                       </div>
+                      {team.criterionScores && team.criterionScores.length > 0 && (
+                        <div className="pt-2 space-y-1">
+                          <span className="text-xs font-semibold text-muted-foreground">Criterion Scores:</span>
+                          {team.criterionScores.map((criterion: any, idx: number) => (
+                            <div key={idx} className="flex justify-between items-center text-xs">
+                              <span className="text-muted-foreground truncate">{criterion.name}</span>
+                              <span className="font-semibold ml-2">{criterion.total}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -340,7 +351,17 @@ export default function LeaderboardPage() {
                       </div>
                       <div className="text-right flex-shrink-0">
                         <div className="text-lg md:text-xl font-bold dark:text-white">{team.total_score || 0}</div>
-                        <div className="text-xs text-muted-foreground">Score</div>
+                        <div className="text-xs text-muted-foreground">Total Score</div>
+                        {team.criterionScores && team.criterionScores.length > 0 && (
+                          <div className="mt-2 pt-2 border-t dark:border-neutral-700 space-y-1">
+                            {team.criterionScores.map((criterion: any, idx: number) => (
+                              <div key={idx} className="flex justify-between gap-2 text-xs">
+                                <span className="text-muted-foreground truncate max-w-[100px]">{criterion.name}</span>
+                                <span className="font-semibold">{criterion.total}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>

@@ -12,6 +12,7 @@ interface Ranking {
     domain: string
     stall: string
     rank: number
+    criterionScores?: Array<{ name: string; total: number }>
 }
 
 export function LeaderboardClient({ initialRankings }: { initialRankings: Ranking[] }) {
@@ -71,34 +72,51 @@ export function LeaderboardClient({ initialRankings }: { initialRankings: Rankin
 
 function ProjectCard({ project }: { project: Ranking }) {
     const isTopThree = project.rank <= 3
+    const [showDetails, setShowDetails] = useState(false)
 
     return (
         <Card className={`overflow-hidden transition-all hover:shadow-md ${isTopThree ? 'border-amber-500/20 bg-amber-500/5' : ''}`}>
-            <CardContent className="p-4 flex items-center gap-4">
-                <div className={`h-10 w-10 shrink-0 flex items-center justify-center rounded-lg font-bold text-lg ${project.rank === 1 ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' :
-                    project.rank === 2 ? 'bg-slate-300 text-slate-700' :
-                        project.rank === 3 ? 'bg-amber-700 text-amber-50' :
-                            'bg-muted text-muted-foreground'
-                    }`}>
-                    {project.rank}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-sm truncate">{project.name}</h3>
-                        {project.rank === 1 && <Star className="h-3 w-3 fill-amber-500 text-amber-500" />}
+            <CardContent className="p-4">
+                <div className="flex items-center gap-4 cursor-pointer" onClick={() => setShowDetails(!showDetails)}>
+                    <div className={`h-10 w-10 shrink-0 flex items-center justify-center rounded-lg font-bold text-lg ${project.rank === 1 ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' :
+                        project.rank === 2 ? 'bg-slate-300 text-slate-700' :
+                            project.rank === 3 ? 'bg-amber-700 text-amber-50' :
+                                'bg-muted text-muted-foreground'
+                        }`}>
+                        {project.rank}
                     </div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-2">
-                        {project.domain}
-                        <span>•</span>
-                        Stall {project.stall}
-                    </p>
+
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-sm truncate">{project.name}</h3>
+                            {project.rank === 1 && <Star className="h-3 w-3 fill-amber-500 text-amber-500" />}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-2">
+                            {project.domain}
+                            <span>•</span>
+                            Stall {project.stall}
+                        </p>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                        <p className="text-lg font-black text-primary tabular-nums">{project.score}</p>
+                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter">Total Score</p>
+                    </div>
                 </div>
 
-                <div className="text-right shrink-0">
-                    <p className="text-lg font-black text-primary tabular-nums">{project.score}</p>
-                    <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-tighter">Avg Score</p>
-                </div>
+                {showDetails && project.criterionScores && project.criterionScores.length > 0 && (
+                    <div className="mt-4 pt-4 border-t space-y-2">
+                        <p className="text-xs font-semibold text-muted-foreground mb-2">Criterion Breakdown:</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            {project.criterionScores.map((criterion, idx) => (
+                                <div key={idx} className="flex justify-between items-center bg-muted/50 rounded px-3 py-2">
+                                    <span className="text-xs font-medium truncate">{criterion.name}</span>
+                                    <span className="text-sm font-bold ml-2">{criterion.total}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     )

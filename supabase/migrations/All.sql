@@ -321,12 +321,12 @@ SET search_path = public, pg_temp
 LANGUAGE plpgsql AS $$
 DECLARE v_event_id uuid;
 BEGIN
-  SELECT event_id INTO v_event_id FROM public.teams WHERE id = NEW.team_id;
-  DELETE FROM public.leaderboard WHERE team_id = NEW.team_id AND event_id = v_event_id;
+  SELECT event_id INTO v_event_id FROM public.teams WHERE id = NEW.id;
+  DELETE FROM public.leaderboard WHERE team_id = NEW.id AND event_id = v_event_id;
   INSERT INTO public.leaderboard (event_id, team_id, team_name, school_name, team_size, stall_no, domain, total_score, rank)
   SELECT t.event_id, t.id, t.team_name, t.school_name, t.team_size, t.stall_no, t.domain, t.total_score,
     ROW_NUMBER() OVER (PARTITION BY t.event_id ORDER BY t.total_score DESC) as rank
-  FROM public.teams t WHERE t.id = NEW.team_id;
+  FROM public.teams t WHERE t.id = NEW.id;
   RETURN NULL;
 END; $$;
 

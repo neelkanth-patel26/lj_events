@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     if (teamError) throw teamError
 
-    // Fetch members for each team
+    // Fetch criterion-wise scores for each team
     const teamsWithMembers = await Promise.all(
       teams.map(async (team: any) => {
         const { data: members } = await supabase
@@ -54,9 +54,35 @@ export async function GET(request: NextRequest) {
           .select('users:user_id(full_name)')
           .eq('team_id', team.id)
         
+        // Get criterion-wise total scores
+        const { data: scores } = await supabase
+          .from('scores')
+          .select(`
+            score,
+            evaluation_criteria:criteria_id(
+              id,
+              criteria_name
+            )
+          `)
+          .eq('team_id', team.id)
+        
+        // Group scores by criterion
+        const criterionScores: Record<string, { name: string; total: number }> = {}
+        scores?.forEach((s: any) => {
+          const criterionId = s.evaluation_criteria?.id
+          const criterionName = s.evaluation_criteria?.criteria_name
+          if (criterionId && criterionName) {
+            if (!criterionScores[criterionId]) {
+              criterionScores[criterionId] = { name: criterionName, total: 0 }
+            }
+            criterionScores[criterionId].total += s.score || 0
+          }
+        })
+        
         return {
           ...team,
-          members: members?.map(m => ({ full_name: m.users?.full_name })) || []
+          members: members?.map(m => ({ full_name: m.users?.full_name })) || [],
+          criterionScores: Object.values(criterionScores)
         }
       })
     )

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { CustomTitleBar } from '@/components/custom-title-bar'
 import './globals.css'
+import './titlebar.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -73,6 +75,7 @@ export default function RootLayout({
         <meta name="screen-orientation" content="portrait-primary" />
       </head>
       <body className="font-sans antialiased">
+        <CustomTitleBar />
         {children}
         <Analytics />
       </body>

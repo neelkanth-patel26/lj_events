@@ -1,0 +1,12 @@
+/* Window Controls Overlay Support */
+@media (display-mode: window-controls-overlay) {
+  body {
+    padding-top: env(titlebar-area-height, 48px);
+  }
+}
+
+@media (display-mode: standalone) and (min-width: 768px) {
+  body {
+    padding-top: 48px;
+  }
+}

@@ -7,7 +7,15 @@ if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const adminClient = createClient(supabaseUrl, supabaseServiceKey)
+export const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  },
+  db: {
+    schema: 'public'
+  }
+})
 
 // Helper function to create admin user with role
 export async function createAdminUser(

@@ -13,7 +13,6 @@ export async function GET() {
     
     const user = JSON.parse(userSession.value)
     
-    // Fetch latest user data including theme
     const supabase = await createClient()
     const { data: userData } = await supabase
       .from('users')
@@ -26,6 +25,7 @@ export async function GET() {
         ...user,
         theme: userData.theme || 'light',
         fullName: userData.full_name,
+        email: userData.email,
         enrollment_number: userData.enrollment_number
       })
     }

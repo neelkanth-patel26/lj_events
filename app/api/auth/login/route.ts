@@ -12,6 +12,9 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient()
     
+    console.log('Attempting login for:', email)
+    console.log('Service role key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+    
     // First, get user by email
     const { data: user, error: userError } = await supabase
       .from('users')
@@ -19,11 +22,20 @@ export async function POST(request: NextRequest) {
       .eq('email', email)
       .single()
 
-    console.log('User lookup:', { email, found: !!user, error: userError?.message, details: userError })
+    console.log('User lookup result:', { 
+      found: !!user, 
+      error: userError?.message, 
+      code: userError?.code,
+      details: userError?.details,
+      hint: userError?.hint 
+    })
 
     if (userError || !user) {
       console.error('Database error:', userError)
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+      return NextResponse.json({ 
+        error: 'Invalid credentials',
+        debug: process.env.NODE_ENV === 'development' ? userError : undefined 
+      }, { status: 401 })
     }
 
     // Check password
@@ -41,6 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ user })
   } catch (error: any) {
+    console.error('Login error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

@@ -83,7 +83,8 @@ export default function ProfilePage() {
       document.documentElement.classList.toggle('dark', theme === 'dark')
       
       toast({ title: 'Success!', description: 'Profile updated successfully' })
-      window.location.reload()
+      
+      setTimeout(() => window.location.reload(), 500)
     } catch (error: any) {
       toast({ title: 'Error', description: error.message || 'Failed to update profile', variant: 'destructive' })
     } finally {

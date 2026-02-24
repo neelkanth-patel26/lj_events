@@ -6,8 +6,8 @@ export default function Loading() {
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    const darkMode = document.documentElement.classList.contains('dark')
-    setIsDark(darkMode)
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    setIsDark(systemDark)
   }, [])
 
   return (

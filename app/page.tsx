@@ -26,7 +26,7 @@ export default function Home() {
   if (loading) return null
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       <div className="relative flex min-h-screen flex-col items-center justify-center px-4 text-center">
         <div className="max-w-4xl space-y-10">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary shadow-lg shadow-primary/20 mb-6">
@@ -56,7 +56,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="pt-10 space-y-6 hidden md:block">
-            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            <p className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
               Features for Admins, Mentors/Judges, and Students
             </p>
             <div className="flex flex-wrap justify-center gap-4">

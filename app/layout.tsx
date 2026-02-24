@@ -53,13 +53,15 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              const theme = localStorage.getItem('theme');
-              if (theme) {
-                document.documentElement.classList.add(theme);
+              const theme = localStorage.getItem('theme') || 'light';
+              const isDark = theme === 'dark';
+              if (isDark) {
+                document.documentElement.classList.add('dark');
               }
-              const color = theme === 'dark' ? '#000000' : '#ffffff';
+              const color = isDark ? '#000000' : '#ffffff';
               document.documentElement.style.backgroundColor = color;
-              document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+              const meta = document.querySelector('meta[name="theme-color"]');
+              if (meta) meta.setAttribute('content', color);
             })()
           `
         }} />

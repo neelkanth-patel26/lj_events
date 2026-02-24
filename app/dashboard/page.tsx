@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import { Calendar, Users, Trophy, UserPlus, BarChart3, Clock, Award, Zap, Activity, ArrowUpRight, Gavel, TrendingUp, Target, CheckCircle2, XCircle } from 'lucide-react'
+import { Calendar, Users, Trophy, UserPlus, BarChart3, Award, Activity, Gavel, TrendingUp, Target, CheckCircle2, XCircle } from 'lucide-react'
 import { useRealtime } from '@/components/realtime-provider'
 import { useMemo, useEffect, useState } from 'react'
+import DashboardSkeleton from '@/components/preloader'
 
 export default function DashboardPage() {
   const { events, students, teams } = useRealtime()
@@ -93,14 +94,7 @@ export default function DashboardPage() {
   }, [events, students, teams, userRole])
 
   if (!userRole) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   // Mentor Dashboard

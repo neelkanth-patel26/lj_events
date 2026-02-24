@@ -53,7 +53,7 @@ export default async function DashboardLayout({
       <OrientationLock />
       <ThemeProvider theme={user.theme} />
       <RealtimeProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col md:flex-row">
+        <div className="min-h-screen bg-white dark:bg-black flex flex-col md:flex-row">
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-72 border-r border-gray-200 dark:border-neutral-800 flex-col bg-white dark:bg-neutral-900 sticky top-0 h-screen shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-neutral-800 flex flex-col gap-3">
@@ -104,7 +104,7 @@ export default async function DashboardLayout({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 pb-20 md:pb-0 min-h-screen overflow-auto bg-gray-50 dark:bg-black">
+        <main className="flex-1 pb-20 md:pb-0 min-h-screen overflow-auto bg-white dark:bg-black">
           <div className="max-w-full mx-auto p-4 md:p-8">
             {children}
           </div>

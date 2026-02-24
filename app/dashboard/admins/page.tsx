@@ -188,7 +188,7 @@ export default function AdminsPage() {
             <Card key={admin.id} className="hover:shadow-lg transition-shadow dark:bg-neutral-900 dark:border-neutral-800">
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-800 dark:from-neutral-700 dark:to-neutral-800 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
+                  <div className="w-20 h-20 bg-gray-700 dark:bg-neutral-700 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-lg">
                     {admin.full_name?.charAt(0)?.toUpperCase() || 'A'}
                   </div>
                   

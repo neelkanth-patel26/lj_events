@@ -414,7 +414,7 @@ export default function StudentsPage() {
                   {filteredStudents.map((student: any) => {
                     const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
                     return (
-                    <Card key={student.id} className={`hover:shadow-lg transition-all ${isSpecial ? 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-700' : 'dark:bg-neutral-900 dark:border-neutral-800'}`}>
+                    <Card key={student.id} className={`hover:shadow-lg transition-all ${isSpecial ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700' : 'dark:bg-neutral-900 dark:border-neutral-800'}`}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <div className="w-12 h-12 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-gray-900 font-bold text-lg flex-shrink-0">
@@ -471,7 +471,7 @@ export default function StudentsPage() {
                   {filteredStudents.map((student: any) => {
                     const isSpecial = ['23012250210200', '23012250210201', '23012250210208'].includes(student.enrollment_number)
                     return (
-                    <Card key={student.id} className={`${isSpecial ? 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 border-l-4 border-l-gray-900 dark:border-l-gray-400 border-gray-300 dark:border-gray-700' : 'border-l-4 border-l-transparent dark:bg-neutral-900 dark:border-neutral-800'}`}>
+                    <Card key={student.id} className={`${isSpecial ? 'bg-gray-100 dark:bg-gray-800 border-l-4 border-l-gray-900 dark:border-l-gray-400 border-gray-300 dark:border-gray-700' : 'border-l-4 border-l-transparent dark:bg-neutral-900 dark:border-neutral-800'}`}>
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center text-white dark:text-gray-900 font-bold text-lg flex-shrink-0">

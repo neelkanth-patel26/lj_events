@@ -66,7 +66,7 @@ export default function EvaluationCriteriaPage({ params }: { params: Promise<{ i
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-neutral-900 dark:to-neutral-900 -mx-6 -mt-6 px-6 pt-6 pb-8 dark:border-b dark:border-neutral-800">
+      <div className="bg-gray-50 dark:bg-neutral-900 -mx-6 -mt-6 px-6 pt-6 pb-8 dark:border-b dark:border-neutral-800">
         <div className="flex items-center justify-between mb-6">
           <Button variant="outline" onClick={() => router.back()} className="bg-white dark:bg-neutral-800 dark:text-white dark:border-neutral-700">
             <ArrowLeft className="h-4 w-4 mr-2" />

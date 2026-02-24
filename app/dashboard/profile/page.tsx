@@ -95,19 +95,19 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6 pb-6 max-w-2xl">
         <div className="space-y-2">
-          <div className="h-8 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-48 animate-shimmer"></div>
-          <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-64 animate-shimmer"></div>
+          <div className="h-8 bg-gray-200 dark:bg-neutral-800 rounded w-48 animate-shimmer"></div>
+          <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded w-64 animate-shimmer"></div>
         </div>
 
         <Card className="border-2 border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <CardHeader className="border-b border-gray-200 dark:border-neutral-800">
-            <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-40 animate-shimmer"></div>
+            <div className="h-6 bg-gray-200 dark:bg-neutral-800 rounded w-40 animate-shimmer"></div>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="space-y-2">
-                <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-24 animate-shimmer"></div>
-                <div className="h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded animate-shimmer"></div>
+                <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded w-24 animate-shimmer"></div>
+                <div className="h-10 bg-gray-200 dark:bg-neutral-800 rounded animate-shimmer"></div>
               </div>
             ))}
           </CardContent>
@@ -115,20 +115,20 @@ export default function ProfilePage() {
 
         <Card className="border-2 border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
           <CardHeader className="border-b border-gray-200 dark:border-neutral-800">
-            <div className="h-6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-32 animate-shimmer"></div>
+            <div className="h-6 bg-gray-200 dark:bg-neutral-800 rounded w-32 animate-shimmer"></div>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-2">
-                <div className="h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-24 animate-shimmer"></div>
-                <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-32 animate-shimmer"></div>
+                <div className="h-4 bg-gray-200 dark:bg-neutral-800 rounded w-24 animate-shimmer"></div>
+                <div className="h-3 bg-gray-200 dark:bg-neutral-800 rounded w-32 animate-shimmer"></div>
               </div>
-              <div className="h-6 w-11 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded-full animate-shimmer"></div>
+              <div className="h-6 w-11 bg-gray-200 dark:bg-neutral-800 rounded-full animate-shimmer"></div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="h-11 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-neutral-800 dark:via-neutral-700 dark:to-neutral-800 rounded w-full md:w-40 animate-shimmer"></div>
+        <div className="h-11 bg-gray-200 dark:bg-neutral-800 rounded w-full md:w-40 animate-shimmer"></div>
         
         <style jsx>{`
           @keyframes shimmer {

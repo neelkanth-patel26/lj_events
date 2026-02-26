@@ -89,10 +89,11 @@ export async function POST(request: NextRequest) {
         }
         updated++
       } else {
+        const passwordHash = Buffer.from(row.password).toString('base64')
         const { data: newUser, error } = await adminClient.from('users').insert({
           email: row.email,
           full_name: row.name,
-          password_hash: row.password,
+          password_hash: passwordHash,
           role: 'mentor',
           department: row.department || null
         }).select('id').single()
